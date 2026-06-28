@@ -5,7 +5,7 @@ import { ToastProvider } from "@/context/ToastContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 
 export const metadata: Metadata = {
-  title: "PaperBol - School Paper Builder",
+  title: "AI Voice Paper - School Paper Builder",
   description: "Create examination papers using voice typing and manual editing",
 };
 
