@@ -8,7 +8,7 @@ export default function PaperPreview() {
   const previewRef = useRef<HTMLDivElement>(null);
 
   const questionCount = state.questions.length;
-  const totalMarks = state.footer.total || state.totalMarks || "___";
+  const totalMarks = state.totalMarks || "___";
 
   return (
     <div className="flex flex-col">
@@ -75,31 +75,35 @@ export default function PaperPreview() {
             <div className="border-t-2 border-b border-slate-900 mb-3 sm:mb-5" />
 
             {/* Student Info */}
-            <div className="text-[10px] sm:text-[11px] lg:text-[12px] mb-4 sm:mb-6 space-y-1.5 sm:space-y-2 text-slate-800">
-              <div className="flex flex-col sm:flex-row gap-1 sm:gap-10">
-                <span>
-                  <span className="font-semibold">{state.studentNameLabel}:</span>{" "}
-                  <span className="border-b border-slate-800 inline-block min-w-[100px] sm:min-w-[180px]">&nbsp;</span>
-                </span>
-                <span>
-                  <span className="font-semibold">{state.fatherNameLabel}:</span>{" "}
-                  <span className="border-b border-slate-800 inline-block min-w-[100px] sm:min-w-[180px]">&nbsp;</span>
-                </span>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-1 sm:gap-10">
-                {state.className && (
-                  <span>
-                    <span className="font-semibold">Class:</span>{" "}
-                    <span className="border-b border-slate-800 inline-block min-w-[60px] sm:min-w-[100px]">{state.className}</span>
-                  </span>
-                )}
-                {state.subject && (
-                  <span>
-                    <span className="font-semibold">Subject:</span>{" "}
-                    <span className="border-b border-slate-800 inline-block min-w-[60px] sm:min-w-[100px]">{state.subject}</span>
-                  </span>
-                )}
-              </div>
+            <div className="flex flex-wrap gap-x-2 sm:gap-x-4 gap-y-1 sm:gap-y-1.5 text-[10px] sm:text-[11px] lg:text-[12px] mb-4 sm:mb-6 text-slate-800">
+              <span>
+                <span className="font-semibold">{state.studentNameLabel}:</span>{" "}
+                <span className="border-b border-slate-800 inline-block min-w-[70px] sm:min-w-[100px]">&nbsp;</span>
+              </span>
+              <span>
+                <span className="font-semibold">{state.fatherNameLabel}:</span>{" "}
+                <span className="border-b border-slate-800 inline-block min-w-[70px] sm:min-w-[100px]">&nbsp;</span>
+              </span>
+              <span>
+                <span className="font-semibold">Marks:</span>{" "}
+                <span className="border-b border-slate-800 inline-block min-w-[40px] sm:min-w-[50px]">{state.totalMarks || ""}</span>
+              </span>
+              <span>
+                <span className="font-semibold">Subject:</span>{" "}
+                <span className="border-b border-slate-800 inline-block min-w-[50px] sm:min-w-[70px]">{state.subject}</span>
+              </span>
+              <span>
+                <span className="font-semibold">Date:</span>{" "}
+                <span className="border-b border-slate-800 inline-block min-w-[60px] sm:min-w-[70px]">{state.date}</span>
+              </span>
+              <span>
+                <span className="font-semibold">Class:</span>{" "}
+                <span className="border-b border-slate-800 inline-block min-w-[40px] sm:min-w-[50px]">{state.className}</span>
+              </span>
+              <span>
+                <span className="font-semibold">Student&apos;s Sig:</span>{" "}
+                <span className="border-b border-slate-800 inline-block min-w-[60px] sm:min-w-[80px]">&nbsp;</span>
+              </span>
             </div>
 
             {/* Questions */}
@@ -127,31 +131,22 @@ export default function PaperPreview() {
               )}
             </div>
 
-            {/* Footer */}
-            <div style={{ position: "absolute", bottom: "clamp(8mm, 3vw, 20mm)", left: "clamp(6mm, 2vw, 15mm)", right: "clamp(6mm, 2vw, 15mm)" }}>
-              <div className="border-t border-slate-800 pt-2 sm:pt-4">
-                <div className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-0 text-[9px] sm:text-[10px] lg:text-[11px] text-slate-700">
-                  <div>
+            {(state.teacherSignature || state.principalSignature) && (
+              <div className="flex justify-between mt-8 sm:mt-12 pt-4 border-t border-slate-800">
+                {state.teacherSignature && (
+                  <div className="text-[10px] sm:text-[11px] lg:text-[12px]">
                     <p className="font-semibold text-slate-800">Teacher&apos;s Signature</p>
-                    <p className="border-b border-slate-600 min-w-[80px] sm:min-w-[140px] inline-block mt-0.5 sm:mt-1">
-                      {state.footer.teacherSignature}&nbsp;
-                    </p>
+                    <p className="border-b border-slate-600 min-w-[100px] sm:min-w-[160px] inline-block mt-1">{state.teacherSignature}</p>
                   </div>
-                  <div>
+                )}
+                {state.principalSignature && (
+                  <div className="text-[10px] sm:text-[11px] lg:text-[12px] text-right">
                     <p className="font-semibold text-slate-800">Principal&apos;s Signature</p>
-                    <p className="border-b border-slate-600 min-w-[80px] sm:min-w-[140px] inline-block mt-0.5 sm:mt-1">
-                      {state.footer.principalSignature}&nbsp;
-                    </p>
+                    <p className="border-b border-slate-600 min-w-[100px] sm:min-w-[160px] inline-block mt-1">{state.principalSignature}</p>
                   </div>
-                  <div className="sm:text-right">
-                    <p className="font-semibold text-slate-800">Total Marks</p>
-                    <p className="font-bold text-sm sm:text-base text-slate-900 mt-0.5">
-                      {totalMarks}
-                    </p>
-                  </div>
-                </div>
+                )}
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

@@ -24,6 +24,12 @@ function paperReducer(state: PaperState, action: PaperAction): PaperState {
       return { ...state, subject: action.payload };
     case "SET_PAPER_TITLE":
       return { ...state, paperTitle: action.payload };
+    case "SET_DATE":
+      return { ...state, date: action.payload };
+    case "SET_TEACHER_SIGNATURE":
+      return { ...state, teacherSignature: action.payload };
+    case "SET_PRINCIPAL_SIGNATURE":
+      return { ...state, principalSignature: action.payload };
     case "SET_STUDENT_NAME_LABEL":
       return { ...state, studentNameLabel: action.payload };
     case "SET_FATHER_NAME_LABEL":
@@ -44,11 +50,6 @@ function paperReducer(state: PaperState, action: PaperAction): PaperState {
       };
     case "REORDER_QUESTIONS":
       return { ...state, questions: action.payload };
-    case "SET_FOOTER":
-      return {
-        ...state,
-        footer: { ...state.footer, ...action.payload },
-      };
     case "RESET":
       return initialState;
     default:

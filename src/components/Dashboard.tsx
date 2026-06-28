@@ -2,19 +2,17 @@
 
 import HeaderSection from "./HeaderSection";
 import QuestionEditor from "./QuestionEditor";
-import FooterSection from "./FooterSection";
 import PaperPreview from "./PaperPreview";
 import ExportBar from "./ExportBar";
 import { useState } from "react";
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState<"header" | "questions" | "footer">("header");
+  const [activeTab, setActiveTab] = useState<"header" | "questions">("header");
   const [menuOpen, setMenuOpen] = useState(false);
 
   const tabs = [
     { id: "header" as const, label: "Header", icon: "M4 6h16M4 12h16M4 18h16" },
     { id: "questions" as const, label: "Questions", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" },
-    { id: "footer" as const, label: "Footer", icon: "M5 10l5-5m0 0l5 5m-5-5v12" },
   ];
 
   return (
@@ -33,7 +31,7 @@ export default function Dashboard() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             )}
           </svg>
-          <span className="font-bold text-sm">PaperBol</span>
+          <span className="font-bold text-sm">AI Voice Paper</span>
         </button>
         <div className="flex items-center gap-2 text-xs text-slate-400">
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -55,7 +53,7 @@ export default function Dashboard() {
       <div
         className={`${
           menuOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0 fixed lg:relative top-0 left-0 z-25 w-[85vw] max-w-[400px] h-full lg:h-auto lg:w-[460px] lg:min-w-[460px] xl:w-[500px] xl:min-w-[500px] bg-white/95 backdrop-blur-sm border-r border-slate-200 flex flex-col overflow-hidden shadow-2xl lg:shadow-lg transition-transform duration-300 ease-in-out`}
+        } lg:translate-x-0 fixed lg:relative top-0 left-0 z-25 w-[92vw] max-w-[480px] h-full lg:h-auto lg:w-[520px] lg:min-w-[520px] xl:w-[560px] xl:min-w-[560px] bg-white/95 backdrop-blur-sm border-r border-slate-200 flex flex-col overflow-hidden shadow-2xl lg:shadow-lg transition-transform duration-300 ease-in-out`}
       >
         {/* Header */}
         <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 px-5 py-4 flex-shrink-0">
@@ -66,7 +64,7 @@ export default function Dashboard() {
               </svg>
             </div>
             <div>
-              <h1 className="text-lg font-bold text-white tracking-tight">PaperBol</h1>
+              <h1 className="text-lg font-bold text-white tracking-tight">AI Voice Paper</h1>
               <p className="text-xs text-indigo-200 font-medium">School Paper Builder</p>
             </div>
             <button
@@ -105,7 +103,6 @@ export default function Dashboard() {
         <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4">
           {activeTab === "header" && <HeaderSection />}
           {activeTab === "questions" && <QuestionEditor />}
-          {activeTab === "footer" && <FooterSection />}
         </div>
 
         {/* Export */}

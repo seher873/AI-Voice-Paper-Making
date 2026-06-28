@@ -124,6 +124,15 @@ export default function ExportBar() {
         );
       });
 
+      if (state.date) {
+        children.push(
+          new Paragraph({
+            children: [new TextRun({ text: `Date: ${state.date}`, size: 20, font: "Times New Roman" })],
+            spacing: { after: 200 },
+          })
+        );
+      }
+
       children.push(
         new Paragraph({
           children: [new TextRun({ text: "________________________________________________________", size: 20, font: "Times New Roman" })],
@@ -131,11 +140,29 @@ export default function ExportBar() {
         })
       );
 
+      if (state.teacherSignature) {
+        children.push(
+          new Paragraph({
+            children: [new TextRun({ text: `Teacher's Signature: ${state.teacherSignature}`, size: 20, font: "Times New Roman" })],
+            spacing: { after: 100 },
+          })
+        );
+      }
+
+      if (state.principalSignature) {
+        children.push(
+          new Paragraph({
+            children: [new TextRun({ text: `Principal's Signature: ${state.principalSignature}`, size: 20, font: "Times New Roman" })],
+            spacing: { after: 100 },
+          })
+        );
+      }
+
       children.push(
         new Paragraph({
           children: [
             new TextRun({
-              text: `Teacher's Signature: ${state.footer.teacherSignature || "______________"}        Principal's Signature: ${state.footer.principalSignature || "______________"}        Total: ${state.footer.total || state.totalMarks || "___"}`,
+              text: `Total: ${state.totalMarks || "___"}`,
               size: 20,
               font: "Times New Roman",
             }),
