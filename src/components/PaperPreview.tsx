@@ -128,22 +128,16 @@ export default function PaperPreview() {
               )}
             </div>
 
-            {(state.teacherSignature || state.principalSignature) && (
-              <div className="flex justify-between mt-8 sm:mt-12 pt-4 border-t border-slate-800">
-                {state.teacherSignature && (
-                  <div className="text-[10px] sm:text-[11px] lg:text-[12px]">
-                    <p className="font-semibold text-slate-800">Teacher&apos;s Signature</p>
-                    <p className="border-b border-slate-600 min-w-[100px] sm:min-w-[160px] inline-block mt-1">{state.teacherSignature}</p>
-                  </div>
-                )}
-                {state.principalSignature && (
-                  <div className="text-[10px] sm:text-[11px] lg:text-[12px] text-right">
-                    <p className="font-semibold text-slate-800">Principal&apos;s Signature</p>
-                    <p className="border-b border-slate-600 min-w-[100px] sm:min-w-[160px] inline-block mt-1">{state.principalSignature}</p>
-                  </div>
-                )}
+            <div className="flex justify-between mt-8 sm:mt-12 pt-4 border-t border-slate-800">
+              <div className="text-[10px] sm:text-[11px] lg:text-[12px]">
+                <p className="font-semibold text-slate-800">Teacher&apos;s Signature</p>
+                <p className="border-b border-slate-600 min-w-[100px] sm:min-w-[160px] inline-block mt-1">{state.teacherSignature || "______________"}</p>
               </div>
-            )}
+              <div className="text-[10px] sm:text-[11px] lg:text-[12px]">
+                <p className="font-semibold text-slate-800">Principal&apos;s Signature</p>
+                <p className="border-b border-slate-600 min-w-[100px] sm:min-w-[160px] inline-block mt-1">{state.principalSignature || "______________"}</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

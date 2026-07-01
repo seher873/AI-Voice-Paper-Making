@@ -42,7 +42,7 @@ export const initialState: PaperState = {
   schoolName: "",
   schoolLogo: null,
   time: "3 Hours",
-  totalMarks: "100",
+  totalMarks: "",
   className: "",
   subject: "",
   paperTitle: "",
