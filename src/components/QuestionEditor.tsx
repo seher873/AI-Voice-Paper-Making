@@ -152,8 +152,9 @@ export default function QuestionEditor() {
                 <textarea
                   value={question.text}
                   onChange={(e) => handleUpdateQuestion(question.id, e.target.value)}
+                  dir="auto"
                   rows={3}
-                  className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-base text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 resize-none transition-all"
+                  className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-base text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 resize-none transition-all text-right"
                   placeholder="Type or edit question text..."
                 />
               </div>

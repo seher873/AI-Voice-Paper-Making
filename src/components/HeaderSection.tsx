@@ -63,6 +63,7 @@ export default function HeaderSection() {
             <textarea
               value={state.schoolName}
               onChange={(e) => dispatch({ type: "SET_SCHOOL_NAME", payload: e.target.value })}
+              dir="auto"
               placeholder="Enter school name"
               rows={2}
               className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-base text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all resize-none"
@@ -97,13 +98,13 @@ export default function HeaderSection() {
 
           <div>
             <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
-              Total Marks
+              Obtained Marks
             </label>
             <input
               type="text"
               value={state.totalMarks}
               onChange={(e) => dispatch({ type: "SET_TOTAL_MARKS", payload: e.target.value })}
-              placeholder="e.g. 100"
+              placeholder="e.g. 85"
               className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-base text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all"
             />
           </div>

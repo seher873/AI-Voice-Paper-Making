@@ -83,7 +83,7 @@ export default function ExportBar() {
 
       children.push(
         new Paragraph({
-          children: [new TextRun({ text: `Time: ${state.time || "___"}        Marks: ${state.totalMarks || "___"}`, size: 20, font: "Times New Roman" })],
+          children: [new TextRun({ text: `Time: ${state.time || "___"}        Obtained Marks: ${state.totalMarks || "___"}`, size: 20, font: "Times New Roman" })],
           alignment: AlignmentType.RIGHT,
           spacing: { after: 200 },
         })
@@ -162,7 +162,7 @@ export default function ExportBar() {
         new Paragraph({
           children: [
             new TextRun({
-              text: `Total: ${state.totalMarks || "___"}`,
+              text: `Obtained Marks: ${state.totalMarks || "___"}`,
               size: 20,
               font: "Times New Roman",
             }),
