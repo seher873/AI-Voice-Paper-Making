@@ -117,13 +117,13 @@ export default function VoiceTyping({ onTranscriptReady }: VoiceTypingProps) {
       {(transcript || interimTranscript) && (
         <div className="bg-white border border-slate-200 rounded-xl p-4 min-h-[60px] shadow-sm">
           {transcript && (
-            <p className="text-sm sm:text-base text-slate-800 break-words leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-800 break-words leading-relaxed" dir="auto">
               <span className="font-bold text-slate-500">Recognized: </span>
               {transcript}
             </p>
           )}
           {interimTranscript && (
-            <p className="text-sm sm:text-base text-slate-400 italic mt-1">{interimTranscript}</p>
+            <p className="text-sm sm:text-base text-slate-400 italic mt-1" dir="auto">{interimTranscript}</p>
           )}
         </div>
       )}

@@ -1,14 +1,13 @@
 "use client";
 
 import { usePaper } from "@/context/PaperContext";
-import { useState, useCallback } from "react";
+import { useCallback } from "react";
 import VoiceTyping from "./VoiceTyping";
 import { useToast } from "@/context/ToastContext";
 
 export default function QuestionEditor() {
   const { state, dispatch } = usePaper();
   const { addToast } = useToast();
-  const [dragIndex, setDragIndex] = useState<number | null>(null);
 
   const handleAddQuestion = useCallback(() => {
     dispatch({
@@ -47,19 +46,25 @@ export default function QuestionEditor() {
     [dispatch, addToast]
   );
 
-  const handleDragStart = (index: number) => setDragIndex(index);
+  const handleMoveUp = useCallback(
+    (index: number) => {
+      if (index === 0) return;
+      const items = [...state.questions];
+      [items[index - 1], items[index]] = [items[index], items[index - 1]];
+      dispatch({ type: "REORDER_QUESTIONS", payload: items });
+    },
+    [dispatch, state.questions]
+  );
 
-  const handleDragOver = (e: React.DragEvent, index: number) => {
-    e.preventDefault();
-    if (dragIndex === null || dragIndex === index) return;
-    const items = [...state.questions];
-    const [reordered] = items.splice(dragIndex, 1);
-    items.splice(index, 0, reordered);
-    dispatch({ type: "REORDER_QUESTIONS", payload: items });
-    setDragIndex(index);
-  };
-
-  const handleDragEnd = () => setDragIndex(null);
+  const handleMoveDown = useCallback(
+    (index: number) => {
+      if (index === state.questions.length - 1) return;
+      const items = [...state.questions];
+      [items[index], items[index + 1]] = [items[index + 1], items[index]];
+      dispatch({ type: "REORDER_QUESTIONS", payload: items });
+    },
+    [dispatch, state.questions]
+  );
 
   return (
     <div className="space-y-4 sm:space-y-5">
@@ -112,20 +117,29 @@ export default function QuestionEditor() {
           state.questions.map((question, index) => (
             <div
               key={question.id}
-              draggable
-              onDragStart={() => handleDragStart(index)}
-              onDragOver={(e) => handleDragOver(e, index)}
-              onDragEnd={handleDragEnd}
-              className={`group flex items-start gap-3 p-4 bg-white border-2 rounded-2xl transition-all ${
-                dragIndex === index
-                  ? "opacity-50 border-indigo-400 shadow-lg"
-                  : "border-slate-200 hover:border-indigo-300 hover:shadow-md"
-              }`}
+              className="flex items-start gap-2 p-4 bg-white border-2 border-slate-200 rounded-2xl transition-all hover:border-indigo-300 hover:shadow-md"
             >
-              <div className="flex items-center gap-1 mt-1.5 cursor-grab text-slate-300 hover:text-slate-500 transition-colors">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" />
-                </svg>
+              <div className="flex flex-col gap-1 mt-1">
+                <button
+                  onClick={() => handleMoveUp(index)}
+                  disabled={index === 0}
+                  className="p-1 rounded-md text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                  title="Move up"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => handleMoveDown(index)}
+                  disabled={index === state.questions.length - 1}
+                  className="p-1 rounded-md text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                  title="Move down"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
               </div>
 
               <div className="flex-1 min-w-0">
@@ -146,7 +160,7 @@ export default function QuestionEditor() {
 
               <button
                 onClick={() => handleDeleteQuestion(question.id)}
-                className="mt-1.5 p-2.5 bg-white border-2 border-red-200 text-red-400 hover:text-white hover:bg-red-500 hover:border-red-500 rounded-xl transition-all"
+                className="mt-1 p-2.5 bg-white border-2 border-red-200 text-red-400 hover:text-white hover:bg-red-500 hover:border-red-500 rounded-xl transition-all"
                 title="Delete question"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -160,7 +174,7 @@ export default function QuestionEditor() {
 
       {state.questions.length > 0 && (
         <p className="text-xs sm:text-sm text-slate-400 text-center font-medium">
-          Drag ⇅ to reorder questions &middot; Click the delete button to remove
+          Use arrow buttons to reorder questions &middot; Click delete to remove
         </p>
       )}
     </div>
