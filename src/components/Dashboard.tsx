@@ -13,8 +13,8 @@ export default function Dashboard() {
 
   const tabs = [
     { id: "header" as const, label: "Header", icon: "M4 6h16M4 12h16M4 18h16" },
-    { id: "questions" as const, label: "Questions", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" },
-    { id: "template" as const, label: "Template", icon: "M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" },
+    { id: "questions" as const, label: "Questions", icon: "M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2m4 9l2 2 4-4" },
+    { id: "template" as const, label: "Template", icon: "M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" },
   ];
 
   return (
@@ -90,14 +90,14 @@ export default function Dashboard() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-4 py-2.5 text-xs sm:text-sm font-medium rounded-t-lg transition-all whitespace-nowrap ${
+              className={`flex items-center justify-center gap-1.5 min-h-[48px] px-3 sm:px-5 py-2.5 text-xs sm:text-sm font-medium rounded-t-lg transition-all whitespace-nowrap ${
                 activeTab === tab.id
                   ? "bg-white text-indigo-700 border border-b-white border-slate-200 shadow-sm"
                   : "text-slate-500 hover:text-slate-700 hover:bg-white/50"
               }`}
             >
-              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={tab.icon} />
+              <svg className="w-5 h-5 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={tab.icon} />
               </svg>
               <span className="hidden xs:inline">{tab.label}</span>
             </button>
