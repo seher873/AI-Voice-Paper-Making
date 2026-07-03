@@ -20,6 +20,7 @@ export interface PaperState {
   principalSignature: string;
   studentNameLabel: string;
   fatherNameLabel: string;
+  paperLanguage: "en" | "ur" | "sd";
   questions: Question[];
 }
 
@@ -37,6 +38,7 @@ export type PaperAction =
   | { type: "SET_PRINCIPAL_SIGNATURE"; payload: string }
   | { type: "SET_STUDENT_NAME_LABEL"; payload: string }
   | { type: "SET_FATHER_NAME_LABEL"; payload: string }
+  | { type: "SET_PAPER_LANGUAGE"; payload: "en" | "ur" | "sd" }
   | { type: "ADD_QUESTION"; payload: Question }
   | { type: "UPDATE_QUESTION"; payload: { id: string; text: string } }
   | { type: "UPDATE_QUESTION_TYPE"; payload: { id: string; type: QuestionType } }
@@ -58,6 +60,7 @@ export const initialState: PaperState = {
   principalSignature: "",
   studentNameLabel: "Student Name",
   fatherNameLabel: "Father's Name",
+  paperLanguage: "en",
   questions: [],
 };
 

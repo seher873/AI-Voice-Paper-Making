@@ -36,6 +36,8 @@ function paperReducer(state: PaperState, action: PaperAction): PaperState {
       return { ...state, studentNameLabel: action.payload };
     case "SET_FATHER_NAME_LABEL":
       return { ...state, fatherNameLabel: action.payload };
+    case "SET_PAPER_LANGUAGE":
+      return { ...state, paperLanguage: action.payload };
     case "ADD_QUESTION":
       return { ...state, questions: [...state.questions, action.payload] };
     case "UPDATE_QUESTION":

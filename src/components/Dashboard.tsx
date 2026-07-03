@@ -6,8 +6,12 @@ import TemplateSection from "./TemplateSection";
 import PaperPreview from "./PaperPreview";
 import ExportBar from "./ExportBar";
 import { useState } from "react";
+import { usePaper } from "@/context/PaperContext";
+import { TEMPLATES } from "@/lib/paperFormat";
+import type { PaperTemplate } from "@/lib/paperFormat";
 
 export default function Dashboard() {
+  const { state, dispatch } = usePaper();
   const [activeTab, setActiveTab] = useState<"header" | "questions" | "template">("header");
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -82,6 +86,24 @@ export default function Dashboard() {
               </svg>
             </button>
           </div>
+        </div>
+
+        {/* Template Selector */}
+        <div className="px-3 sm:px-4 pt-3 pb-2 bg-slate-50/80 border-b border-slate-200">
+          <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Paper Template</label>
+          <select
+            value={TEMPLATES.find((t) => t.lang === state.paperLanguage)?.id || "english"}
+            onChange={(e) => {
+              const id = e.target.value as PaperTemplate;
+              const tpl = TEMPLATES.find((t) => t.id === id);
+              if (tpl) dispatch({ type: "SET_PAPER_LANGUAGE", payload: tpl.lang });
+            }}
+            className="appearance-none w-full px-4 py-2.5 pr-8 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all cursor-pointer font-medium"
+          >
+            {TEMPLATES.map((t) => (
+              <option key={t.id} value={t.id}>{t.label}</option>
+            ))}
+          </select>
         </div>
 
         {/* Tabs */}

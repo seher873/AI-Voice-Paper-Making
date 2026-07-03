@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { usePaper } from "@/context/PaperContext";
 import { useToast } from "@/context/ToastContext";
+import { getTemplate } from "@/lib/paperFormat";
 
 export default function ExportBar() {
   const { state } = usePaper();
@@ -69,6 +70,9 @@ export default function ExportBar() {
     try {
       const { Document, Packer, Paragraph, TextRun, AlignmentType } = await import("docx");
 
+      const tpl = getTemplate(state.paperLanguage === "ur" ? "urdu" : state.paperLanguage === "sd" ? "sindhi" : "english");
+      const isRTL = tpl.dir === "rtl";
+
       const children: import("docx").Paragraph[] = [];
 
       if (state.schoolName) {
@@ -95,11 +99,11 @@ export default function ExportBar() {
         new Paragraph({
           children: [
             new TextRun({
-              text: `Time: ${state.time || "___"}        Total Marks: ${state.totalMarks || "___"}`,
+              text: `${tpl.timeLabel}: ${state.time || "___"}        ${tpl.totalMarksLabel}: ${state.totalMarks || "___"}`,
               size: 20,
             }),
           ],
-          alignment: AlignmentType.RIGHT,
+          alignment: isRTL ? AlignmentType.LEFT : AlignmentType.RIGHT,
           spacing: { after: 200 },
         })
       );
@@ -111,7 +115,7 @@ export default function ExportBar() {
         new Paragraph({
           children: [
             new TextRun(
-              `${state.studentNameLabel || "Student Name"}: ___________________    ${state.fatherNameLabel || "Father Name"}: ___________________            Obtained Marks: ${state.obtainedMarks || "___"}`
+              `${tpl.studentNameLabel}: ___________________    ${tpl.fatherNameLabel}: ___________________            ${tpl.obtainedMarksLabel}: ${state.obtainedMarks || "___"}`
             ),
           ],
           spacing: { after: 100 },
@@ -120,14 +124,14 @@ export default function ExportBar() {
 
       if (state.className || state.subject) {
         const parts: string[] = [];
-        if (state.className) parts.push(`Class: ${state.className}`);
-        if (state.subject) parts.push(`Subject: ${state.subject}`);
+        if (state.className) parts.push(`${tpl.classLabel}: ${state.className}`);
+        if (state.subject) parts.push(`${tpl.subjectLabel}: ${state.subject}`);
         children.push(new Paragraph({ children: [new TextRun(parts.join("    "))], spacing: { after: 200 } }));
       }
 
       state.questions.forEach((q, i) => {
-        let text = `Q${i + 1}. ${q.text}`;
-        if (q.type === "truefalse") text += " (True / False)";
+        let text = `${tpl.numbering(i)} ${q.text}`;
+        if (q.type === "truefalse") text += ` ${tpl.trueFalseLabel}`;
         children.push(
           new Paragraph({
             children: [new TextRun(text)],
@@ -135,10 +139,10 @@ export default function ExportBar() {
           })
         );
         if (q.type === "mcq") {
-          for (const opt of ["A", "B", "C", "D"]) {
+          for (let oi = 0; oi < 4; oi++) {
             children.push(
               new Paragraph({
-                children: [new TextRun(`     ${opt}) __________`)],
+                children: [new TextRun(`     ${tpl.mcqOption(oi)} __________`)],
                 spacing: { after: 80 },
               })
             );
@@ -147,7 +151,7 @@ export default function ExportBar() {
       });
 
       if (state.date) {
-        children.push(new Paragraph({ children: [new TextRun(`Date: ${state.date}`)], spacing: { after: 200 } }));
+        children.push(new Paragraph({ children: [new TextRun(`${isRTL ? "تاریخ" : "Date"}: ${state.date}`)], spacing: { after: 200 } }));
       }
 
       children.push(new Paragraph({ children: [new TextRun(sep)], spacing: { before: 400, after: 200 } }));
@@ -155,7 +159,7 @@ export default function ExportBar() {
       if (state.teacherSignature) {
         children.push(
           new Paragraph({
-            children: [new TextRun(`Teacher's Signature: ${state.teacherSignature}`)],
+            children: [new TextRun(`${tpl.teacherSignatureLabel}: ${state.teacherSignature}`)],
             spacing: { after: 100 },
           })
         );
@@ -164,11 +168,18 @@ export default function ExportBar() {
       if (state.principalSignature) {
         children.push(
           new Paragraph({
-            children: [new TextRun(`Principal's Signature: ${state.principalSignature}`)],
+            children: [new TextRun(`${tpl.principalSignatureLabel}: ${state.principalSignature}`)],
             spacing: { after: 100 },
           })
         );
       }
+
+      children.push(
+        new Paragraph({
+          children: [new TextRun(`${tpl.obtainedMarksLabel}: ${state.obtainedMarks || "___"}`)],
+          spacing: { after: 100 },
+        })
+      );
 
       const doc = new Document({
         sections: [

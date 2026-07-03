@@ -2,13 +2,15 @@
 
 import { usePaper } from "@/context/PaperContext";
 import { useRef } from "react";
+import { getTemplate } from "@/lib/paperFormat";
 
 export default function PaperPreview() {
   const { state } = usePaper();
   const previewRef = useRef<HTMLDivElement>(null);
+  const tpl = getTemplate(state.paperLanguage === "ur" ? "urdu" : state.paperLanguage === "sd" ? "sindhi" : "english");
 
   const questionCount = state.questions.length;
-  const obtainedMarks = state.obtainedMarks || "___";
+  const isRTL = tpl.dir === "rtl";
 
   return (
     <div className="flex flex-col">
@@ -25,7 +27,7 @@ export default function PaperPreview() {
             {questionCount} question{questionCount !== 1 ? "s" : ""}
           </span>
           <span className="text-slate-300">|</span>
-          <span>obtained marks: {obtainedMarks}</span>
+          <span>{tpl.obtainedMarksLabel}: {state.obtainedMarks || "___"}</span>
         </div>
       </div>
 
@@ -35,6 +37,7 @@ export default function PaperPreview() {
             ref={previewRef}
             id="paper-preview"
             className="bg-white shadow-xl border border-slate-200 mx-auto print-font"
+            dir={isRTL ? "rtl" : "ltr"}
             style={{
               width: "min(210mm, 100%)",
               minHeight: "min(297mm, 140vw)",
@@ -43,8 +46,8 @@ export default function PaperPreview() {
             }}
           >
             {/* Header */}
-            <div className="flex items-start mb-4 sm:mb-6">
-              <div className="w-[50px] sm:w-[60px] lg:w-[75px] h-[50px] sm:h-[60px] lg:h-[75px] flex-shrink-0">
+            <div className={`flex items-start mb-4 sm:mb-6 ${isRTL ? "flex-row" : ""}`}>
+              <div className={`w-[50px] sm:w-[60px] lg:w-[75px] h-[50px] sm:h-[60px] lg:h-[75px] flex-shrink-0 ${isRTL ? "order-3" : ""}`}>
                 {state.schoolLogo ? (
                   <img src={state.schoolLogo} alt="School Logo" className="w-full h-full object-contain" />
                 ) : (
@@ -65,9 +68,9 @@ export default function PaperPreview() {
                   </h2>
                 )}
               </div>
-              <div className="text-[9px] sm:text-[10px] lg:text-[11px] leading-relaxed text-slate-700 whitespace-nowrap">
-                <p><span className="font-semibold">Time:</span> {state.time || "________"}</p>
-                <p><span className="font-semibold">Total Marks:</span> {state.totalMarks || "________"}</p>
+              <div className={`text-[9px] sm:text-[10px] lg:text-[11px] leading-relaxed text-slate-700 whitespace-nowrap ${isRTL ? "order-1" : ""}`}>
+                <p><span className="font-semibold">{tpl.timeLabel}:</span> {state.time || "________"}</p>
+                <p><span className="font-semibold">{tpl.totalMarksLabel}:</span> {state.totalMarks || "________"}</p>
               </div>
             </div>
 
@@ -75,21 +78,21 @@ export default function PaperPreview() {
             <div className="border-t-2 border-b border-slate-900 mb-3 sm:mb-5" />
 
             {/* Student Info */}
-            <div className="flex flex-wrap gap-x-2 sm:gap-x-4 gap-y-1 sm:gap-y-1.5 text-[10px] sm:text-[11px] lg:text-[12px] mb-4 sm:mb-6 text-slate-800">
-              <span>
-                <span className="font-semibold">{state.studentNameLabel}:</span>{" "}
+            <div className={`flex flex-wrap gap-x-2 sm:gap-x-4 gap-y-1 sm:gap-y-1.5 text-[10px] sm:text-[11px] lg:text-[12px] mb-4 sm:mb-6 text-slate-800 ${isRTL ? "justify-end" : ""}`}>
+              <span className={isRTL ? "order-2" : ""}>
+                <span className="font-semibold">{tpl.studentNameLabel}:</span>{" "}
+                <span className="border-b border-slate-800 inline-block min-w-[70px] sm:min-w-[100px]">&nbsp;</span>
+              </span>
+              <span className={isRTL ? "order-1" : ""}>
+                <span className="font-semibold">{tpl.fatherNameLabel}:</span>{" "}
                 <span className="border-b border-slate-800 inline-block min-w-[70px] sm:min-w-[100px]">&nbsp;</span>
               </span>
               <span>
-                <span className="font-semibold">{state.fatherNameLabel}:</span>{" "}
-                <span className="border-b border-slate-800 inline-block min-w-[70px] sm:min-w-[100px]">&nbsp;</span>
-              </span>
-              <span>
-                <span className="font-semibold">Obtained Marks:</span>{" "}
+                <span className="font-semibold">{tpl.obtainedMarksLabel}:</span>{" "}
                 <span className="border-b border-slate-800 inline-block min-w-[40px] sm:min-w-[50px]">{state.obtainedMarks || ""}</span>
               </span>
               <span>
-                <span className="font-semibold">Subject:</span>{" "}
+                <span className="font-semibold">{tpl.subjectLabel}:</span>{" "}
                 <span className="border-b border-slate-800 inline-block min-w-[50px] sm:min-w-[70px]">{state.subject}</span>
               </span>
               <span>
@@ -97,10 +100,9 @@ export default function PaperPreview() {
                 <span className="border-b border-slate-800 inline-block min-w-[60px] sm:min-w-[70px]">{state.date}</span>
               </span>
               <span>
-                <span className="font-semibold">Class:</span>{" "}
+                <span className="font-semibold">{tpl.classLabel}:</span>{" "}
                 <span className="border-b border-slate-800 inline-block min-w-[40px] sm:min-w-[50px]">{state.className}</span>
               </span>
-
             </div>
 
             {/* Questions */}
@@ -115,43 +117,51 @@ export default function PaperPreview() {
                   </div>
                 </div>
               ) : (
-                <ol className="list-none space-y-3 sm:space-y-5">
+                <div className={`space-y-3 sm:space-y-5 ${isRTL ? "text-right" : ""}`}>
                   {state.questions.map((question, index) => (
-                    <li key={question.id} className="text-[11px] sm:text-[12px] lg:text-[13px] leading-relaxed text-slate-800">
-                      <span className="font-bold text-slate-900">{index + 1}.</span>{" "}
-                      <span dir="auto">
+                    <div key={question.id} className="text-[11px] sm:text-[12px] lg:text-[13px] leading-relaxed text-slate-800">
+                      <span className="font-bold text-slate-900">{tpl.numbering(index)}</span>
+                      {!isRTL && <span> </span>}
+                      <span dir={isRTL ? "rtl" : "auto"}>
                         {question.text || (
                           <span className="text-slate-300 italic">[Empty question]</span>
                         )}
+                        {isRTL && <span> {tpl.questionMark}</span>}
+                        {!isRTL && question.type === "truefalse" && (
+                          <span className="ml-2 text-slate-400 text-[11px] font-medium">{tpl.trueFalseLabel}</span>
+                        )}
                       </span>
+                      {isRTL && question.type === "truefalse" && (
+                        <span className="mr-2 text-slate-400 text-[11px] font-medium">{tpl.trueFalseLabel}</span>
+                      )}
                       {question.type === "mcq" && (
-                        <div className="mt-1 ml-4 text-slate-600 text-[11px]">
-                          <div>A) __________</div>
-                          <div>B) __________</div>
-                          <div>C) __________</div>
-                          <div>D) __________</div>
+                        <div className={`mt-1 ${isRTL ? "mr-4 text-right" : "ml-4"} text-slate-600 text-[11px] space-y-0.5`}>
+                          {[0, 1, 2, 3].map((i) => (
+                            <div key={i}>{tpl.mcqOption(i)} __________</div>
+                          ))}
                         </div>
                       )}
-                      {question.type === "truefalse" && (
-                        <span className="ml-2 text-slate-400 text-[11px] font-medium">
-                          (True / False)
-                        </span>
-                      )}
-                    </li>
+                    </div>
                   ))}
-                </ol>
+                </div>
               )}
             </div>
 
-            <div className="flex justify-between mt-8 sm:mt-12 pt-4 border-t border-slate-800">
-              <div className="text-[10px] sm:text-[11px] lg:text-[12px]">
-                <p className="font-semibold text-slate-800">Teacher&apos;s Signature</p>
+            {/* Footer Signatures */}
+            <div className={`flex ${isRTL ? "justify-between flex-row" : "justify-between"} mt-8 sm:mt-12 pt-4 border-t border-slate-800`}>
+              <div className={`text-[10px] sm:text-[11px] lg:text-[12px] ${isRTL ? "text-right" : ""}`}>
+                <p className="font-semibold text-slate-800">{tpl.teacherSignatureLabel}</p>
                 <p className="border-b border-slate-600 min-w-[100px] sm:min-w-[160px] inline-block mt-1">{state.teacherSignature || "______________"}</p>
               </div>
-              <div className="text-[10px] sm:text-[11px] lg:text-[12px]">
-                <p className="font-semibold text-slate-800">Principal&apos;s Signature</p>
+              <div className={`text-[10px] sm:text-[11px] lg:text-[12px] ${isRTL ? "text-right" : ""}`}>
+                <p className="font-semibold text-slate-800">{tpl.principalSignatureLabel}</p>
                 <p className="border-b border-slate-600 min-w-[100px] sm:min-w-[160px] inline-block mt-1">{state.principalSignature || "______________"}</p>
               </div>
+            </div>
+
+            {/* Obtained Marks Footer */}
+            <div className={`mt-4 text-[10px] sm:text-[11px] lg:text-[12px] ${isRTL ? "text-right" : ""}`}>
+              <p className="font-semibold text-slate-800">{tpl.obtainedMarksLabel}: {state.obtainedMarks || "________"}</p>
             </div>
           </div>
         </div>
