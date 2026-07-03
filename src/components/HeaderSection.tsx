@@ -205,7 +205,7 @@ export default function HeaderSection() {
             <div className="flex flex-wrap items-center gap-3">
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-2.5 px-5 py-3 bg-white border border-slate-200 rounded-xl text-sm text-slate-600 hover:border-indigo-400 hover:text-indigo-600 transition-all font-medium shadow-sm"
+                className="flex items-center gap-2.5 min-h-[48px] px-5 py-3 bg-white border border-slate-200 rounded-xl text-sm text-slate-600 hover:border-indigo-400 hover:text-indigo-600 transition-all font-medium shadow-sm"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -224,7 +224,7 @@ export default function HeaderSection() {
                   </div>
                   <button
                     onClick={handleRemoveLogo}
-                    className="text-sm text-red-500 hover:text-red-700 font-semibold transition-colors px-3 py-1.5 bg-red-50 hover:bg-red-100 rounded-lg"
+                    className="text-sm text-red-500 hover:text-red-700 font-semibold transition-colors min-h-[44px] px-4 py-2 bg-red-50 hover:bg-red-100 rounded-xl"
                   >
                     Remove
                   </button>

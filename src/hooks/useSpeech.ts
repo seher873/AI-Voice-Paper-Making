@@ -2,16 +2,22 @@
 
 import { useState, useCallback, useRef } from "react"
 
+export interface SpeechResult {
+  text: string
+  confidence: number
+}
+
 export function useSpeech() {
   const [isListening, setIsListening] = useState(false)
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [transcript, setTranscript] = useState("")
+  const [confidence, setConfidence] = useState(0)
   const [activeLang, setActiveLang] = useState("")
 
   const recognitionRef = useRef<SpeechRecognition | null>(null)
 
   const startListening = useCallback(
-    (onResult: (text: string) => void, lang: string = "ur-PK") => {
+    (onResult: (result: SpeechResult) => void, lang: string = "ur-PK") => {
       if (!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
         alert("Speech recognition is not supported in this browser. Please use Chrome or Edge.")
         return
@@ -28,7 +34,8 @@ export function useSpeech() {
 
       const recognition = new SpeechRecognitionAPI()
       recognition.continuous = false
-      recognition.interimResults = true
+      recognition.interimResults = false
+      recognition.maxAlternatives = 1
       recognition.lang = lang
 
       setActiveLang(lang)
@@ -38,13 +45,16 @@ export function useSpeech() {
       recognition.onerror = () => setIsListening(false)
 
       recognition.onresult = (event: SpeechRecognitionEvent) => {
-        const current = event.resultIndex
-        const transcriptText = event.results[current][0].transcript
+        const result = event.results[event.resultIndex]
+        const transcriptText = result[0].transcript
+        const conf = result[0].confidence
+
         setTranscript(transcriptText)
-        if (event.results[current].isFinal) {
-          onResult(transcriptText)
-          setTranscript("")
-        }
+        setConfidence(conf)
+
+        onResult({ text: transcriptText, confidence: conf })
+        setTranscript("")
+        setConfidence(0)
       }
 
       recognition.start()
@@ -84,6 +94,7 @@ export function useSpeech() {
     isListening,
     isSpeaking,
     transcript,
+    confidence,
     activeLang,
     startListening,
     stopListening,

@@ -5,6 +5,7 @@ import { parseDocx, generateDocx } from "@/lib/docx"
 import { useSpeech } from "@/hooks/useSpeech"
 import { saveAs } from "file-saver"
 import { useToast } from "@/context/ToastContext"
+import { cleanTranscript } from "@/lib/textCleaner"
 
 interface TagEntry {
   tag: string
@@ -22,9 +23,12 @@ export default function TemplateSection() {
   const [parsing, setParsing] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [voiceLang, setVoiceLang] = useState<"ur-PK" | "en-US">("ur-PK")
+  const [pendingText, setPendingText] = useState("")
+  const [pendingConfidence, setPendingConfidence] = useState(0)
+  const [showPending, setShowPending] = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const { isListening, startListening, stopListening } = useSpeech()
+  const { isListening, startListening, stopListening, transcript } = useSpeech()
   const { addToast } = useToast()
 
   const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,6 +72,7 @@ export default function TemplateSection() {
     setSelectedTag(tag)
     const existing = tags.find((t) => t.tag === tag)
     setTextareaValue(existing?.value || "")
+    setShowPending(false)
   }, [tags])
 
   const handleTextareaChange = useCallback((value: string) => {
@@ -78,22 +83,42 @@ export default function TemplateSection() {
   }, [selectedTag])
 
   const handleVoiceResult = useCallback(
-    (text: string) => {
-      setTextareaValue(text)
-      setTags((prev) =>
-        prev.map((t) => (t.tag === selectedTag ? { ...t, value: text } : t))
-      )
+    (result: { text: string; confidence: number }) => {
+      const cleaned = voiceLang === "en-US" ? cleanTranscript(result.text) : result.text
+      setPendingText(cleaned)
+      setPendingConfidence(result.confidence)
+      setShowPending(true)
     },
-    [selectedTag]
+    [voiceLang]
   )
 
   const handleMicClick = useCallback(() => {
     if (isListening) {
       stopListening()
     } else {
+      setShowPending(false)
       startListening(handleVoiceResult, voiceLang)
     }
   }, [isListening, startListening, stopListening, handleVoiceResult, voiceLang])
+
+  const handleAcceptPending = useCallback(() => {
+    if (!pendingText.trim()) return
+    setTextareaValue(pendingText)
+    setTags((prev) =>
+      prev.map((t) => (t.tag === selectedTag ? { ...t, value: pendingText } : t))
+    )
+    setShowPending(false)
+    setPendingText("")
+    setPendingConfidence(0)
+    addToast("Tag value updated", "success")
+  }, [pendingText, selectedTag, addToast])
+
+  const handleRejectPending = useCallback(() => {
+    setShowPending(false)
+    setPendingText("")
+    setPendingConfidence(0)
+    addToast("Re-record", "info")
+  }, [addToast])
 
   const allFilled = tags.length > 0 && tags.every((t) => t.value.trim().length > 0)
 
@@ -124,6 +149,7 @@ export default function TemplateSection() {
     setTags([])
     setSelectedTag("")
     setTextareaValue("")
+    setShowPending(false)
     if (fileInputRef.current) fileInputRef.current.value = ""
   }, [])
 
@@ -211,19 +237,24 @@ export default function TemplateSection() {
               </div>
             </div>
 
-            <div className="flex gap-2">
-              <button
-                onClick={handleMicClick}
-                className={`flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-bold transition-all shadow-sm flex-1 ${
-                  isListening ? "bg-red-600 text-white shadow-md" : "bg-indigo-600 text-white hover:bg-indigo-700 active:scale-[0.98]"
-                }`}
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path fillRule="evenodd" d="M12 4a3 3 0 00-3 3v4a3 3 0 006 0V7a3 3 0 00-3-3zm0 10a5 5 0 005-5 1 1 0 10-2 0 3 3 0 11-6 0 1 1 0 10-2 0 5 5 0 005 5zm-1 3.07A7.001 7.001 0 015 11a1 1 0 10-2 0 9 9 0 008 8.94V22a1 1 0 102 0v-2.06A9 9 0 0021 11a1 1 0 10-2 0 7.001 7.001 0 01-6 6.07z" clipRule="evenodd" />
+            <button
+              onClick={handleMicClick}
+              className={`flex items-center justify-center gap-2 min-h-[48px] w-full px-5 py-3 rounded-xl text-sm font-bold transition-all shadow-sm ${
+                isListening ? "bg-red-600 text-white shadow-md" : "bg-indigo-600 text-white hover:bg-indigo-700 active:scale-[0.98]"
+              }`}
+            >
+              {isListening ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor" />
+                  <rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor" />
                 </svg>
-                {isListening ? "Stop" : "🎤 Mic"}
-              </button>
-            </div>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m-4 0h8" />
+                </svg>
+              )}
+              <span>{isListening ? "Stop" : "Mic"}</span>
+            </button>
 
             {isListening && (
               <div className="flex items-center gap-2 text-sm text-red-600 font-bold">
@@ -236,6 +267,57 @@ export default function TemplateSection() {
               </div>
             )}
           </div>
+
+          {/* Pending transcription preview */}
+          {showPending && (
+            <div className="bg-slate-50 rounded-2xl p-4 sm:p-5 border border-indigo-200 shadow-sm space-y-3 animate-fade-in">
+              <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">
+                Preview Transcription
+              </label>
+              <textarea
+                value={pendingText}
+                onChange={(e) => setPendingText(e.target.value)}
+                dir="auto"
+                rows={3}
+                className="w-full px-4 py-3 bg-white border-2 border-indigo-200 rounded-xl text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 resize-none transition-all"
+              />
+              {voiceLang === "en-US" && pendingConfidence > 0 && (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-slate-500">Confidence:</span>
+                  <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden max-w-[120px]">
+                    <div
+                      className="h-full rounded-full transition-all"
+                      style={{
+                        width: `${Math.round(pendingConfidence * 100)}%`,
+                        backgroundColor: pendingConfidence > 0.7 ? "#10b981" : pendingConfidence > 0.4 ? "#f59e0b" : "#ef4444",
+                      }}
+                    />
+                  </div>
+                  <span className="text-xs font-bold text-slate-600">{Math.round(pendingConfidence * 100)}%</span>
+                </div>
+              )}
+              <div className="flex gap-3">
+                <button
+                  onClick={handleAcceptPending}
+                  className="flex items-center justify-center gap-2 min-h-[48px] flex-1 px-5 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 active:scale-[0.98] transition-all text-sm font-bold shadow-sm"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Accept
+                </button>
+                <button
+                  onClick={handleRejectPending}
+                  className="flex items-center justify-center gap-2 min-h-[48px] flex-1 px-5 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 active:scale-[0.98] transition-all text-sm font-bold shadow-sm"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 6L6 18M6 6l12 12" />
+                  </svg>
+                  Reject
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Textarea */}
           <div className="bg-slate-50 rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm">
@@ -276,7 +358,7 @@ export default function TemplateSection() {
             <button
               onClick={handleDownload}
               disabled={!allFilled || generating || !zipData}
-              className="w-full flex items-center justify-center gap-2 px-5 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all text-sm font-bold shadow-md"
+              className="w-full flex items-center justify-center gap-2 min-h-[48px] px-5 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all text-sm font-bold shadow-md"
             >
               {generating ? (
                 <>
