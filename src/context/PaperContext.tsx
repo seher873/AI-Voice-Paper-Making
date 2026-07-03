@@ -18,6 +18,8 @@ function paperReducer(state: PaperState, action: PaperAction): PaperState {
       return { ...state, time: action.payload };
     case "SET_TOTAL_MARKS":
       return { ...state, totalMarks: action.payload };
+    case "SET_OBTAINED_MARKS":
+      return { ...state, obtainedMarks: action.payload };
     case "SET_CLASS":
       return { ...state, className: action.payload };
     case "SET_SUBJECT":

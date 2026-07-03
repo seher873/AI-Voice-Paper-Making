@@ -8,7 +8,7 @@ export default function PaperPreview() {
   const previewRef = useRef<HTMLDivElement>(null);
 
   const questionCount = state.questions.length;
-  const totalMarks = state.totalMarks || "___";
+  const obtainedMarks = state.obtainedMarks || "___";
 
   return (
     <div className="flex flex-col">
@@ -25,7 +25,7 @@ export default function PaperPreview() {
             {questionCount} question{questionCount !== 1 ? "s" : ""}
           </span>
           <span className="text-slate-300">|</span>
-          <span>obtained marks: {totalMarks}</span>
+          <span>obtained marks: {obtainedMarks}</span>
         </div>
       </div>
 
@@ -67,7 +67,7 @@ export default function PaperPreview() {
               </div>
               <div className="text-[9px] sm:text-[10px] lg:text-[11px] leading-relaxed text-slate-700 whitespace-nowrap">
                 <p><span className="font-semibold">Time:</span> {state.time || "________"}</p>
-                <p><span className="font-semibold">Obtained Marks:</span> {state.totalMarks || "________"}</p>
+                <p><span className="font-semibold">Total Marks:</span> {state.totalMarks || "________"}</p>
               </div>
             </div>
 
@@ -86,7 +86,7 @@ export default function PaperPreview() {
               </span>
               <span>
                 <span className="font-semibold">Obtained Marks:</span>{" "}
-                <span className="border-b border-slate-800 inline-block min-w-[40px] sm:min-w-[50px]">{state.totalMarks || ""}</span>
+                <span className="border-b border-slate-800 inline-block min-w-[40px] sm:min-w-[50px]">{state.obtainedMarks || ""}</span>
               </span>
               <span>
                 <span className="font-semibold">Subject:</span>{" "}

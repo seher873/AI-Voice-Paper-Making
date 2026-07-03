@@ -93,7 +93,7 @@ export default function ExportBar() {
         new Paragraph({
           children: [
             new TextRun({
-              text: `Time: ${state.time || "___"}        Obtained Marks: ${state.totalMarks || "___"}`,
+              text: `Time: ${state.time || "___"}        Total Marks: ${state.totalMarks || "___"}`,
               size: 20,
             }),
           ],
@@ -109,7 +109,7 @@ export default function ExportBar() {
         new Paragraph({
           children: [
             new TextRun(
-              `${state.studentNameLabel || "Student Name"}: ___________________    ${state.fatherNameLabel || "Father Name"}: ___________________`
+              `${state.studentNameLabel || "Student Name"}: ___________________    ${state.fatherNameLabel || "Father Name"}: ___________________            Obtained Marks: ${state.obtainedMarks || "___"}`
             ),
           ],
           spacing: { after: 100 },
@@ -155,13 +155,6 @@ export default function ExportBar() {
           })
         );
       }
-
-      children.push(
-        new Paragraph({
-          children: [new TextRun(`Obtained Marks: ${state.totalMarks || "___"}`)],
-          spacing: { after: 100 },
-        })
-      );
 
       const doc = new Document({
         sections: [

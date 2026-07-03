@@ -8,6 +8,7 @@ export interface PaperState {
   schoolLogo: string | null;
   time: string;
   totalMarks: string;
+  obtainedMarks: string;
   className: string;
   subject: string;
   paperTitle: string;
@@ -24,6 +25,7 @@ export type PaperAction =
   | { type: "SET_SCHOOL_LOGO"; payload: string | null }
   | { type: "SET_TIME"; payload: string }
   | { type: "SET_TOTAL_MARKS"; payload: string }
+  | { type: "SET_OBTAINED_MARKS"; payload: string }
   | { type: "SET_CLASS"; payload: string }
   | { type: "SET_SUBJECT"; payload: string }
   | { type: "SET_PAPER_TITLE"; payload: string }
@@ -43,6 +45,7 @@ export const initialState: PaperState = {
   schoolLogo: null,
   time: "3 Hours",
   totalMarks: "",
+  obtainedMarks: "",
   className: "",
   subject: "",
   paperTitle: "",
