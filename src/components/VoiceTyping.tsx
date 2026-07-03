@@ -1,7 +1,7 @@
 "use client";
 
 import { useSpeech } from "@/hooks/useSpeech";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useToast } from "@/context/ToastContext";
 import { cleanTranscript, mathsCleaner } from "@/lib/textCleaner";
 import type { QuestionType } from "@/types/paper";
@@ -27,6 +27,27 @@ export default function VoiceTyping({ onTranscriptReady }: VoiceTypingProps) {
   const [questionType, setQuestionType] = useState<QuestionType>("descriptive");
   const [mathsMode, setMathsMode] = useState(false);
   const [editing, setEditing] = useState(false);
+  const previewRef = useRef<HTMLTextAreaElement>(null);
+
+  const insertSymbol = useCallback((symbol: string) => {
+    const ta = previewRef.current;
+    if (!ta) {
+      setPendingText((prev) => prev + symbol);
+      return;
+    }
+    const start = ta.selectionStart;
+    const end = ta.selectionEnd;
+    const before = ta.value.substring(0, start);
+    const after = ta.value.substring(end);
+    const newText = before + symbol + after;
+    setPendingText(newText);
+    requestAnimationFrame(() => {
+      ta.focus();
+      ta.selectionStart = ta.selectionEnd = start + symbol.length;
+    });
+  }, []);
+
+  const SYMBOLS = ["+", "-", "×", "÷", "=", "(", ")", "%", "√", "²", "³"];
 
   const handleVoiceResult = useCallback(
     (result: { text: string; confidence: number }) => {
@@ -174,6 +195,24 @@ export default function VoiceTyping({ onTranscriptReady }: VoiceTypingProps) {
         )}
       </div>
 
+      {/* Symbol Toolbar — Maths Mode */}
+      {mathsMode && (
+        <div>
+          <label className="block text-xs font-semibold text-slate-500 mb-1.5">Insert Symbol</label>
+          <div className="flex flex-wrap gap-1.5">
+            {SYMBOLS.map((sym) => (
+              <button
+                key={sym}
+                onClick={() => insertSymbol(sym)}
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center bg-white border border-slate-200 rounded-xl text-lg font-bold text-slate-700 hover:bg-orange-50 hover:border-orange-400 hover:text-orange-700 active:scale-[0.92] transition-all shadow-sm"
+              >
+                {sym}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Pending transcription preview with edit */}
       {editing && (
         <div className="space-y-3 animate-fade-in p-4 bg-white border-2 border-indigo-200 rounded-2xl">
@@ -183,6 +222,7 @@ export default function VoiceTyping({ onTranscriptReady }: VoiceTypingProps) {
             </span>
           </div>
           <textarea
+            ref={previewRef}
             value={pendingText}
             onChange={(e) => setPendingText(e.target.value)}
             dir="auto"
