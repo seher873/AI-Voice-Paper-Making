@@ -118,10 +118,12 @@ export default function PaperPreview() {
                 <ol className="list-none space-y-3 sm:space-y-5">
                   {state.questions.map((question, index) => (
                     <li key={question.id} className="text-[11px] sm:text-[12px] lg:text-[13px] leading-relaxed text-slate-800">
-                      <span className="font-bold text-slate-900">Q{index + 1}.</span>{" "}
-                      {question.text || (
-                        <span className="text-slate-300 italic">[Empty question]</span>
-                      )}
+                      <span className="font-bold text-slate-900">{index + 1}.</span>{" "}
+                      <span dir="auto">
+                        {question.text || (
+                          <span className="text-slate-300 italic">[Empty question]</span>
+                        )}
+                      </span>
                     </li>
                   ))}
                 </ol>

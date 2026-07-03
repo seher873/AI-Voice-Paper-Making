@@ -22,7 +22,7 @@ export default function TemplateSection() {
   const [textareaValue, setTextareaValue] = useState("")
   const [parsing, setParsing] = useState(false)
   const [generating, setGenerating] = useState(false)
-  const [voiceLang, setVoiceLang] = useState<"ur-PK" | "en-US">("ur-PK")
+  const [voiceLang, setVoiceLang] = useState<"ur-PK" | "en-US" | "sd-PK">("ur-PK")
   const [pendingText, setPendingText] = useState("")
   const [pendingConfidence, setPendingConfidence] = useState(0)
   const [showPending, setShowPending] = useState(false)
@@ -224,16 +224,22 @@ export default function TemplateSection() {
               <div className="flex gap-2">
                 <button
                   onClick={() => setVoiceLang("ur-PK")}
-                  className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                  className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-bold transition-all min-h-[44px] ${
                     voiceLang === "ur-PK" ? "bg-emerald-600 text-white shadow-sm" : "bg-white text-slate-600 border border-slate-200 hover:border-emerald-400"
                   }`}
                 >اردو</button>
                 <button
                   onClick={() => setVoiceLang("en-US")}
-                  className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                  className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-bold transition-all min-h-[44px] ${
                     voiceLang === "en-US" ? "bg-blue-600 text-white shadow-sm" : "bg-white text-slate-600 border border-slate-200 hover:border-blue-400"
                   }`}
                 >English</button>
+                <button
+                  onClick={() => setVoiceLang("sd-PK")}
+                  className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-bold transition-all min-h-[44px] ${
+                    voiceLang === "sd-PK" ? "bg-emerald-600 text-white shadow-sm" : "bg-white text-slate-600 border border-slate-200 hover:border-emerald-400"
+                  }`}
+                >سنڌي</button>
               </div>
             </div>
 

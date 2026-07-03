@@ -14,7 +14,7 @@ export default function VoiceTyping({ onTranscriptReady }: VoiceTypingProps) {
   const { addToast } = useToast();
   const [pendingText, setPendingText] = useState("");
   const [pendingConfidence, setPendingConfidence] = useState(0);
-  const [language, setLanguage] = useState<"en-US" | "ur-PK">("en-US");
+  const [language, setLanguage] = useState<"en-US" | "ur-PK" | "sd-PK">("en-US");
   const [editing, setEditing] = useState(false);
 
   const handleVoiceResult = useCallback(
@@ -64,12 +64,13 @@ export default function VoiceTyping({ onTranscriptReady }: VoiceTypingProps) {
         <div className="relative">
           <select
             value={language}
-            onChange={(e) => setLanguage(e.target.value as "en-US" | "ur-PK")}
+            onChange={(e) => setLanguage(e.target.value as "en-US" | "ur-PK" | "sd-PK")}
             disabled={isListening}
             className="appearance-none w-full min-w-[130px] px-4 py-3 pr-10 bg-white border border-slate-200 rounded-xl text-base text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 disabled:opacity-50 transition-all cursor-pointer font-medium"
           >
             <option value="en-US">English</option>
             <option value="ur-PK">اردو (Urdu)</option>
+            <option value="sd-PK">سنڌي (Sindhi)</option>
           </select>
           <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
