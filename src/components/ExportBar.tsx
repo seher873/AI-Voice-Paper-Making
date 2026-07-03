@@ -31,21 +31,23 @@ export default function ExportBar() {
         return;
       }
 
-      const html2canvas = (await import("html2canvas")).default;
-      const { default: jsPDF } = await import("jspdf");
+      const html2canvasMod = await import("html2canvas");
+      const h2c = html2canvasMod.default || html2canvasMod;
+      const jsPdfMod = await import("jspdf");
+      const JsPDF = jsPdfMod.default || jsPdfMod.jsPDF;
 
-      const canvas = await html2canvas(element, {
+      const canvas = await h2c(element, {
         scale: 2,
         useCORS: true,
         backgroundColor: "#ffffff",
       });
 
       const imgData = canvas.toDataURL("image/jpeg", 0.95);
-      const pdf = new jsPDF("p", "mm", "a4");
+      const pdf = new JsPDF("p", "mm", "a4");
       const pdfWidth = 210;
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
-      pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight, undefined, "FAST");
+      pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
       pdf.save(`${state.schoolName || "paper"}-${state.paperTitle || "examination"}.pdf`);
 
       addToast("PDF downloaded successfully", "success");
