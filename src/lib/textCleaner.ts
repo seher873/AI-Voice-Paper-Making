@@ -152,3 +152,63 @@ export function cleanTranscript(text: string): string {
 
   return result
 }
+
+const NUMBER_WORDS: Record<string, string> = {
+  zero: "0", one: "1", two: "2", three: "3", four: "4",
+  five: "5", six: "6", seven: "7", eight: "8", nine: "9",
+  ten: "10", eleven: "11", twelve: "12", thirteen: "13",
+  fourteen: "14", fifteen: "15", sixteen: "16", seventeen: "17",
+  eighteen: "18", nineteen: "19", twenty: "20", thirty: "30",
+  forty: "40", fifty: "50", sixty: "60", seventy: "70",
+  eighty: "80", ninety: "90", hundred: "100",
+}
+
+const MATH_OPS: [RegExp, string][] = [
+  [/plus/g, "+"],
+  [/minus/g, "-"],
+  [/multiplied by/g, "×"],
+  [/multiply by/g, "×"],
+  [/times/g, "×"],
+  [/divided by/g, "÷"],
+  [/divide by/g, "÷"],
+  [/equals/g, "="],
+  [/equal to/g, "="],
+  [/percent/g, "%"],
+  [/percentage/g, "%"],
+  [/square/g, "²"],
+  [/cube/g, "³"],
+  [/greater than/g, ">"],
+  [/less than/g, "<"],
+  [/bracket open/g, "("],
+  [/open bracket/g, "("],
+  [/bracket close/g, ")"],
+  [/close bracket/g, ")"],
+]
+
+function replaceNumberWords(text: string): string {
+  const words = text.split(/\s+/)
+  const result = words.map((w) => {
+    const clean = w.toLowerCase().replace(/[^a-zA-Z]/g, "")
+    if (NUMBER_WORDS[clean]) {
+      return w.toLowerCase().replace(clean, NUMBER_WORDS[clean])
+    }
+    return w
+  })
+  return result.join(" ")
+}
+
+export function mathsCleaner(text: string): string {
+  if (!text) return text
+
+  let result = text.toLowerCase()
+  result = replaceNumberWords(result)
+
+  for (const [pattern, replacement] of MATH_OPS) {
+    result = result.replace(pattern, replacement)
+  }
+
+  result = result.replace(/\s+/g, " ").trim()
+  result = capitalizeFirst(result)
+
+  return result
+}

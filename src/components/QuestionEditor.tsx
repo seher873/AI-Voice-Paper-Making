@@ -4,6 +4,15 @@ import { usePaper } from "@/context/PaperContext";
 import { useCallback } from "react";
 import VoiceTyping from "./VoiceTyping";
 import { useToast } from "@/context/ToastContext";
+import { QUESTION_TYPE_LABELS, type QuestionType } from "@/types/paper";
+
+const TYPE_BADGE_COLORS: Record<QuestionType, string> = {
+  descriptive: "bg-blue-100 text-blue-700 border-blue-200",
+  mcq: "bg-purple-100 text-purple-700 border-purple-200",
+  fillblanks: "bg-amber-100 text-amber-700 border-amber-200",
+  truefalse: "bg-rose-100 text-rose-700 border-rose-200",
+  maths: "bg-orange-100 text-orange-700 border-orange-200",
+};
 
 export default function QuestionEditor() {
   const { state, dispatch } = usePaper();
@@ -12,20 +21,20 @@ export default function QuestionEditor() {
   const handleAddQuestion = useCallback(() => {
     dispatch({
       type: "ADD_QUESTION",
-      payload: { id: crypto.randomUUID(), text: "" },
+      payload: { id: crypto.randomUUID(), text: "", type: "descriptive" },
     });
     addToast("New question added", "info");
   }, [dispatch, addToast]);
 
   const handleVoiceResult = useCallback(
-    (text: string) => {
+    (text: string, type: QuestionType) => {
       if (!text.trim()) {
         addToast("No speech detected", "warning");
         return;
       }
       dispatch({
         type: "ADD_QUESTION",
-        payload: { id: crypto.randomUUID(), text },
+        payload: { id: crypto.randomUUID(), text, type },
       });
     },
     [dispatch, addToast]
@@ -34,6 +43,13 @@ export default function QuestionEditor() {
   const handleUpdateQuestion = useCallback(
     (id: string, text: string) => {
       dispatch({ type: "UPDATE_QUESTION", payload: { id, text } });
+    },
+    [dispatch]
+  );
+
+  const handleTypeChange = useCallback(
+    (id: string, type: QuestionType) => {
+      dispatch({ type: "UPDATE_QUESTION_TYPE", payload: { id, type } });
     },
     [dispatch]
   );
@@ -93,12 +109,7 @@ export default function QuestionEditor() {
         </button>
       </div>
 
-      <div className="space-y-2">
-        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
-          Voice Typing
-        </label>
-        <VoiceTyping onTranscriptReady={handleVoiceResult} />
-      </div>
+      <VoiceTyping onTranscriptReady={handleVoiceResult} />
 
       <div className="space-y-3 max-h-[400px] sm:max-h-[500px] lg:max-h-[550px] overflow-y-auto pr-1">
         {state.questions.length === 0 ? (
@@ -148,13 +159,22 @@ export default function QuestionEditor() {
                     {index + 1}
                   </span>
                   <span className="text-xs sm:text-sm text-slate-400 font-bold">Q{index + 1}</span>
+                  <select
+                    value={question.type}
+                    onChange={(e) => handleTypeChange(question.id, e.target.value as QuestionType)}
+                    className={`ml-auto text-[11px] font-bold px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${TYPE_BADGE_COLORS[question.type]}`}
+                  >
+                    {(Object.entries(QUESTION_TYPE_LABELS) as [QuestionType, string][]).map(([val, lbl]) => (
+                      <option key={val} value={val}>{lbl}</option>
+                    ))}
+                  </select>
                 </div>
                 <textarea
                   value={question.text}
                   onChange={(e) => handleUpdateQuestion(question.id, e.target.value)}
                   dir="auto"
                   rows={3}
-                  className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-base text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 resize-none transition-all text-right"
+                  className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-base text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 resize-none transition-all"
                   placeholder="Type or edit question text..."
                 />
               </div>

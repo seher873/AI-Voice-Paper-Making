@@ -124,6 +124,19 @@ export default function PaperPreview() {
                           <span className="text-slate-300 italic">[Empty question]</span>
                         )}
                       </span>
+                      {question.type === "mcq" && (
+                        <div className="mt-1 ml-4 text-slate-600 text-[11px]">
+                          <div>A) __________</div>
+                          <div>B) __________</div>
+                          <div>C) __________</div>
+                          <div>D) __________</div>
+                        </div>
+                      )}
+                      {question.type === "truefalse" && (
+                        <span className="ml-2 text-slate-400 text-[11px] font-medium">
+                          (True / False)
+                        </span>
+                      )}
                     </li>
                   ))}
                 </ol>

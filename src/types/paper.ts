@@ -1,6 +1,9 @@
+export type QuestionType = "descriptive" | "mcq" | "fillblanks" | "truefalse" | "maths";
+
 export interface Question {
   id: string;
   text: string;
+  type: QuestionType;
 }
 
 export interface PaperState {
@@ -36,6 +39,7 @@ export type PaperAction =
   | { type: "SET_FATHER_NAME_LABEL"; payload: string }
   | { type: "ADD_QUESTION"; payload: Question }
   | { type: "UPDATE_QUESTION"; payload: { id: string; text: string } }
+  | { type: "UPDATE_QUESTION_TYPE"; payload: { id: string; type: QuestionType } }
   | { type: "DELETE_QUESTION"; payload: string }
   | { type: "REORDER_QUESTIONS"; payload: Question[] }
   | { type: "RESET" };
@@ -55,4 +59,12 @@ export const initialState: PaperState = {
   studentNameLabel: "Student Name",
   fatherNameLabel: "Father's Name",
   questions: [],
+};
+
+export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
+  descriptive: "Descriptive",
+  mcq: "Multiple Choice",
+  fillblanks: "Fill in the Blanks",
+  truefalse: "True / False",
+  maths: "Maths Question",
 };

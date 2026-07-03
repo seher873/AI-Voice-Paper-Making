@@ -124,12 +124,24 @@ export default function ExportBar() {
       }
 
       state.questions.forEach((q, i) => {
+        let text = `Q${i + 1}. ${q.text}`;
+        if (q.type === "truefalse") text += " (True / False)";
         children.push(
           new Paragraph({
-            children: [new TextRun(`Q${i + 1}. ${q.text}`)],
+            children: [new TextRun(text)],
             spacing: { after: 200 },
           })
         );
+        if (q.type === "mcq") {
+          for (const opt of ["A", "B", "C", "D"]) {
+            children.push(
+              new Paragraph({
+                children: [new TextRun(`     ${opt}) __________`)],
+                spacing: { after: 80 },
+              })
+            );
+          }
+        }
       });
 
       if (state.date) {
