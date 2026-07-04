@@ -144,17 +144,17 @@ export default function VoiceTyping({ onTranscriptReady }: VoiceTypingProps) {
         </div>
 
         {language === "en-US" && (
-          <div className="min-w-[80px]">
+          <div className="min-w-[100px]">
             <label className="block text-xs font-semibold text-slate-500 mb-1">Mode</label>
             <button
               onClick={() => setMathsMode(!mathsMode)}
-              className={`w-full min-h-[42px] px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${
+              className={`w-full min-h-[42px] px-3 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${
                 mathsMode
                   ? "bg-orange-600 text-white shadow-sm"
                   : "bg-white text-slate-600 border border-slate-200 hover:border-orange-400"
               }`}
             >
-              {mathsMode ? "Maths" : "Text"}
+              {mathsMode ? "Maths Mode" : "Text Mode"}
             </button>
           </div>
         )}
