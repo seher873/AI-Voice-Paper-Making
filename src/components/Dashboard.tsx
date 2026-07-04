@@ -22,7 +22,7 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen bg-gradient-to-br from-slate-50 to-indigo-50/50 overflow-hidden">
+    <div className="flex flex-col lg:flex-row h-screen bg-gradient-to-br from-slate-50 to-indigo-50/50">
       {/* Mobile top bar */}
       <div className="lg:hidden flex items-center justify-between bg-white border-b border-slate-200 px-4 py-2 z-30 shadow-sm">
         <button
@@ -91,19 +91,24 @@ export default function Dashboard() {
         {/* Template Selector */}
         <div className="px-3 sm:px-4 pt-3 pb-2 bg-slate-50/80 border-b border-slate-200">
           <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Paper Template</label>
-          <select
-            value={TEMPLATES.find((t) => t.lang === state.paperLanguage)?.id || "english"}
-            onChange={(e) => {
-              const id = e.target.value as PaperTemplate;
-              const tpl = TEMPLATES.find((t) => t.id === id);
-              if (tpl) dispatch({ type: "SET_PAPER_LANGUAGE", payload: tpl.lang });
-            }}
-            className="appearance-none w-full px-4 py-2.5 pr-8 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all cursor-pointer font-medium relative z-10"
-          >
-            {TEMPLATES.map((t) => (
-              <option key={t.id} value={t.id}>{t.label}</option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              value={TEMPLATES.find((t) => t.lang === state.paperLanguage)?.id || "english"}
+              onChange={(e) => {
+                const id = e.target.value as PaperTemplate;
+                const tpl = TEMPLATES.find((t) => t.id === id);
+                if (tpl) dispatch({ type: "SET_PAPER_LANGUAGE", payload: tpl.lang });
+              }}
+              className="appearance-none w-full px-3 py-2.5 pr-8 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all cursor-pointer font-medium"
+            >
+              {TEMPLATES.map((t) => (
+                <option key={t.id} value={t.id}>{t.label}</option>
+              ))}
+            </select>
+            <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
         </div>
 
         {/* Tabs */}
