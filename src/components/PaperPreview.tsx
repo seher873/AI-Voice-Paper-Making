@@ -74,35 +74,35 @@ export default function PaperPreview() {
             <div className="border-t-2 border-b border-slate-900 mb-3 sm:mb-5" />
 
             {/* Student Info */}
-            <div className={`flex flex-wrap gap-x-2 sm:gap-x-4 gap-y-1 sm:gap-y-1.5 text-[10px] sm:text-[11px] lg:text-[12px] mb-4 sm:mb-6 text-slate-800`}>
-              <span>
-                <span className="font-semibold">{state.studentNameLabel || tpl.studentNameLabel}:</span>{" "}
-                <span className="border-b border-slate-800 inline-block min-w-[70px] sm:min-w-[100px]">&nbsp;</span>
-              </span>
-              <span>
-                <span className="font-semibold">{state.fatherNameLabel || tpl.fatherNameLabel}:</span>{" "}
-                <span className="border-b border-slate-800 inline-block min-w-[70px] sm:min-w-[100px]">&nbsp;</span>
-              </span>
-              <span>
-                <span className="font-semibold">{tpl.classLabel}:</span>{" "}
-                <span className="border-b border-slate-800 inline-block min-w-[40px] sm:min-w-[50px]">{state.className}</span>
-              </span>
-              <span>
-                <span className="font-semibold">{tpl.timeLabel}:</span>{" "}
-                <span className="border-b border-slate-800 inline-block min-w-[50px] sm:min-w-[60px]">{isRTL && state.time === "3 Hours" ? "3 گھنٹے" : state.time || ""}</span>
-              </span>
-              <span>
-                <span className="font-semibold">{tpl.obtainedMarksLabel}:</span>{" "}
-                <span className="border-b border-slate-800 inline-block min-w-[40px] sm:min-w-[50px]">{state.obtainedMarks || ""}</span>
-              </span>
-              <span>
-                <span className="font-semibold">{tpl.subjectLabel}:</span>{" "}
-                <span className="border-b border-slate-800 inline-block min-w-[50px] sm:min-w-[70px]">{state.subject}</span>
-              </span>
-              <span>
-                <span className="font-semibold">{tpl.dateLabel}:</span>{" "}
-                <span className="border-b border-slate-800 inline-block min-w-[60px] sm:min-w-[70px]">{state.date}</span>
-              </span>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-2 text-[10px] sm:text-[11px] lg:text-[12px] mb-4 sm:mb-6 text-slate-800">
+              <div>
+                <p className="font-semibold">{state.studentNameLabel || tpl.studentNameLabel}</p>
+                <div className="border-b border-slate-800 mt-0.5 min-w-[70px] sm:min-w-[100px]">&nbsp;</div>
+              </div>
+              <div>
+                <p className="font-semibold">{state.fatherNameLabel || tpl.fatherNameLabel}</p>
+                <div className="border-b border-slate-800 mt-0.5 min-w-[70px] sm:min-w-[100px]">&nbsp;</div>
+              </div>
+              <div>
+                <p className="font-semibold">{tpl.classLabel}</p>
+                <div className="border-b border-slate-800 mt-0.5 min-w-[40px] sm:min-w-[50px]">{state.className}&nbsp;</div>
+              </div>
+              <div>
+                <p className="font-semibold">{tpl.timeLabel}</p>
+                <div className="border-b border-slate-800 mt-0.5 min-w-[50px] sm:min-w-[60px]">{isRTL && state.time === "3 Hours" ? "3 گھنٹے" : state.time || ""}&nbsp;</div>
+              </div>
+              <div>
+                <p className="font-semibold">{tpl.obtainedMarksLabel}</p>
+                <div className="border-b border-slate-800 mt-0.5 min-w-[40px] sm:min-w-[50px]">{state.obtainedMarks || ""}&nbsp;</div>
+              </div>
+              <div>
+                <p className="font-semibold">{tpl.subjectLabel}</p>
+                <div className="border-b border-slate-800 mt-0.5 min-w-[50px] sm:min-w-[70px]">{state.subject}&nbsp;</div>
+              </div>
+              <div>
+                <p className="font-semibold">{tpl.dateLabel}</p>
+                <div className="border-b border-slate-800 mt-0.5 min-w-[60px] sm:min-w-[70px]">{state.date}&nbsp;</div>
+              </div>
             </div>
 
             {/* Questions */}
