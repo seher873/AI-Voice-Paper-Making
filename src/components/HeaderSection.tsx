@@ -127,11 +127,10 @@ export default function HeaderSection() {
               Date
             </label>
             <input
-              type="text"
+              type="date"
               value={state.date}
               onChange={(e) => dispatch({ type: "SET_DATE", payload: e.target.value })}
-              placeholder="e.g. 15-03-2026"
-              className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-base text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all"
+              className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all"
             />
           </div>
 
