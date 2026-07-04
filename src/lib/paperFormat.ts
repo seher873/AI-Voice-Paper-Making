@@ -16,6 +16,7 @@ export interface TemplateConfig {
   totalMarksLabel: string;
   obtainedMarksLabel: string;
   timeLabel: string;
+  dateLabel: string;
   teacherSignatureLabel: string;
   principalSignatureLabel: string;
 }
@@ -37,6 +38,7 @@ export const TEMPLATES: TemplateConfig[] = [
     totalMarksLabel: "Total Marks",
     obtainedMarksLabel: "Obtained Marks",
     timeLabel: "Time",
+    dateLabel: "Date",
     teacherSignatureLabel: "Teacher's Signature",
     principalSignatureLabel: "Principal's Signature",
   },
@@ -59,6 +61,7 @@ export const TEMPLATES: TemplateConfig[] = [
     totalMarksLabel: "کل نمبر",
     obtainedMarksLabel: "حاصل کردہ نمبر",
     timeLabel: "وقت",
+    dateLabel: "تاریخ",
     teacherSignatureLabel: "استاد کے دستخط",
     principalSignatureLabel: "پرنسپل کے دستخط",
   },
@@ -81,6 +84,7 @@ export const TEMPLATES: TemplateConfig[] = [
     totalMarksLabel: "کل نمبر",
     obtainedMarksLabel: "حاصل ڪيل نمبر",
     timeLabel: "وقت",
+    dateLabel: "تاريخ",
     teacherSignatureLabel: "استاد جا دستخط",
     principalSignatureLabel: "پرنسپل جا دستخط",
   },
@@ -100,6 +104,7 @@ export const TEMPLATES: TemplateConfig[] = [
     totalMarksLabel: "Total Marks",
     obtainedMarksLabel: "Obtained Marks",
     timeLabel: "Time",
+    dateLabel: "Date",
     teacherSignatureLabel: "Teacher's Signature",
     principalSignatureLabel: "Principal's Signature",
   },
@@ -122,6 +127,7 @@ export const TEMPLATES: TemplateConfig[] = [
     totalMarksLabel: "کل نمبر",
     obtainedMarksLabel: "حاصل کردہ نمبر",
     timeLabel: "وقت",
+    dateLabel: "تاریخ",
     teacherSignatureLabel: "استاد کے دستخط",
     principalSignatureLabel: "پرنسپل کے دستخط",
   },
@@ -141,6 +147,7 @@ export const TEMPLATES: TemplateConfig[] = [
     totalMarksLabel: "Total Marks",
     obtainedMarksLabel: "Obtained Marks",
     timeLabel: "Time",
+    dateLabel: "Date",
     teacherSignatureLabel: "Teacher's Signature",
     principalSignatureLabel: "Principal's Signature",
   },
@@ -160,6 +167,7 @@ export const TEMPLATES: TemplateConfig[] = [
     totalMarksLabel: "Total Marks",
     obtainedMarksLabel: "Obtained Marks",
     timeLabel: "Time",
+    dateLabel: "Date",
     teacherSignatureLabel: "Teacher's Signature",
     principalSignatureLabel: "Principal's Signature",
   },
@@ -179,6 +187,7 @@ export const TEMPLATES: TemplateConfig[] = [
     totalMarksLabel: "Total Marks",
     obtainedMarksLabel: "Obtained Marks",
     timeLabel: "Time",
+    dateLabel: "Date",
     teacherSignatureLabel: "Teacher's Signature",
     principalSignatureLabel: "Principal's Signature",
   },

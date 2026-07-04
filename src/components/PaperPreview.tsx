@@ -46,8 +46,8 @@ export default function PaperPreview() {
             }}
           >
             {/* Header */}
-            <div className={`flex items-start mb-4 sm:mb-6 ${isRTL ? "flex-row" : ""}`}>
-              <div className={`w-[50px] sm:w-[60px] lg:w-[75px] h-[50px] sm:h-[60px] lg:h-[75px] flex-shrink-0 ${isRTL ? "order-3" : ""}`}>
+            <div className={`flex items-center gap-x-4 sm:gap-x-8 mb-3 sm:mb-4 ${isRTL ? "flex-row" : ""}`}>
+              <div className={`w-[50px] sm:w-[60px] lg:w-[75px] h-[50px] sm:h-[60px] lg:h-[75px] flex-shrink-0`}>
                 {state.schoolLogo ? (
                   <img src={state.schoolLogo} alt="School Logo" className="w-full h-full object-contain" />
                 ) : (
@@ -56,7 +56,7 @@ export default function PaperPreview() {
                   </div>
                 )}
               </div>
-              <div className="flex-1 text-center px-2 sm:px-4 min-w-0">
+              <div className="flex-1 text-center min-w-0">
                 <h1 className="text-sm sm:text-base lg:text-xl font-bold uppercase tracking-wide text-slate-900 truncate">
                   {state.schoolName || (
                     <span className="text-slate-300 font-normal normal-case">School Name</span>
@@ -68,24 +68,28 @@ export default function PaperPreview() {
                   </h2>
                 )}
               </div>
-              <div className={`text-[9px] sm:text-[10px] lg:text-[11px] leading-relaxed text-slate-700 whitespace-nowrap ${isRTL ? "order-1" : ""}`}>
-                <p><span className="font-semibold">{tpl.timeLabel}:</span> {state.time || "________"}</p>
-                <p><span className="font-semibold">{tpl.totalMarksLabel}:</span> {state.totalMarks || "________"}</p>
-              </div>
             </div>
 
             {/* Decorative line */}
             <div className="border-t-2 border-b border-slate-900 mb-3 sm:mb-5" />
 
             {/* Student Info */}
-            <div className={`flex flex-wrap gap-x-2 sm:gap-x-4 gap-y-1 sm:gap-y-1.5 text-[10px] sm:text-[11px] lg:text-[12px] mb-4 sm:mb-6 text-slate-800 ${isRTL ? "justify-end" : ""}`}>
-              <span className={isRTL ? "order-2" : ""}>
-                <span className="font-semibold">{tpl.studentNameLabel}:</span>{" "}
+            <div className={`flex flex-wrap gap-x-2 sm:gap-x-4 gap-y-1 sm:gap-y-1.5 text-[10px] sm:text-[11px] lg:text-[12px] mb-4 sm:mb-6 text-slate-800`}>
+              <span>
+                <span className="font-semibold">{state.studentNameLabel || tpl.studentNameLabel}:</span>{" "}
                 <span className="border-b border-slate-800 inline-block min-w-[70px] sm:min-w-[100px]">&nbsp;</span>
               </span>
-              <span className={isRTL ? "order-1" : ""}>
-                <span className="font-semibold">{tpl.fatherNameLabel}:</span>{" "}
+              <span>
+                <span className="font-semibold">{state.fatherNameLabel || tpl.fatherNameLabel}:</span>{" "}
                 <span className="border-b border-slate-800 inline-block min-w-[70px] sm:min-w-[100px]">&nbsp;</span>
+              </span>
+              <span>
+                <span className="font-semibold">{tpl.classLabel}:</span>{" "}
+                <span className="border-b border-slate-800 inline-block min-w-[40px] sm:min-w-[50px]">{state.className}</span>
+              </span>
+              <span>
+                <span className="font-semibold">{tpl.timeLabel}:</span>{" "}
+                <span className="border-b border-slate-800 inline-block min-w-[50px] sm:min-w-[60px]">{isRTL && state.time === "3 Hours" ? "3 گھنٹے" : state.time || ""}</span>
               </span>
               <span>
                 <span className="font-semibold">{tpl.obtainedMarksLabel}:</span>{" "}
@@ -96,12 +100,8 @@ export default function PaperPreview() {
                 <span className="border-b border-slate-800 inline-block min-w-[50px] sm:min-w-[70px]">{state.subject}</span>
               </span>
               <span>
-                <span className="font-semibold">Date:</span>{" "}
+                <span className="font-semibold">{tpl.dateLabel}:</span>{" "}
                 <span className="border-b border-slate-800 inline-block min-w-[60px] sm:min-w-[70px]">{state.date}</span>
-              </span>
-              <span>
-                <span className="font-semibold">{tpl.classLabel}:</span>{" "}
-                <span className="border-b border-slate-800 inline-block min-w-[40px] sm:min-w-[50px]">{state.className}</span>
               </span>
             </div>
 

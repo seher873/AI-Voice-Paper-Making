@@ -98,36 +98,30 @@ export default function ExportBar() {
       children.push(
         new Paragraph({
           children: [
-            new TextRun({
-              text: `${tpl.timeLabel}: ${state.time || "___"}        ${tpl.totalMarksLabel}: ${state.totalMarks || "___"}`,
-              size: 20,
-            }),
-          ],
-          alignment: isRTL ? AlignmentType.LEFT : AlignmentType.RIGHT,
-          spacing: { after: 200 },
-        })
-      );
-
-      const sep = "________________________________________";
-      children.push(new Paragraph({ children: [new TextRun(sep)], spacing: { after: 200 } }));
-
-      children.push(
-        new Paragraph({
-          children: [
             new TextRun(
-              `${tpl.studentNameLabel}: ___________________    ${tpl.fatherNameLabel}: ___________________            ${tpl.obtainedMarksLabel}: ${state.obtainedMarks || "___"}`
+              `${tpl.studentNameLabel}: ___________________    ${tpl.fatherNameLabel}: ___________________`
             ),
           ],
           spacing: { after: 100 },
         })
       );
 
-      if (state.className || state.subject) {
-        const parts: string[] = [];
-        if (state.className) parts.push(`${tpl.classLabel}: ${state.className}`);
-        if (state.subject) parts.push(`${tpl.subjectLabel}: ${state.subject}`);
-        children.push(new Paragraph({ children: [new TextRun(parts.join("    "))], spacing: { after: 200 } }));
-      }
+      const infoParts: string[] = [];
+      if (state.className) infoParts.push(`${tpl.classLabel}: ${state.className}`);
+      infoParts.push(`${tpl.timeLabel}: ${isRTL && state.time === "3 Hours" ? "3 گھنٹے" : state.time || "___"}`);
+      infoParts.push(`${tpl.totalMarksLabel}: ${state.totalMarks || "___"}`);
+      children.push(new Paragraph({ children: [new TextRun(infoParts.join("    "))], spacing: { after: 100 } }));
+
+      children.push(
+        new Paragraph({
+          children: [
+            new TextRun(
+              `${tpl.obtainedMarksLabel}: ${state.obtainedMarks || "___"}    ${tpl.subjectLabel}: ${state.subject || "___"}    ${tpl.dateLabel}: ${state.date || "___"}`
+            ),
+          ],
+          spacing: { after: 200 },
+        })
+      );
 
       state.questions.forEach((q, i) => {
         let text = `${tpl.numbering(i)} ${q.text}`;
@@ -150,10 +144,7 @@ export default function ExportBar() {
         }
       });
 
-      if (state.date) {
-        children.push(new Paragraph({ children: [new TextRun(`${isRTL ? "تاریخ" : "Date"}: ${state.date}`)], spacing: { after: 200 } }));
-      }
-
+      const sep = "________________________________________";
       children.push(new Paragraph({ children: [new TextRun(sep)], spacing: { before: 400, after: 200 } }));
 
       if (state.teacherSignature) {

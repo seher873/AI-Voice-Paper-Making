@@ -40,7 +40,7 @@ export default function Dashboard() {
               <path strokeLinecap="round" d="M7 8h10M7 12h10M7 16h10" />
             </svg>
           )}
-          <span className="font-bold text-sm tracking-tight">AI Voice Paper</span>
+          <span className="font-bold text-sm tracking-tight truncate max-w-[120px]">AI Voice Paper</span>
         </button>
         <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,7 +62,7 @@ export default function Dashboard() {
       <div
         className={`${
           menuOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0 fixed lg:relative top-0 left-0 z-25 w-[92vw] max-w-[480px] h-full lg:h-auto lg:w-[520px] lg:min-w-[520px] xl:w-[560px] xl:min-w-[560px] bg-white/95 backdrop-blur-sm border-r border-slate-200 flex flex-col overflow-hidden shadow-2xl lg:shadow-lg transition-transform duration-300 ease-in-out`}
+        } lg:translate-x-0 fixed lg:relative top-0 left-0 z-25           w-[92vw] max-w-[480px] h-full lg:h-auto lg:w-[520px] lg:min-w-[520px] xl:w-[560px] xl:min-w-[560px] bg-white/95 backdrop-blur-sm border-r border-slate-200 flex flex-col shadow-2xl lg:shadow-lg transition-transform duration-300 ease-in-out`}
       >
         {/* Header */}
         <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 px-5 py-4 flex-shrink-0">
@@ -73,7 +73,7 @@ export default function Dashboard() {
               </svg>
             </div>
             <div>
-              <h1 className="text-lg font-bold text-white tracking-tight">AI Voice Paper</h1>
+              <h1 className="text-lg font-bold text-white tracking-tight truncate">AI Voice Paper</h1>
               <p className="text-xs text-indigo-200 font-medium">School Paper Builder</p>
             </div>
             <button
@@ -98,7 +98,7 @@ export default function Dashboard() {
               const tpl = TEMPLATES.find((t) => t.id === id);
               if (tpl) dispatch({ type: "SET_PAPER_LANGUAGE", payload: tpl.lang });
             }}
-            className="appearance-none w-full px-4 py-2.5 pr-8 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all cursor-pointer font-medium"
+            className="appearance-none w-full px-4 py-2.5 pr-8 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all cursor-pointer font-medium relative z-10"
           >
             {TEMPLATES.map((t) => (
               <option key={t.id} value={t.id}>{t.label}</option>
