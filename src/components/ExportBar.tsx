@@ -130,43 +130,62 @@ export default function ExportBar() {
       );
 
       // Student Info
-      children.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: `${tpl.studentNameLabel}: ___________________    ${tpl.fatherNameLabel}: ___________________`,
-              font: isRTL ? "Noto Nastaliq Urdu" : "Times New Roman",
-            }),
-          ],
-          alignment: isRTL ? AlignmentType.RIGHT : AlignmentType.LEFT,
-          spacing: { after: 120 },
-        })
-      );
+      const nameLabel = state.studentNameLabel || tpl.studentNameLabel;
+      const fatherLabel = state.fatherNameLabel || tpl.fatherNameLabel;
+      if (nameLabel || fatherLabel) {
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `${nameLabel}: ___________________${fatherLabel ? `    ${fatherLabel}: ___________________` : ""}`,
+                font: isRTL ? "Noto Nastaliq Urdu" : "Times New Roman",
+              }),
+            ],
+            alignment: isRTL ? AlignmentType.RIGHT : AlignmentType.LEFT,
+            spacing: { after: 120 },
+          })
+        );
+      }
 
-      const infoParts: string[] = [];
-      if (state.className) infoParts.push(`${tpl.classLabel}: ${state.className}`);
-      infoParts.push(`${tpl.timeLabel}: ${isRTL && state.time === "3 Hours" ? "3 گھنٹے" : state.time || "___"}`);
-      infoParts.push(`${tpl.totalMarksLabel}: ${state.totalMarks || "___"}`);
-      children.push(
-        new Paragraph({
-          children: [new TextRun({ text: infoParts.join("    "), font: isRTL ? "Noto Nastaliq Urdu" : "Times New Roman" })],
-          alignment: isRTL ? AlignmentType.RIGHT : AlignmentType.LEFT,
-          spacing: { after: 120 },
-        })
-      );
+      const classTimeParts: string[] = [];
+      if (state.className) classTimeParts.push(`${tpl.classLabel}: ${state.className}`);
+      const timeVal = isRTL && state.time === "3 Hours" ? "3 گھنٹے" : state.time;
+      if (timeVal) classTimeParts.push(`${tpl.timeLabel}: ${timeVal}`);
+      if (classTimeParts.length) {
+        children.push(
+          new Paragraph({
+            children: [new TextRun({ text: classTimeParts.join("    "), font: isRTL ? "Noto Nastaliq Urdu" : "Times New Roman" })],
+            alignment: isRTL ? AlignmentType.RIGHT : AlignmentType.LEFT,
+            spacing: { after: 120 },
+          })
+        );
+      }
 
-      children.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: `${tpl.obtainedMarksLabel}: ${state.obtainedMarks || "___"}    ${tpl.subjectLabel}: ${state.subject || "___"}    ${tpl.dateLabel}: ${state.date || "___"}`,
-              font: isRTL ? "Noto Nastaliq Urdu" : "Times New Roman",
-            }),
-          ],
-          alignment: isRTL ? AlignmentType.RIGHT : AlignmentType.LEFT,
-          spacing: { after: 200 },
-        })
-      );
+      const marksParts: string[] = [];
+      if (state.totalMarks) marksParts.push(`${tpl.totalMarksLabel}: ${state.totalMarks}`);
+      if (state.obtainedMarks) marksParts.push(`${tpl.obtainedMarksLabel}: ${state.obtainedMarks}`);
+      if (marksParts.length) {
+        children.push(
+          new Paragraph({
+            children: [new TextRun({ text: marksParts.join("    "), font: isRTL ? "Noto Nastaliq Urdu" : "Times New Roman" })],
+            alignment: isRTL ? AlignmentType.RIGHT : AlignmentType.LEFT,
+            spacing: { after: 120 },
+          })
+        );
+      }
+
+      const subjDateParts: string[] = [];
+      if (state.subject) subjDateParts.push(`${tpl.subjectLabel}: ${state.subject}`);
+      if (state.date) subjDateParts.push(`${tpl.dateLabel}: ${state.date}`);
+      if (subjDateParts.length) {
+        children.push(
+          new Paragraph({
+            children: [new TextRun({ text: subjDateParts.join("    "), font: isRTL ? "Noto Nastaliq Urdu" : "Times New Roman" })],
+            alignment: isRTL ? AlignmentType.RIGHT : AlignmentType.LEFT,
+            spacing: { after: 200 },
+          })
+        );
+      }
 
       // Decorative line
       children.push(

@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import { initialState, type PaperState, type PaperAction } from "@/types/paper";
+import { getTemplate } from "@/lib/paperFormat";
 
 function paperReducer(state: PaperState, action: PaperAction): PaperState {
   switch (action.type) {
@@ -36,8 +37,15 @@ function paperReducer(state: PaperState, action: PaperAction): PaperState {
       return { ...state, studentNameLabel: action.payload };
     case "SET_FATHER_NAME_LABEL":
       return { ...state, fatherNameLabel: action.payload };
-    case "SET_PAPER_LANGUAGE":
-      return { ...state, paperLanguage: action.payload };
+    case "SET_PAPER_LANGUAGE": {
+      const tpl = getTemplate(action.payload === "ur" ? "urdu" : action.payload === "sd" ? "sindhi" : "english");
+      return {
+        ...state,
+        paperLanguage: action.payload,
+        studentNameLabel: tpl.studentNameLabel,
+        fatherNameLabel: tpl.fatherNameLabel,
+      };
+    }
     case "ADD_QUESTION":
       return { ...state, questions: [...state.questions, action.payload] };
     case "UPDATE_QUESTION":
