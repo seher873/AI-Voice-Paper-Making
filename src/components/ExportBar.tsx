@@ -41,14 +41,15 @@ export default function ExportBar() {
         scale: 2,
         useCORS: true,
         backgroundColor: "#ffffff",
+        logging: false,
       });
 
-      const imgData = canvas.toDataURL("image/jpeg", 0.95);
+      const imgData = canvas.toDataURL("image/png");
       const pdf = new JsPDF("p", "mm", "a4");
       const pdfWidth = 210;
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
-      pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
       pdf.save(`${state.schoolName || "paper"}-${state.paperTitle || "examination"}.pdf`);
 
       addToast("PDF downloaded successfully", "success");
@@ -68,19 +69,44 @@ export default function ExportBar() {
 
     setExporting("docx");
     try {
-      const { Document, Packer, Paragraph, TextRun, AlignmentType } = await import("docx");
+      const { Document, Packer, Paragraph, TextRun, AlignmentType, ImageRun } = await import("docx");
+      const fs = await import("file-saver");
 
       const tpl = getTemplate(state.paperLanguage === "ur" ? "urdu" : state.paperLanguage === "sd" ? "sindhi" : "english");
       const isRTL = tpl.dir === "rtl";
 
       const children: import("docx").Paragraph[] = [];
 
+      // Header: Logo + School Name
+      if (state.schoolLogo) {
+        try {
+          const logoResp = await fetch(state.schoolLogo);
+          const logoBlob = await logoResp.blob();
+          const logoBuf = await logoBlob.arrayBuffer();
+          children.push(
+            new Paragraph({
+              children: [
+                new ImageRun({
+                  data: logoBuf,
+                  transformation: { width: 60, height: 60 },
+                  type: logoBlob.type.includes("png") ? "png" : "jpg",
+                }),
+              ],
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 60 },
+            })
+          );
+        } catch {
+          // skip logo if it fails
+        }
+      }
+
       if (state.schoolName) {
         children.push(
           new Paragraph({
-            children: [new TextRun({ text: state.schoolName, bold: true, size: 28 })],
+            children: [new TextRun({ text: state.schoolName, bold: true, size: 28, font: isRTL ? "Noto Nastaliq Urdu" : "Times New Roman" })],
             alignment: AlignmentType.CENTER,
-            spacing: { after: 100 },
+            spacing: { after: 60 },
           })
         );
       }
@@ -88,21 +114,32 @@ export default function ExportBar() {
       if (state.paperTitle) {
         children.push(
           new Paragraph({
-            children: [new TextRun({ text: state.paperTitle, bold: true, size: 24 })],
+            children: [new TextRun({ text: state.paperTitle, bold: true, size: 24, font: isRTL ? "Noto Nastaliq Urdu" : "Times New Roman" })],
             alignment: AlignmentType.CENTER,
             spacing: { after: 200 },
           })
         );
       }
 
+      // Decorative line
+      children.push(
+        new Paragraph({
+          children: [new TextRun({ text: "________________________________________", size: 16 })],
+          spacing: { after: 200 },
+        })
+      );
+
+      // Student Info
       children.push(
         new Paragraph({
           children: [
-            new TextRun(
-              `${tpl.studentNameLabel}: ___________________    ${tpl.fatherNameLabel}: ___________________`
-            ),
+            new TextRun({
+              text: `${tpl.studentNameLabel}: ___________________    ${tpl.fatherNameLabel}: ___________________`,
+              font: isRTL ? "Noto Nastaliq Urdu" : "Times New Roman",
+            }),
           ],
-          spacing: { after: 100 },
+          alignment: isRTL ? AlignmentType.RIGHT : AlignmentType.LEFT,
+          spacing: { after: 120 },
         })
       );
 
@@ -110,47 +147,72 @@ export default function ExportBar() {
       if (state.className) infoParts.push(`${tpl.classLabel}: ${state.className}`);
       infoParts.push(`${tpl.timeLabel}: ${isRTL && state.time === "3 Hours" ? "3 گھنٹے" : state.time || "___"}`);
       infoParts.push(`${tpl.totalMarksLabel}: ${state.totalMarks || "___"}`);
-      children.push(new Paragraph({ children: [new TextRun(infoParts.join("    "))], spacing: { after: 100 } }));
+      children.push(
+        new Paragraph({
+          children: [new TextRun({ text: infoParts.join("    "), font: isRTL ? "Noto Nastaliq Urdu" : "Times New Roman" })],
+          alignment: isRTL ? AlignmentType.RIGHT : AlignmentType.LEFT,
+          spacing: { after: 120 },
+        })
+      );
 
       children.push(
         new Paragraph({
           children: [
-            new TextRun(
-              `${tpl.obtainedMarksLabel}: ${state.obtainedMarks || "___"}    ${tpl.subjectLabel}: ${state.subject || "___"}    ${tpl.dateLabel}: ${state.date || "___"}`
-            ),
+            new TextRun({
+              text: `${tpl.obtainedMarksLabel}: ${state.obtainedMarks || "___"}    ${tpl.subjectLabel}: ${state.subject || "___"}    ${tpl.dateLabel}: ${state.date || "___"}`,
+              font: isRTL ? "Noto Nastaliq Urdu" : "Times New Roman",
+            }),
           ],
+          alignment: isRTL ? AlignmentType.RIGHT : AlignmentType.LEFT,
           spacing: { after: 200 },
         })
       );
 
+      // Decorative line
+      children.push(
+        new Paragraph({
+          children: [new TextRun({ text: "________________________________________", size: 16 })],
+          spacing: { after: 200 },
+        })
+      );
+
+      // Questions
       state.questions.forEach((q, i) => {
         let text = `${tpl.numbering(i)} ${q.text}`;
         if (q.type === "truefalse") text += ` ${tpl.trueFalseLabel}`;
         children.push(
           new Paragraph({
-            children: [new TextRun(text)],
-            spacing: { after: 200 },
+            children: [new TextRun({ text, font: isRTL ? "Noto Nastaliq Urdu" : "Times New Roman" })],
+            alignment: isRTL ? AlignmentType.RIGHT : AlignmentType.LEFT,
+            spacing: { after: 120 },
           })
         );
         if (q.type === "mcq") {
           for (let oi = 0; oi < 4; oi++) {
             children.push(
               new Paragraph({
-                children: [new TextRun(`     ${tpl.mcqOption(oi)} __________`)],
-                spacing: { after: 80 },
+                children: [new TextRun({ text: `     ${tpl.mcqOption(oi)} __________` })],
+                indent: { left: 400 },
+                spacing: { after: 60 },
               })
             );
           }
         }
       });
 
-      const sep = "________________________________________";
-      children.push(new Paragraph({ children: [new TextRun(sep)], spacing: { before: 400, after: 200 } }));
+      // Footer separator
+      children.push(
+        new Paragraph({
+          children: [new TextRun({ text: "________________________________________", size: 16 })],
+          spacing: { before: 400, after: 200 },
+        })
+      );
 
       if (state.teacherSignature) {
         children.push(
           new Paragraph({
-            children: [new TextRun(`${tpl.teacherSignatureLabel}: ${state.teacherSignature}`)],
+            children: [new TextRun({ text: `${tpl.teacherSignatureLabel}: ${state.teacherSignature}`, font: isRTL ? "Noto Nastaliq Urdu" : "Times New Roman" })],
+            alignment: isRTL ? AlignmentType.RIGHT : AlignmentType.LEFT,
             spacing: { after: 100 },
           })
         );
@@ -159,7 +221,8 @@ export default function ExportBar() {
       if (state.principalSignature) {
         children.push(
           new Paragraph({
-            children: [new TextRun(`${tpl.principalSignatureLabel}: ${state.principalSignature}`)],
+            children: [new TextRun({ text: `${tpl.principalSignatureLabel}: ${state.principalSignature}`, font: isRTL ? "Noto Nastaliq Urdu" : "Times New Roman" })],
+            alignment: isRTL ? AlignmentType.RIGHT : AlignmentType.LEFT,
             spacing: { after: 100 },
           })
         );
@@ -167,7 +230,8 @@ export default function ExportBar() {
 
       children.push(
         new Paragraph({
-          children: [new TextRun(`${tpl.obtainedMarksLabel}: ${state.obtainedMarks || "___"}`)],
+          children: [new TextRun({ text: `${tpl.obtainedMarksLabel}: ${state.obtainedMarks || "___"}`, font: isRTL ? "Noto Nastaliq Urdu" : "Times New Roman" })],
+          alignment: isRTL ? AlignmentType.RIGHT : AlignmentType.LEFT,
           spacing: { after: 100 },
         })
       );
@@ -186,14 +250,7 @@ export default function ExportBar() {
       });
 
       const blob = await Packer.toBlob(doc);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${state.schoolName || "paper"}-${state.paperTitle || "examination"}.docx`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      fs.saveAs(blob, `${state.schoolName || "paper"}-${state.paperTitle || "examination"}.docx`);
 
       addToast("DOCX downloaded successfully", "success");
     } catch (err) {

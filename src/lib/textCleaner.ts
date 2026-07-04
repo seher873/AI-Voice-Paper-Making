@@ -126,6 +126,12 @@ function removeExtraSpaces(text: string): string {
   return text.replace(/\s+/g, " ").trim()
 }
 
+function convertBlanks(text: string): string {
+  return text
+    .replace(/\b(?:dash|blank)\b/gi, "___________")
+    .replace(/_{2,}/g, "___________")
+}
+
 export function cleanTranscript(text: string): string {
   if (!text) return text
 
@@ -146,6 +152,7 @@ export function cleanTranscript(text: string): string {
   result = cleanedParts.join("")
 
   result = cleanPunctuation(result)
+  result = convertBlanks(result)
   result = removeExtraSpaces(result)
   result = addQuestionMark(result)
   result = capitalizeFirst(result)
