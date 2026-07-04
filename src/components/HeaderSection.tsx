@@ -138,26 +138,37 @@ export default function HeaderSection() {
             <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
               Class
             </label>
-            <input
-              type="text"
+            <select
               value={state.className}
               onChange={(e) => dispatch({ type: "SET_CLASS", payload: e.target.value })}
-              placeholder="e.g. 10th"
-              className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-base text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all"
-            />
+              className="appearance-none w-full px-4 py-3 pr-8 bg-white border border-slate-200 rounded-xl text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all cursor-pointer"
+            >
+              <option value="">Select Class</option>
+              {[1,2,3,4,5,6,7,8,9,10,11,12].map((n) => (
+                <option key={n} value={`${n}${n === 1 ? "st" : n === 2 ? "nd" : n === 3 ? "rd" : "th"}`}>{n}{n === 1 ? "st" : n === 2 ? "nd" : n === 3 ? "rd" : "th"}</option>
+              ))}
+            </select>
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
               Subject
             </label>
-            <input
-              type="text"
+            <select
               value={state.subject}
               onChange={(e) => dispatch({ type: "SET_SUBJECT", payload: e.target.value })}
-              placeholder="e.g. English"
-              className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-base text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all"
-            />
+              className="appearance-none w-full px-4 py-3 pr-8 bg-white border border-slate-200 rounded-xl text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all cursor-pointer"
+            >
+              <option value="">Select Subject</option>
+              <option value="English">English</option>
+              <option value="Urdu">Urdu</option>
+              <option value="Sindhi">Sindhi</option>
+              <option value="Mathematics">Mathematics</option>
+              <option value="Islamiat">Islamiat</option>
+              <option value="Science">Science</option>
+              <option value="Social Studies">Social Studies</option>
+              <option value="Computer">Computer</option>
+            </select>
           </div>
 
           <div>

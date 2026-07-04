@@ -74,34 +74,42 @@ export default function PaperPreview() {
             <div className="border-t-2 border-b border-slate-900 mb-3 sm:mb-5" />
 
             {/* Student Info */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-2 text-[10px] sm:text-[11px] lg:text-[12px] mb-4 sm:mb-6 text-slate-800">
-              <div>
-                <p className="font-semibold">{state.studentNameLabel || tpl.studentNameLabel}</p>
-                <div className="border-b border-slate-800 mt-0.5 min-w-[70px] sm:min-w-[100px]">&nbsp;</div>
+            <div className="space-y-1.5 text-[10px] sm:text-[11px] lg:text-[12px] mb-4 sm:mb-6 text-slate-800">
+              <div className="flex gap-x-6">
+                <div className="flex-1">
+                  <p className="font-semibold">{state.studentNameLabel || tpl.studentNameLabel}</p>
+                  <div className="border-b border-slate-800 mt-0.5 min-w-[70px] sm:min-w-[100px]">&nbsp;</div>
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold">{state.fatherNameLabel || tpl.fatherNameLabel}</p>
+                  <div className="border-b border-slate-800 mt-0.5 min-w-[70px] sm:min-w-[100px]">&nbsp;</div>
+                </div>
               </div>
-              <div>
-                <p className="font-semibold">{state.fatherNameLabel || tpl.fatherNameLabel}</p>
-                <div className="border-b border-slate-800 mt-0.5 min-w-[70px] sm:min-w-[100px]">&nbsp;</div>
-              </div>
-              <div>
-                <p className="font-semibold">{tpl.classLabel}</p>
-                <div className="border-b border-slate-800 mt-0.5 min-w-[40px] sm:min-w-[50px]">{state.className}&nbsp;</div>
-              </div>
-              <div>
-                <p className="font-semibold">{tpl.timeLabel}</p>
-                <div className="border-b border-slate-800 mt-0.5 min-w-[50px] sm:min-w-[60px]">{isRTL && state.time === "3 Hours" ? "3 گھنٹے" : state.time || ""}&nbsp;</div>
-              </div>
-              <div>
-                <p className="font-semibold">{tpl.obtainedMarksLabel}</p>
-                <div className="border-b border-slate-800 mt-0.5 min-w-[40px] sm:min-w-[50px]">{state.obtainedMarks || ""}&nbsp;</div>
-              </div>
-              <div>
-                <p className="font-semibold">{tpl.subjectLabel}</p>
-                <div className="border-b border-slate-800 mt-0.5 min-w-[50px] sm:min-w-[70px]">{state.subject}&nbsp;</div>
-              </div>
-              <div>
-                <p className="font-semibold">{tpl.dateLabel}</p>
-                <div className="border-b border-slate-800 mt-0.5 min-w-[60px] sm:min-w-[70px]">{state.date}&nbsp;</div>
+              <div className="flex flex-wrap gap-x-6 gap-y-1.5">
+                <div>
+                  <p className="font-semibold">{tpl.classLabel}</p>
+                  <div className="border-b border-slate-800 mt-0.5 min-w-[40px] sm:min-w-[50px]">{state.className}&nbsp;</div>
+                </div>
+                <div>
+                  <p className="font-semibold">{tpl.timeLabel}</p>
+                  <div className="border-b border-slate-800 mt-0.5 min-w-[50px] sm:min-w-[60px]">{isRTL && state.time === "3 Hours" ? "3 گھنٹے" : state.time || ""}&nbsp;</div>
+                </div>
+                <div>
+                  <p className="font-semibold">{tpl.totalMarksLabel}</p>
+                  <div className="border-b border-slate-800 mt-0.5 min-w-[40px] sm:min-w-[50px]">{state.totalMarks || ""}&nbsp;</div>
+                </div>
+                <div>
+                  <p className="font-semibold">{tpl.obtainedMarksLabel}</p>
+                  <div className="border-b border-slate-800 mt-0.5 min-w-[40px] sm:min-w-[50px]">{state.obtainedMarks || ""}&nbsp;</div>
+                </div>
+                <div>
+                  <p className="font-semibold">{tpl.subjectLabel}</p>
+                  <div className="border-b border-slate-800 mt-0.5 min-w-[50px] sm:min-w-[70px]">{state.subject}&nbsp;</div>
+                </div>
+                <div>
+                  <p className="font-semibold">{tpl.dateLabel}</p>
+                  <div className="border-b border-slate-800 mt-0.5 min-w-[60px] sm:min-w-[70px]">{state.date}&nbsp;</div>
+                </div>
               </div>
             </div>
 
