@@ -89,7 +89,7 @@ export default function Dashboard() {
         </div>
 
         {/* Template Selector */}
-        <div className="px-3 sm:px-4 pt-3 pb-2 bg-slate-50/80 border-b border-slate-200">
+        <div className="px-3 sm:px-4 pt-4 pb-3 bg-slate-50/80 border-b border-slate-200">
           <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase">Paper Template</label>
           <div className="relative">
             <select
