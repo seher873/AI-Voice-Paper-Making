@@ -62,7 +62,7 @@ export default function Dashboard() {
       <div
         className={`${
           menuOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0 fixed lg:relative top-0 left-0 z-25           w-[92vw] max-w-[480px] h-full lg:h-auto lg:w-[520px] lg:min-w-[520px] xl:w-[560px] xl:min-w-[560px] bg-white/95 backdrop-blur-sm border-r border-slate-200 flex flex-col shadow-2xl lg:shadow-lg transition-transform duration-300 ease-in-out`}
+        } lg:translate-x-0 fixed lg:relative top-0 left-0 z-30           w-[92vw] max-w-[480px] h-full lg:h-auto lg:w-[520px] lg:min-w-[520px] xl:w-[560px] xl:min-w-[560px] bg-white/95 backdrop-blur-sm border-r border-slate-200 flex flex-col shadow-2xl lg:shadow-lg transition-transform duration-300 ease-in-out`}
       >
         {/* Header */}
         <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 px-5 py-2.5 flex-shrink-0">
@@ -89,8 +89,8 @@ export default function Dashboard() {
         </div>
 
         {/* Template Selector */}
-        <div className="px-5 pt-4 pb-3 bg-slate-50/80 border-b border-slate-200">
-          <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase whitespace-nowrap">Paper Template</label>
+        <div className="px-3 sm:px-4 pt-4 pb-3 bg-slate-50/80 border-b border-slate-200">
+          <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase">Paper Template</label>
           <div className="relative">
             <select
               value={TEMPLATES.find((t) => t.lang === state.paperLanguage)?.id || "english"}
