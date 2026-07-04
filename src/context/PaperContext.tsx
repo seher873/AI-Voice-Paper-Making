@@ -4,10 +4,28 @@ import {
   createContext,
   useContext,
   useReducer,
+  useEffect,
+  useRef,
   type ReactNode,
 } from "react";
 import { initialState, type PaperState, type PaperAction } from "@/types/paper";
 import { getTemplate } from "@/lib/paperFormat";
+
+const STORAGE_KEY = "paper-maker-state";
+
+function loadState(): PaperState {
+  if (typeof window === "undefined") return initialState;
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      return { ...initialState, ...parsed };
+    }
+  } catch {
+    // ignore
+  }
+  return initialState;
+}
 
 function paperReducer(state: PaperState, action: PaperAction): PaperState {
   switch (action.type) {
@@ -70,6 +88,7 @@ function paperReducer(state: PaperState, action: PaperAction): PaperState {
     case "REORDER_QUESTIONS":
       return { ...state, questions: action.payload };
     case "RESET":
+      try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
       return initialState;
     default:
       return state;
@@ -84,7 +103,20 @@ interface PaperContextType {
 const PaperContext = createContext<PaperContextType | undefined>(undefined);
 
 export function PaperProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(paperReducer, initialState);
+  const [state, dispatch] = useReducer(paperReducer, undefined, loadState);
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch {
+      // ignore
+    }
+  }, [state]);
 
   return (
     <PaperContext.Provider value={{ state, dispatch }}>
