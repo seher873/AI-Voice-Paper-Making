@@ -2,7 +2,7 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 
 const allowedEmails = [
-  "teacher1@gmail.com",
+  "sehrkhan873@gmail.com",
   "teacher2@gmail.com",
   "admin@gmail.com",
 ];
