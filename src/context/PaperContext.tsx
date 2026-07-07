@@ -87,6 +87,8 @@ function paperReducer(state: PaperState, action: PaperAction): PaperState {
       };
     case "REORDER_QUESTIONS":
       return { ...state, questions: action.payload };
+    case "HYDRATE":
+      return { ...action.payload, questions: action.payload.questions || [] };
     case "RESET":
       try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
       return initialState;
@@ -103,14 +105,23 @@ interface PaperContextType {
 const PaperContext = createContext<PaperContextType | undefined>(undefined);
 
 export function PaperProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(paperReducer, undefined, loadState);
+  const [state, dispatch] = useReducer(paperReducer, initialState);
   const isFirstRender = useRef(true);
 
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
-      return;
+      const saved = loadState();
+      if (saved !== initialState) {
+        dispatch({ type: "HYDRATE", payload: saved });
+      }
     }
+  }, []);
+
+  const prevState = useRef(state);
+  useEffect(() => {
+    if (prevState.current === state) return;
+    prevState.current = state;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch {

@@ -44,6 +44,7 @@ export type PaperAction =
   | { type: "UPDATE_QUESTION_TYPE"; payload: { id: string; type: QuestionType } }
   | { type: "DELETE_QUESTION"; payload: string }
   | { type: "REORDER_QUESTIONS"; payload: Question[] }
+  | { type: "HYDRATE"; payload: PaperState }
   | { type: "RESET" };
 
 export const initialState: PaperState = {
