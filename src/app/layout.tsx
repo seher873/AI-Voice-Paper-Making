@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { PaperProvider } from "@/context/PaperContext";
+import { ResultProvider } from "@/context/ResultContext";
 import { ToastProvider } from "@/context/ToastContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import SessionProviderWrapper from "@/components/SessionProviderWrapper";
@@ -23,7 +24,9 @@ export default function RootLayout({
           <AuthNav />
           <ErrorBoundary>
             <PaperProvider>
-              <ToastProvider>{children}</ToastProvider>
+              <ResultProvider>
+                <ToastProvider>{children}</ToastProvider>
+              </ResultProvider>
             </PaperProvider>
           </ErrorBoundary>
         </SessionProviderWrapper>
