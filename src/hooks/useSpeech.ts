@@ -36,7 +36,8 @@ export function useSpeech() {
       recognition.continuous = false
       recognition.interimResults = false
       recognition.maxAlternatives = 1
-      recognition.lang = lang
+      const effectiveLang = lang === "sd-PK" ? "ur-PK" : lang
+      recognition.lang = effectiveLang
 
       setActiveLang(lang)
 
