@@ -42,12 +42,7 @@ export function useSpeech() {
 
       recognition.onstart = () => setIsListening(true)
       recognition.onend = () => setIsListening(false)
-      recognition.onerror = (event) => {
-        setIsListening(false)
-        if (onResult && event.error === "language-not-supported") {
-          onResult({ text: `Language "${lang}" not supported by this browser`, confidence: 0 })
-        }
-      }
+      recognition.onerror = () => setIsListening(false)
 
       recognition.onresult = (event: SpeechRecognitionEvent) => {
         const result = event.results[event.resultIndex]

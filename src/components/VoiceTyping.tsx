@@ -51,10 +51,6 @@ export default function VoiceTyping({ onTranscriptReady }: VoiceTypingProps) {
 
   const handleVoiceResult = useCallback(
     (result: { text: string; confidence: number }) => {
-      if (result.confidence === 0 && result.text.includes("not supported")) {
-        addToast(result.text, "error");
-        return;
-      }
       let cleaned: string;
       if (mathsMode) {
         cleaned = mathsCleaner(result.text);
