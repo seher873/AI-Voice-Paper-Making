@@ -60,6 +60,17 @@ function paperReducer(state: PaperState, action: PaperAction): PaperState {
       return {
         ...state,
         paperLanguage: action.payload,
+        paperTemplate: tpl.id,
+        studentNameLabel: tpl.studentNameLabel,
+        fatherNameLabel: tpl.fatherNameLabel,
+      };
+    }
+    case "SET_PAPER_TEMPLATE": {
+      const tpl = getTemplate(action.payload);
+      return {
+        ...state,
+        paperTemplate: action.payload,
+        paperLanguage: tpl.lang,
         studentNameLabel: tpl.studentNameLabel,
         fatherNameLabel: tpl.fatherNameLabel,
       };

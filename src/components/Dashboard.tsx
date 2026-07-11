@@ -290,11 +290,9 @@ export default function Dashboard() {
             <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase">Paper Template</label>
             <div className="relative">
               <select
-                value={TEMPLATES.find((t) => t.lang === state.paperLanguage)?.id || "english"}
+                value={state.paperTemplate}
                 onChange={(e) => {
-                  const id = e.target.value as PaperTemplate;
-                  const tpl = TEMPLATES.find((t) => t.id === id);
-                  if (tpl) dispatch({ type: "SET_PAPER_LANGUAGE", payload: tpl.lang });
+                  dispatch({ type: "SET_PAPER_TEMPLATE", payload: e.target.value as PaperTemplate });
                 }}
                 className="appearance-none w-full px-3 py-2.5 pr-8 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition-all cursor-pointer font-medium"
               >

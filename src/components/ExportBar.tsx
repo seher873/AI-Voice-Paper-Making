@@ -72,7 +72,7 @@ export default function ExportBar() {
       const { Document, Packer, Paragraph, TextRun, AlignmentType, ImageRun } = await import("docx");
       const fs = await import("file-saver");
 
-      const tpl = getTemplate(state.paperLanguage === "ur" ? "urdu" : state.paperLanguage === "sd" ? "sindhi" : "english");
+      const tpl = getTemplate(state.paperTemplate);
       const isRTL = tpl.dir === "rtl";
 
       const children: import("docx").Paragraph[] = [];

@@ -5,6 +5,7 @@ const allowedEmails = [
   "sehrkhan873@gmail.com",
   "teacher2@gmail.com",
   "admin@gmail.com",
+  "zarqa640@gmail.com",
 ];
 
 export const { handlers, auth, signIn, signOut } = NextAuth({

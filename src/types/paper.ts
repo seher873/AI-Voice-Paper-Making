@@ -1,3 +1,5 @@
+import type { PaperTemplate } from "@/lib/paperFormat";
+
 export type QuestionType = "descriptive" | "mcq" | "fillblanks" | "truefalse" | "maths";
 
 export interface Question {
@@ -21,6 +23,7 @@ export interface PaperState {
   studentNameLabel: string;
   fatherNameLabel: string;
   paperLanguage: "en" | "ur" | "sd";
+  paperTemplate: PaperTemplate;
   questions: Question[];
 }
 
@@ -39,6 +42,7 @@ export type PaperAction =
   | { type: "SET_STUDENT_NAME_LABEL"; payload: string }
   | { type: "SET_FATHER_NAME_LABEL"; payload: string }
   | { type: "SET_PAPER_LANGUAGE"; payload: "en" | "ur" | "sd" }
+  | { type: "SET_PAPER_TEMPLATE"; payload: PaperTemplate }
   | { type: "ADD_QUESTION"; payload: Question }
   | { type: "UPDATE_QUESTION"; payload: { id: string; text: string } }
   | { type: "UPDATE_QUESTION_TYPE"; payload: { id: string; type: QuestionType } }
@@ -62,6 +66,7 @@ export const initialState: PaperState = {
   studentNameLabel: "Student Name",
   fatherNameLabel: "Father's Name",
   paperLanguage: "en",
+  paperTemplate: "english",
   questions: [],
 };
 

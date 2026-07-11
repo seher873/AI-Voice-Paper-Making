@@ -7,7 +7,7 @@ import { getTemplate } from "@/lib/paperFormat";
 export default function PaperPreview() {
   const { state } = usePaper();
   const previewRef = useRef<HTMLDivElement>(null);
-  const tpl = getTemplate(state.paperLanguage === "ur" ? "urdu" : state.paperLanguage === "sd" ? "sindhi" : "english");
+  const tpl = getTemplate(state.paperTemplate);
 
   const questionCount = state.questions.length;
   const isRTL = tpl.dir === "rtl";
