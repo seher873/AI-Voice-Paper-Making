@@ -33,8 +33,8 @@ export function useSpeech() {
       }
 
       const recognition = new SpeechRecognitionAPI()
-      recognition.continuous = false
-      recognition.interimResults = false
+      recognition.continuous = true
+      recognition.interimResults = true
       recognition.maxAlternatives = 1
       const effectiveLang = lang === "sd-PK" ? "ur-PK" : lang
       recognition.lang = effectiveLang
@@ -45,17 +45,22 @@ export function useSpeech() {
       recognition.onend = () => setIsListening(false)
       recognition.onerror = () => setIsListening(false)
 
+      let fullTranscript = ""
       recognition.onresult = (event: SpeechRecognitionEvent) => {
-        const result = event.results[event.resultIndex]
-        const transcriptText = result[0].transcript
-        const conf = result[0].confidence
-
-        setTranscript(transcriptText)
-        setConfidence(conf)
-
-        onResult({ text: transcriptText, confidence: conf })
-        setTranscript("")
-        setConfidence(0)
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const result = event.results[i]
+          if (result.isFinal) {
+            fullTranscript += (fullTranscript ? " " : "") + result[0].transcript
+          }
+        }
+        const last = event.results[event.results.length - 1]
+        if (last.isFinal && fullTranscript) {
+          setTranscript(fullTranscript)
+          setConfidence(last[0].confidence)
+          onResult({ text: fullTranscript, confidence: last[0].confidence })
+          setTranscript("")
+          setConfidence(0)
+        }
       }
 
       recognition.start()
