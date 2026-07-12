@@ -1,9 +1,9 @@
 "use client"
 
 import { useState, useRef, useCallback } from "react"
-import { parseDocx, generateDocx } from "@/lib/docx"
+import { parseDocx } from "@/lib/docx"
 import { useSpeech } from "@/hooks/useSpeech"
-import { saveAs } from "file-saver"
+
 import { useToast } from "@/context/ToastContext"
 import { cleanTranscript } from "@/lib/textCleaner"
 
@@ -21,7 +21,7 @@ export default function TemplateSection() {
   const [selectedTag, setSelectedTag] = useState("")
   const [textareaValue, setTextareaValue] = useState("")
   const [parsing, setParsing] = useState(false)
-  const [generating, setGenerating] = useState(false)
+
   const [voiceLang, setVoiceLang] = useState<"ur-PK" | "en-US">("ur-PK")
   const [pendingText, setPendingText] = useState("")
   const [pendingConfidence, setPendingConfidence] = useState(0)
@@ -119,28 +119,6 @@ export default function TemplateSection() {
     setPendingConfidence(0)
     addToast("Re-record", "info")
   }, [addToast])
-
-  const allFilled = tags.length > 0 && tags.every((t) => t.value.trim().length > 0)
-
-  const handleDownload = useCallback(async () => {
-    if (!zipData || tags.length === 0) return
-
-    setGenerating(true)
-    try {
-      const tagValues: Record<string, string> = {}
-      for (const t of tags) {
-        tagValues[t.name] = t.value
-      }
-      const blob = generateDocx(zipData, tagValues)
-      const outName = fileName.replace(".docx", "-filled.docx")
-      saveAs(blob, outName)
-      addToast("File downloaded successfully", "success")
-    } catch {
-      addToast("Failed to generate DOCX", "error")
-    } finally {
-      setGenerating(false)
-    }
-  }, [zipData, tags, fileName, addToast])
 
   const handleReset = useCallback(() => {
     setFile(null)
@@ -335,53 +313,7 @@ export default function TemplateSection() {
             />
           </div>
 
-          {/* Progress + Download */}
-          <div className="bg-slate-50 rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm space-y-4">
-            <div className="flex flex-wrap gap-2">
-              {tags.map((t) => (
-                <span key={t.tag} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  t.value.trim() ? "bg-emerald-100 text-emerald-700 border border-emerald-200" : "bg-white text-slate-400 border border-slate-200"
-                }`}>
-                  {t.value.trim() ? (
-                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  ) : (
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01" />
-                    </svg>
-                  )}
-                  {t.tag}
-                </span>
-              ))}
-            </div>
 
-            <button
-              onClick={handleDownload}
-              disabled={!allFilled || generating || !zipData}
-              className="w-full flex items-center justify-center gap-2 min-h-[48px] px-5 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all text-sm font-bold shadow-md"
-            >
-              {generating ? (
-                <>
-                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  Download Filled DOCX
-                </>
-              )}
-            </button>
-            {!allFilled && tags.length > 0 && (
-              <p className="text-xs text-slate-400 text-center">Fill all tags to enable download</p>
-            )}
-          </div>
         </>
       )}
     </div>

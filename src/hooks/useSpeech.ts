@@ -50,7 +50,18 @@ export function useSpeech() {
         for (let i = event.resultIndex; i < event.results.length; i++) {
           const result = event.results[i]
           if (result.isFinal) {
-            fullTranscript += (fullTranscript ? " " : "") + result[0].transcript
+            let newText = result[0].transcript.trim()
+            if (fullTranscript) {
+              const lastWords = fullTranscript.split(/\s+/)
+              const firstWords = newText.split(/\s+/)
+              const lastWord = lastWords[lastWords.length - 1]
+              if (firstWords[0] === lastWord) {
+                newText = firstWords.slice(1).join(" ")
+              }
+            }
+            if (newText) {
+              fullTranscript += (fullTranscript ? " " : "") + newText
+            }
           }
         }
         const last = event.results[event.results.length - 1]
