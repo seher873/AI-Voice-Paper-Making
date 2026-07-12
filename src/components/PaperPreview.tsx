@@ -80,7 +80,6 @@ export default function PaperPreview() {
                   <div className="flex-1">
                     <p className="border-b border-slate-800 pb-0.5">
                       <span className="font-semibold">{state.studentNameLabel || tpl.studentNameLabel}:</span>
-                      <span className="inline-block min-w-[120px] sm:min-w-[180px]">&nbsp;</span>
                     </p>
                   </div>
                 ) : null}
@@ -88,7 +87,6 @@ export default function PaperPreview() {
                   <div className="flex-1">
                     <p className="border-b border-slate-800 pb-0.5">
                       <span className="font-semibold">{state.fatherNameLabel || tpl.fatherNameLabel}:</span>
-                      <span className="inline-block min-w-[120px] sm:min-w-[180px]">&nbsp;</span>
                     </p>
                   </div>
                 ) : null}
