@@ -1,7 +1,7 @@
 "use client";
 
 import { usePaper } from "@/context/PaperContext";
-import { useCallback } from "react";
+import { useCallback, useRef, useState } from "react";
 import VoiceTyping from "./VoiceTyping";
 import { useToast } from "@/context/ToastContext";
 import { QUESTION_TYPE_LABELS, type QuestionType } from "@/types/paper";
@@ -49,6 +49,46 @@ export default function QuestionEditor() {
       dispatch({ type: "UPDATE_QUESTION_OPTIONS", payload: { id, options: opts } });
     },
     [dispatch, state.questions]
+  );
+
+  const [voiceOptionId, setVoiceOptionId] = useState<{ qId: string; idx: number } | null>(null);
+  const optionRecogRef = useRef<SpeechRecognition | null>(null);
+
+  const handleOptionVoice = useCallback(
+    (qId: string, idx: number) => {
+      if (!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
+        addToast("Speech recognition not supported", "warning");
+        return;
+      }
+      if (optionRecogRef.current) {
+        optionRecogRef.current.stop();
+        optionRecogRef.current = null;
+        setVoiceOptionId(null);
+        return;
+      }
+      const w = window as unknown as Window;
+      const SpeechRecognitionAPI = w.SpeechRecognition || w.webkitSpeechRecognition;
+      if (!SpeechRecognitionAPI) return;
+      const recognition = new SpeechRecognitionAPI();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = "en-US";
+      recognition.onstart = () => setVoiceOptionId({ qId, idx });
+      recognition.onend = () => { setVoiceOptionId(null); optionRecogRef.current = null; };
+      recognition.onerror = () => { setVoiceOptionId(null); optionRecogRef.current = null; };
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
+        const text = event.results[0][0].transcript.trim();
+        if (!text) return;
+        const q = state.questions.find((q) => q.id === qId);
+        if (!q) return;
+        const opts = [...(q.options || ["", "", "", ""])];
+        opts[idx] = text;
+        dispatch({ type: "UPDATE_QUESTION_OPTIONS", payload: { id: qId, options: opts } });
+      };
+      recognition.start();
+      optionRecogRef.current = recognition;
+    },
+    [addToast, dispatch, state.questions]
   );
 
   const handleUpdateQuestion = useCallback(
@@ -192,13 +232,28 @@ export default function QuestionEditor() {
                 {question.type === "mcq" && (
                   <div className="mt-2 grid grid-cols-2 gap-2">
                     {["a", "b", "c", "d"].map((label, i) => (
-                      <input
-                        key={label}
-                        value={question.options?.[i] ?? ""}
-                        onChange={(e) => handleOptionChange(question.id, i, e.target.value)}
-                        placeholder={`Option ${label}`}
-                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/40 focus:border-purple-500 transition-all"
-                      />
+                      <div key={label} className="flex items-center gap-1">
+                        <input
+                          value={question.options?.[i] ?? ""}
+                          onChange={(e) => handleOptionChange(question.id, i, e.target.value)}
+                          placeholder={`Option ${label}`}
+                          className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/40 focus:border-purple-500 transition-all"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleOptionVoice(question.id, i)}
+                          className={`flex items-center justify-center min-h-[36px] min-w-[36px] rounded-lg transition-all ${
+                            voiceOptionId?.qId === question.id && voiceOptionId.idx === i
+                              ? "bg-red-500 text-white shadow-sm"
+                              : "bg-slate-100 text-slate-500 hover:bg-purple-100 hover:text-purple-600"
+                          }`}
+                          title="Voice type this option"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m-4 0h8" />
+                          </svg>
+                        </button>
+                      </div>
                     ))}
                   </div>
                 )}
