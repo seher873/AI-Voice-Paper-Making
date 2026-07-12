@@ -15,6 +15,7 @@ export function useSpeech() {
   const [activeLang, setActiveLang] = useState("")
 
   const recognitionRef = useRef<SpeechRecognition | null>(null)
+  const manualStopRef = useRef(false)
 
   const startListening = useCallback(
     (onResult: (result: SpeechResult) => void, lang: string = "ur-PK") => {
@@ -40,10 +41,17 @@ export function useSpeech() {
       recognition.lang = effectiveLang
 
       setActiveLang(lang)
+      manualStopRef.current = false
 
       recognition.onstart = () => setIsListening(true)
-      recognition.onend = () => setIsListening(false)
-      recognition.onerror = () => setIsListening(false)
+      recognition.onend = () => {
+        if (!manualStopRef.current) {
+          try { recognition.start() } catch { setIsListening(false) }
+        } else {
+          setIsListening(false)
+        }
+      }
+      recognition.onerror = () => { manualStopRef.current = true; setIsListening(false) }
 
       let fullTranscript = ""
       recognition.onresult = (event: SpeechRecognitionEvent) => {
@@ -86,6 +94,7 @@ export function useSpeech() {
   )
 
   const stopListening = useCallback(() => {
+    manualStopRef.current = true
     if (recognitionRef.current) {
       recognitionRef.current.stop()
       setIsListening(false)
