@@ -54,41 +54,35 @@ export default function QuestionEditor() {
   const [voiceOptionId, setVoiceOptionId] = useState<{ qId: string; idx: number } | null>(null);
   const optionRecogRef = useRef<SpeechRecognition | null>(null);
 
+  const stopOptionVoice = useCallback(() => {
+    if (optionRecogRef.current) {
+      try { optionRecogRef.current.stop(); } catch { /* ignore */ }
+      optionRecogRef.current = null;
+    }
+    setVoiceOptionId(null);
+  }, []);
+
   const handleOptionVoice = useCallback(
     (qId: string, idx: number) => {
-      if (!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
-        addToast("Speech recognition not supported", "warning");
-        return;
-      }
-      if (optionRecogRef.current) {
-        optionRecogRef.current.stop();
-        optionRecogRef.current = null;
-        setVoiceOptionId(null);
-        return;
-      }
+      if (optionRecogRef.current) { stopOptionVoice(); return; }
       const w = window as unknown as Window;
-      const SpeechRecognitionAPI = w.SpeechRecognition || w.webkitSpeechRecognition;
-      if (!SpeechRecognitionAPI) return;
-      const recognition = new SpeechRecognitionAPI();
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang = "en-US";
-      recognition.onstart = () => setVoiceOptionId({ qId, idx });
-      recognition.onend = () => { setVoiceOptionId(null); optionRecogRef.current = null; };
-      recognition.onerror = () => { setVoiceOptionId(null); optionRecogRef.current = null; };
-      recognition.onresult = (event: SpeechRecognitionEvent) => {
+      const API = w.SpeechRecognition || w.webkitSpeechRecognition;
+      if (!API) { addToast("Speech recognition not supported", "warning"); return; }
+      const rec = new API();
+      rec.continuous = false;
+      rec.interimResults = false;
+      rec.lang = "en-US";
+      rec.onstart = () => setVoiceOptionId({ qId, idx });
+      rec.onend = () => { setVoiceOptionId(null); optionRecogRef.current = null; };
+      rec.onerror = () => { setVoiceOptionId(null); optionRecogRef.current = null; addToast("Voice input failed, try again", "warning"); };
+      rec.onresult = (event: SpeechRecognitionEvent) => {
         const text = event.results[0][0].transcript.trim();
         if (!text) return;
-        const q = state.questions.find((q) => q.id === qId);
-        if (!q) return;
-        const opts = [...(q.options || ["", "", "", ""])];
-        opts[idx] = text;
-        dispatch({ type: "UPDATE_QUESTION_OPTIONS", payload: { id: qId, options: opts } });
+        dispatch({ type: "UPDATE_QUESTION_OPTIONS", payload: { id: qId, options: (state.questions.find((q) => q.id === qId)?.options ?? ["", "", "", ""]).map((o, i) => i === idx ? text : o) } });
       };
-      recognition.start();
-      optionRecogRef.current = recognition;
+      try { rec.start(); optionRecogRef.current = rec; } catch { addToast("Could not start microphone", "warning"); }
     },
-    [addToast, dispatch, state.questions]
+    [addToast, dispatch, state.questions, stopOptionVoice]
   );
 
   const handleUpdateQuestion = useCallback(
@@ -230,7 +224,7 @@ export default function QuestionEditor() {
                 />
 
                 {question.type === "mcq" && (
-                  <div className="mt-2 grid grid-cols-2 gap-2">
+                  <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {["a", "b", "c", "d"].map((label, i) => (
                       <div key={label} className="flex items-center gap-1">
                         <input
