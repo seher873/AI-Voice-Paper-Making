@@ -97,9 +97,7 @@ export default function PaperPreview() {
                 {state.className ? (
                   <div className="flex-1">
                     <p className="border-b border-slate-800 pb-0.5">
-                      <span className="font-semibold">{tpl.classLabel}:</span>
-                      <span className="inline-block min-w-[80px] sm:min-w-[120px]">&nbsp;</span>
-                      <span>{state.className}</span>
+                      <span className="font-semibold">{tpl.classLabel}: {state.className}</span>
                     </p>
                   </div>
                 ) : null}
