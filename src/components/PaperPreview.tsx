@@ -47,7 +47,7 @@ export default function PaperPreview() {
           >
             {/* Header */}
             <div className={`flex items-center gap-x-6 sm:gap-x-10 mb-3 sm:mb-4 ${isRTL ? "flex-row" : ""}`}>
-              <div className={`w-[55px] sm:w-[65px] lg:w-[80px] h-[55px] sm:h-[65px] lg:h-[80px] flex-shrink-0`}>
+              <div className={`w-[70px] sm:w-[90px] lg:w-[110px] h-[70px] sm:h-[90px] lg:h-[110px] flex-shrink-0`}>
                 {state.schoolLogo ? (
                   <img src={state.schoolLogo} alt="School Logo" className="w-full h-full object-contain" />
                 ) : (
@@ -57,13 +57,13 @@ export default function PaperPreview() {
                 )}
               </div>
               <div className="flex-1 text-center min-w-0 px-1 sm:px-2">
-                <h1 className="text-sm sm:text-base lg:text-xl font-bold uppercase tracking-wide text-slate-900 break-words">
+                <h1 className="text-base sm:text-lg lg:text-2xl font-bold uppercase tracking-wide text-slate-900 break-words">
                   {state.schoolName || (
                     <span className="text-slate-300 font-normal normal-case">School Name</span>
                   )}
                 </h1>
                 {state.paperTitle && (
-                  <h2 className="text-xs sm:text-sm lg:text-base font-semibold mt-0.5 sm:mt-1 text-slate-700 break-words">
+                  <h2 className="text-sm sm:text-base lg:text-lg font-semibold mt-0.5 sm:mt-1 text-slate-700 break-words">
                     {state.paperTitle}
                   </h2>
                 )}
