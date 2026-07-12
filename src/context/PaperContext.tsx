@@ -91,6 +91,13 @@ function paperReducer(state: PaperState, action: PaperAction): PaperState {
           q.id === action.payload.id ? { ...q, type: action.payload.type } : q
         ),
       };
+    case "UPDATE_QUESTION_OPTIONS":
+      return {
+        ...state,
+        questions: state.questions.map((q) =>
+          q.id === action.payload.id ? { ...q, options: action.payload.options } : q
+        ),
+      };
     case "DELETE_QUESTION":
       return {
         ...state,

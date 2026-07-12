@@ -6,6 +6,7 @@ export interface Question {
   id: string;
   text: string;
   type: QuestionType;
+  options?: string[];
 }
 
 export interface PaperState {
@@ -46,6 +47,7 @@ export type PaperAction =
   | { type: "ADD_QUESTION"; payload: Question }
   | { type: "UPDATE_QUESTION"; payload: { id: string; text: string } }
   | { type: "UPDATE_QUESTION_TYPE"; payload: { id: string; type: QuestionType } }
+  | { type: "UPDATE_QUESTION_OPTIONS"; payload: { id: string; options: string[] } }
   | { type: "DELETE_QUESTION"; payload: string }
   | { type: "REORDER_QUESTIONS"; payload: Question[] }
   | { type: "HYDRATE"; payload: PaperState }

@@ -182,7 +182,7 @@ export default function PaperPreview() {
                       {question.type === "mcq" && (
                         <div className={`mt-1 ${isRTL ? "mr-4 text-right" : "ml-4"} text-slate-600 text-[11px] flex flex-wrap gap-x-5 gap-y-1`}>
                           {[0, 1, 2, 3].map((i) => (
-                            <span key={i}>{tpl.mcqOption(i)} __________</span>
+                            <span key={i}>{tpl.mcqOption(i)} {question.options?.[i] || "__________"}</span>
                           ))}
                         </div>
                       )}

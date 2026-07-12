@@ -34,10 +34,21 @@ export default function QuestionEditor() {
       }
       dispatch({
         type: "ADD_QUESTION",
-        payload: { id: crypto.randomUUID(), text, type },
+        payload: { id: crypto.randomUUID(), text, type, options: type === "mcq" ? ["", "", "", ""] : undefined },
       });
     },
     [dispatch, addToast]
+  );
+
+  const handleOptionChange = useCallback(
+    (id: string, index: number, value: string) => {
+      const q = state.questions.find((q) => q.id === id);
+      if (!q) return;
+      const opts = [...(q.options || ["", "", "", ""])];
+      opts[index] = value;
+      dispatch({ type: "UPDATE_QUESTION_OPTIONS", payload: { id, options: opts } });
+    },
+    [dispatch, state.questions]
   );
 
   const handleUpdateQuestion = useCallback(
@@ -177,6 +188,20 @@ export default function QuestionEditor() {
                   className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-base text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 resize-none transition-all"
                   placeholder="Type or edit question text..."
                 />
+
+                {question.type === "mcq" && (
+                  <div className="mt-2 grid grid-cols-2 gap-2">
+                    {["a", "b", "c", "d"].map((label, i) => (
+                      <input
+                        key={label}
+                        value={question.options?.[i] ?? ""}
+                        onChange={(e) => handleOptionChange(question.id, i, e.target.value)}
+                        placeholder={`Option ${label}`}
+                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/40 focus:border-purple-500 transition-all"
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
 
               <button
