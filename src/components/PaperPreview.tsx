@@ -180,9 +180,9 @@ export default function PaperPreview() {
                         <span className="mr-2 text-slate-400 text-[11px] font-medium">{tpl.trueFalseLabel}</span>
                       )}
                       {question.type === "mcq" && (
-                        <div className={`mt-1 ${isRTL ? "mr-4 text-right" : "ml-4"} text-slate-600 text-[11px] space-y-0.5`}>
+                        <div className={`mt-1 ${isRTL ? "mr-4 text-right" : "ml-4"} text-slate-600 text-[11px] flex flex-wrap gap-x-5 gap-y-1`}>
                           {[0, 1, 2, 3].map((i) => (
-                            <div key={i}>{tpl.mcqOption(i)} __________</div>
+                            <span key={i}>{tpl.mcqOption(i)} __________</span>
                           ))}
                         </div>
                       )}
