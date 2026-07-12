@@ -51,12 +51,17 @@ export function useSpeech() {
           const result = event.results[i]
           if (result.isFinal) {
             let newText = result[0].transcript.trim()
-            if (fullTranscript) {
+            if (fullTranscript && newText) {
               const lastWords = fullTranscript.split(/\s+/)
               const firstWords = newText.split(/\s+/)
-              const lastWord = lastWords[lastWords.length - 1]
-              if (firstWords[0] === lastWord) {
-                newText = firstWords.slice(1).join(" ")
+              let overlap = 0
+              for (let len = Math.min(lastWords.length, firstWords.length); len > 0; len--) {
+                const tail = lastWords.slice(-len).join(" ")
+                const head = firstWords.slice(0, len).join(" ")
+                if (tail === head) { overlap = len; break }
+              }
+              if (overlap > 0) {
+                newText = firstWords.slice(overlap).join(" ")
               }
             }
             if (newText) {
