@@ -53,34 +53,39 @@ export default function QuestionEditor() {
 
   const [voiceOptionId, setVoiceOptionId] = useState<{ qId: string; idx: number } | null>(null);
   const optionRecogRef = useRef<SpeechRecognition | null>(null);
+  const voiceOptRef = useRef<{ qId: string; idx: number } | null>(null);
 
   const stopOptionVoice = useCallback(() => {
     if (optionRecogRef.current) {
-      try { optionRecogRef.current.stop(); } catch { /* ignore */ }
+      try { optionRecogRef.current.abort(); } catch { /* ignore */ }
       optionRecogRef.current = null;
     }
+    voiceOptRef.current = null;
     setVoiceOptionId(null);
   }, []);
 
   const handleOptionVoice = useCallback(
     (qId: string, idx: number) => {
-      if (optionRecogRef.current) { stopOptionVoice(); return; }
+      stopOptionVoice();
       const w = window as unknown as Window;
       const API = w.SpeechRecognition || w.webkitSpeechRecognition;
       if (!API) { addToast("Speech recognition not supported", "warning"); return; }
+      voiceOptRef.current = { qId, idx };
       const rec = new API();
       rec.continuous = false;
       rec.interimResults = false;
       rec.lang = "en-US";
-      rec.onstart = () => setVoiceOptionId({ qId, idx });
-      rec.onend = () => { setVoiceOptionId(null); optionRecogRef.current = null; };
-      rec.onerror = () => { setVoiceOptionId(null); optionRecogRef.current = null; addToast("Voice input failed, try again", "warning"); };
+      rec.onstart = () => { if (voiceOptRef.current) setVoiceOptionId({ ...voiceOptRef.current }); };
+      rec.onend = () => { voiceOptRef.current = null; optionRecogRef.current = null; setVoiceOptionId(null); };
+      rec.onerror = () => { voiceOptRef.current = null; optionRecogRef.current = null; setVoiceOptionId(null); addToast("Voice input, try again", "warning"); };
       rec.onresult = (event: SpeechRecognitionEvent) => {
+        const target = voiceOptRef.current;
+        if (!target) return;
         const text = event.results[0][0].transcript.trim();
         if (!text) return;
-        dispatch({ type: "UPDATE_QUESTION_OPTIONS", payload: { id: qId, options: (state.questions.find((q) => q.id === qId)?.options ?? ["", "", "", ""]).map((o, i) => i === idx ? text : o) } });
+        dispatch({ type: "UPDATE_QUESTION_OPTIONS", payload: { id: target.qId, options: (state.questions.find((q) => q.id === target.qId)?.options ?? ["", "", "", ""]).map((o, i) => i === target.idx ? text : o) } });
       };
-      try { rec.start(); optionRecogRef.current = rec; } catch { addToast("Could not start microphone", "warning"); }
+      try { rec.start(); optionRecogRef.current = rec; } catch { voiceOptRef.current = null; addToast("Mic failed", "warning"); }
     },
     [addToast, dispatch, state.questions, stopOptionVoice]
   );
