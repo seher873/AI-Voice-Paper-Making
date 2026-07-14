@@ -204,7 +204,10 @@ export default function Dashboard() {
                 <input
                   type="text"
                   value={resultCtx.state.schoolName}
-                  onChange={(e) => resultCtx.dispatch({ type: "SET_SCHOOL_INFO", payload: { name: e.target.value, logo: resultCtx.state.schoolLogo } })}
+                  onChange={(e) => {
+                    resultCtx.dispatch({ type: "SET_SCHOOL_INFO", payload: { name: e.target.value, logo: resultCtx.state.schoolLogo } });
+                    dispatch({ type: "SET_SCHOOL_NAME", payload: e.target.value });
+                  }}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
                   placeholder="e.g. Sunshine Public School"
                 />
@@ -218,7 +221,7 @@ export default function Dashboard() {
                     <div className="relative w-16 h-16 rounded-xl border-2 border-slate-300 overflow-hidden flex-shrink-0">
                       <img src={resultCtx.state.schoolLogo} alt="Logo" className="w-full h-full object-contain" />
                       <button
-                        onClick={() => resultCtx.dispatch({ type: "SET_SCHOOL_INFO", payload: { name: resultCtx.state.schoolName, logo: "" } })}
+                        onClick={() => { resultCtx.dispatch({ type: "SET_SCHOOL_INFO", payload: { name: resultCtx.state.schoolName, logo: "" } }); dispatch({ type: "SET_SCHOOL_LOGO", payload: null }); }}
                         className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center shadow-md hover:bg-red-600"
                       >
                         &times;
@@ -231,7 +234,7 @@ export default function Dashboard() {
                       </svg>
                       <input type="file" accept="image/*" onChange={(e) => {
                         const file = e.target.files?.[0];
-                        if (file) { const r = new FileReader(); r.onload = (ev) => resultCtx.dispatch({ type: "SET_SCHOOL_INFO", payload: { name: resultCtx.state.schoolName, logo: ev.target?.result as string } }); r.readAsDataURL(file); }
+                        if (file) { const r = new FileReader(); r.onload = (ev) => { const logo = ev.target?.result as string; resultCtx.dispatch({ type: "SET_SCHOOL_INFO", payload: { name: resultCtx.state.schoolName, logo } }); dispatch({ type: "SET_SCHOOL_LOGO", payload: logo }); }; r.readAsDataURL(file); }
                       }} className="hidden" />
                     </label>
                   )}
