@@ -20,7 +20,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     error: "/no-access",
   },
   callbacks: {
-    signIn({ user }) {
+    async signIn({ user }) {
       if (!user.email) return false;
       return allowedEmails.includes(user.email);
     },

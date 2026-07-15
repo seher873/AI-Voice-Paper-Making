@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@auth/supabase-adapter": "^1.11.2",
+    "@supabase/supabase-js": "^2.110.5",
     "@swc/helpers": "^0.5.23",
     "autoprefixer": "^10.5.2",
     "docx": "^9.7.1",
