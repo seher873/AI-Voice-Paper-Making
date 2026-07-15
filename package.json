@@ -9,7 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@auth/supabase-adapter": "^1.11.2",
+    "@supabase/ssr": "^0.12.3",
     "@supabase/supabase-js": "^2.110.5",
     "@swc/helpers": "^0.5.23",
     "autoprefixer": "^10.5.2",
@@ -20,7 +20,6 @@
     "html2pdf.js": "^0.14.0",
     "jspdf": "^4.2.1",
     "next": "16.2.9",
-    "next-auth": "^5.0.0-beta.31",
     "pizzip": "^3.2.0",
     "postcss": "^8.5.16",
     "react": "19.2.4",

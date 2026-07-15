@@ -1,10 +1,11 @@
-import { supabase } from "@/lib/supabase";
-import { auth } from "@/auth";
+import { createClient } from "@/lib/supabaseServer";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-  const session = await auth();
-  if (!session?.user?.email) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user?.email) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
@@ -28,15 +29,14 @@ export async function POST(req: Request) {
   const { error: profileErr } = await supabase
     .from("profiles")
     .insert({
-      id: session.user.id || session.user.email,
+      id: user.id,
       school_id: school.id,
-      email: session.user.email,
-      name: session.user.name,
+      email: user.email,
+      name: user.user_metadata?.name || "",
       role: "admin",
     });
 
   if (profileErr) {
-    // Rollback school
     await supabase.from("schools").delete().eq("id", school.id);
     return NextResponse.json({ error: "Failed to create profile" }, { status: 500 });
   }
@@ -45,15 +45,17 @@ export async function POST(req: Request) {
 }
 
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.email) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user?.email) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
   const { data: profile } = await supabase
     .from("profiles")
     .select("school_id, schools(name, logo, theme_colors)")
-    .eq("id", session.user.id || session.user.email)
+    .eq("id", user.id)
     .single();
 
   return NextResponse.json({ profile });

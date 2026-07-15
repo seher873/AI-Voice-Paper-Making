@@ -9,7 +9,9 @@ import ResultManagement from "./ResultManagement";
 import ReportCardPreview from "./ReportCardPreview";
 import GenerateResultSheet from "./GenerateResultSheet";
 import UpgradeBanner from "./UpgradeBanner";
+import SchoolSetup from "./SchoolSetup";
 import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 import { usePaper } from "@/context/PaperContext";
 import { useResult } from "@/context/ResultContext";
 import { TEMPLATES } from "@/lib/paperFormat";
@@ -28,6 +30,16 @@ export default function Dashboard() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showSchoolInfo, setShowSchoolInfo] = useState(false);
   const [lockedPlan, setLockedPlan] = useState<"paper" | "results" | null>(null);
+  const [schoolReady, setSchoolReady] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return;
+      supabase.from("profiles").select("school_id").eq("id", user.id).then(({ data }) => {
+        setSchoolReady(data && data.length > 0);
+      });
+    });
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -63,6 +75,24 @@ export default function Dashboard() {
     { id: "questions" as const, label: "Questions", icon: "M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2m4 9l2 2 4-4" },
     { id: "template" as const, label: "Template", icon: "M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" },
   ];
+
+  if (schoolReady === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-slate-100">
+        <div className="flex items-center gap-3 text-slate-500">
+          <svg className="w-6 h-6 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" strokeWidth={3} className="opacity-25" />
+            <path d="M4 12a8 8 0 018-8" strokeWidth={3} className="opacity-75" />
+          </svg>
+          <span className="font-medium">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!schoolReady) {
+    return <SchoolSetup onComplete={(id) => setSchoolReady(true)} />;
+  }
 
   return (
     <div className="flex flex-col lg:flex-row h-screen bg-gradient-to-br from-slate-50 to-indigo-50/50">

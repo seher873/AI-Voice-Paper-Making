@@ -1,8 +1,31 @@
 "use client";
 
-import { signIn } from "next-auth/react";
+import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) router.replace("/");
+      else setChecking(false);
+    });
+  }, [router]);
+
+  const handleLogin = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${location.origin}/auth/callback`,
+      },
+    });
+  };
+
+  if (checking) return null;
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-indigo-50/50 p-4">
       <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md text-center">
@@ -14,7 +37,7 @@ export default function LoginPage() {
         <h1 className="text-2xl font-bold text-slate-800 mb-2">Paper Maker</h1>
         <p className="text-sm text-slate-500 mb-8">Sign in to create and manage examination papers</p>
         <button
-          onClick={() => signIn("google")}
+          onClick={handleLogin}
           className="w-full flex items-center justify-center gap-3 px-6 py-3 border-2 border-slate-200 rounded-xl text-slate-700 hover:bg-slate-50 hover:border-indigo-400 transition-all font-medium"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">

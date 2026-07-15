@@ -4,7 +4,6 @@ import { PaperProvider } from "@/context/PaperContext";
 import { ResultProvider } from "@/context/ResultContext";
 import { ToastProvider } from "@/context/ToastContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import SessionProviderWrapper from "@/components/SessionProviderWrapper";
 import AuthNav from "@/components/AuthNav";
 
 export const metadata: Metadata = {
@@ -20,16 +19,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen">
-        <SessionProviderWrapper>
-          <AuthNav />
-          <ErrorBoundary>
-            <PaperProvider>
-              <ResultProvider>
-                <ToastProvider>{children}</ToastProvider>
-              </ResultProvider>
-            </PaperProvider>
-          </ErrorBoundary>
-        </SessionProviderWrapper>
+        <AuthNav />
+        <ErrorBoundary>
+          <PaperProvider>
+            <ResultProvider>
+              <ToastProvider>{children}</ToastProvider>
+            </ResultProvider>
+          </PaperProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
