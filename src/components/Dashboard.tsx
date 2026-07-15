@@ -10,6 +10,7 @@ import ReportCardPreview from "./ReportCardPreview";
 import GenerateResultSheet from "./GenerateResultSheet";
 import UpgradeBanner from "./UpgradeBanner";
 import SchoolSetup from "./SchoolSetup";
+import BackupPanel from "./BackupPanel";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { usePaper } from "@/context/PaperContext";
@@ -103,26 +104,14 @@ export default function Dashboard() {
           className="flex items-center gap-2 min-h-[48px] px-2 text-slate-700 hover:text-indigo-600 active:scale-[0.96] transition-all rounded-xl"
           aria-label="Toggle menu"
         >
-          {menuOpen ? (
-            <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" d="M18 6L6 18M6 6l12 12" />
-            </svg>
-          ) : (
-            <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-              <rect x="2" y="3" width="20" height="18" rx="3" stroke="currentColor" fill="none" />
-              <path strokeLinecap="round" d="M7 8h10M7 12h10M7 16h10" />
-            </svg>
-          )}
-          <span className="font-bold text-sm tracking-tight truncate max-w-[120px]">
+          <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+            <rect x="2" y="3" width="20" height="18" rx="3" stroke="currentColor" fill="none" />
+            <path strokeLinecap="round" d="M7 8h10M7 12h10M7 16h10" />
+          </svg>
+          <span className="font-bold text-sm tracking-tight truncate max-w-[160px]">
             {mode === "paper" ? "AI Voice Paper" : "Result Management"}
           </span>
         </button>
-        <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-          </svg>
-          Preview
-        </div>
       </div>
 
       {/* Mobile backdrop */}
@@ -176,7 +165,7 @@ export default function Dashboard() {
               {!lockedPlan && availableModes.length > 1 && (
                 <button
                   onClick={() => setMode(mode === "paper" ? "results" : "paper")}
-                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  className={`hidden lg:inline-flex px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
                     mode === "results"
                       ? "bg-white/20 text-white"
                       : "bg-white/10 text-indigo-200 hover:bg-white/20 hover:text-white"
@@ -186,7 +175,7 @@ export default function Dashboard() {
                 </button>
               )}
               {!lockedPlan && (
-                <div className="relative group">
+                <div className="relative group hidden lg:block">
                   <button
                     className="px-2 py-1.5 rounded-lg text-xs font-bold text-indigo-200 hover:bg-white/10 hover:text-white transition-all"
                   >
@@ -210,15 +199,6 @@ export default function Dashboard() {
                 </div>
               </div>
               )}
-              <button
-              onClick={() => setMenuOpen(false)}
-              className="lg:hidden ml-auto min-h-[36px] min-w-[36px] flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all rounded-xl"
-              aria-label="Close menu"
-            >
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" d="M18 6L6 18M6 6l12 12" />
-              </svg>
-            </button>
           </div>
           </div>
         </div>
@@ -314,6 +294,7 @@ export default function Dashboard() {
                 ))}
               </div>
             </div>
+            <BackupPanel />
           </div>
         )}
 
