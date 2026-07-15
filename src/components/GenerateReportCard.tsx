@@ -11,6 +11,13 @@ export default function GenerateReportCard() {
   const setReportState = (rollNo: string, remarks: string) =>
     dispatch({ type: "SET_REPORT_CARD_STATE", payload: { rollNo, remarks } });
 
+  const handlePositionChange = (rollNo: string, position: string) => {
+    const p = parseInt(position, 10);
+    if (!isNaN(p) && p > 0) {
+      dispatch({ type: "UPDATE_STUDENT_RESULT", payload: { rollNo, position: p } });
+    }
+  };
+
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -48,6 +55,16 @@ export default function GenerateReportCard() {
             <>
               <div className="p-4 bg-white rounded-xl border border-slate-200 space-y-4">
                 <h3 className="text-sm font-bold text-slate-700">Teacher Remarks</h3>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1">Position / Rank (override)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={selectedStudent.position}
+                    onChange={(e) => handlePositionChange(selectedStudent.rollNo, e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                  />
+                </div>
                 <textarea
                   value={state.reportCardRemarks}
                   onChange={(e) => setReportState(state.reportCardRollNo, e.target.value)}

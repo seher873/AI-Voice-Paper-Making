@@ -67,9 +67,7 @@ const ReportCardPreview = forwardRef<HTMLDivElement, Props>(
                 <div className="flex gap-2 justify-end">
                   <span className="font-semibold" style={{ color: c.primary }}>Rank:</span>
                   <span className="font-bold" style={{ fontFamily: "'Playfair Display', 'Georgia', serif", color: c.accent }}>
-                    {student.position <= 10
-                      ? student.position + ["th","st","nd","rd"][student.position % 10 > 3 ? 0 : student.position % 10]
-                      : "—"}
+                    {student.position + ["th","st","nd","rd"][student.position % 10 > 3 ? 0 : student.position % 10]}
                   </span>
                 </div>
                 <div className="flex gap-2 justify-end">

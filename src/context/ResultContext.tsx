@@ -18,6 +18,7 @@ type ResultAction =
   | { type: "SET_REPORT_CARD_STATE"; payload: { rollNo: string; remarks: string } }
   | { type: "SET_THEME_COLORS"; payload: ThemeColors }
   | { type: "CALCULATE_RESULTS" }
+  | { type: "UPDATE_STUDENT_RESULT"; payload: { rollNo: string; position: number } }
   | { type: "RESET" };
 
 const initialState: ResultState = {
@@ -63,6 +64,13 @@ function resultReducer(state: ResultState, action: ResultAction): ResultState {
       return { ...state, themeColors: action.payload };
     case "SET_REPORT_CARD_STATE":
       return { ...state, reportCardRollNo: action.payload.rollNo, reportCardRemarks: action.payload.remarks };
+    case "UPDATE_STUDENT_RESULT":
+      return {
+        ...state,
+        results: state.results.map((r) =>
+          r.rollNo === action.payload.rollNo ? { ...r, position: action.payload.position } : r
+        ),
+      };
     case "CALCULATE_RESULTS": {
       const subjects = state.currentExam?.subjects || [];
       const results = calculateResults(state.students, subjects, state.gradeScale);

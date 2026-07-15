@@ -45,8 +45,20 @@ export default function PaperPreview() {
               position: "relative",
             }}
           >
+            {/* Watermark */}
+            {state.showWatermark && state.watermark && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none" style={{ zIndex: 0 }}>
+                <span
+                  className="text-[100px] sm:text-[140px] lg:text-[180px] font-black uppercase tracking-[0.3em] opacity-[0.06] text-slate-600"
+                  style={{ transform: "rotate(-30deg)", whiteSpace: "nowrap" }}
+                >
+                  {state.watermark}
+                </span>
+              </div>
+            )}
+
             {/* Header */}
-            <div className={`flex items-center gap-x-6 sm:gap-x-10 mb-3 sm:mb-4 ${isRTL ? "flex-row" : ""}`}>
+            <div className={`flex items-center gap-x-6 sm:gap-x-10 mb-3 sm:mb-4 relative ${isRTL ? "flex-row" : ""}`}>
               <div className={`w-[70px] sm:w-[90px] lg:w-[110px] h-[70px] sm:h-[90px] lg:h-[110px] flex-shrink-0`}>
                 {state.schoolLogo ? (
                   <img src={state.schoolLogo} alt="School Logo" className="w-full h-full object-contain" />
