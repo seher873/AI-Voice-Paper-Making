@@ -20,7 +20,7 @@ export default function AuthNav() {
       <div className="flex items-center gap-3 text-sm">
         <span className="text-slate-600 font-medium">{user.email}</span>
         <button
-          onClick={() => supabase.auth.signOut().then(() => router.push("/login"))}
+          onClick={async () => { await supabase.auth.signOut({ scope: "global" }); window.location.href = "/login"; }}
           className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all text-xs font-medium"
         >
           Logout
