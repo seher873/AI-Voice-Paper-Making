@@ -35,8 +35,9 @@ export default function Dashboard() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) return;
-      supabase.from("profiles").select("school_id").eq("id", user.id).then(({ data }) => {
+      if (!user) { setSchoolReady(false); return; }
+      supabase.from("profiles").select("school_id").eq("id", user.id).then(({ data, error }) => {
+        if (error) { setSchoolReady(false); return; }
         setSchoolReady(data && data.length > 0);
       });
     });
