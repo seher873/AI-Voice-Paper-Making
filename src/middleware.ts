@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabaseServer";
+import { updateSession } from "@/lib/supabaseMiddleware";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
@@ -9,8 +9,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const supabase = await createClient();
-  const { data: { session } } = await supabase.auth.getSession();
+  const { session, res } = await updateSession(req);
 
   if (!session && pathname !== "/login" && pathname !== "/no-access") {
     return NextResponse.redirect(new URL("/login", req.url));
@@ -20,7 +19,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
-  return NextResponse.next();
+  return res;
 }
 
 export const config = {
