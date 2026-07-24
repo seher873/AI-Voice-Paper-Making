@@ -34,13 +34,36 @@ export default function Dashboard() {
   const [schoolReady, setSchoolReady] = useState<boolean | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) { setSchoolReady(false); return; }
-      supabase.from("profiles").select("school_id").eq("id", user.id).then(({ data, error }) => {
-        if (error) { setSchoolReady(false); return; }
-        setSchoolReady(data && data.length > 0);
-      });
+    let mounted = true;
+    const init = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        window.location.href = "/login";
+        return;
+      }
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        window.location.href = "/login";
+        return;
+      }
+      const { data } = await supabase.from("profiles").select("school_id").eq("id", user.id);
+      if (mounted) setSchoolReady(!!data && data.length > 0);
+    };
+    init();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!session) {
+        window.location.href = "/login";
+        return;
+      }
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        window.location.href = "/login";
+        return;
+      }
+      const { data } = await supabase.from("profiles").select("school_id").eq("id", user.id);
+      if (mounted) setSchoolReady(!!data && data.length > 0);
     });
+    return () => { mounted = false; subscription.unsubscribe(); };
   }, []);
 
   useEffect(() => {
