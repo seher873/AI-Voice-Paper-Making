@@ -1,8 +1,27 @@
-import { createClient } from "@/lib/supabaseServer";
+import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 
+function createClient(req: Request) {
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          const cookieHeader = req.headers.get("cookie") || "";
+          return cookieHeader.split(";").filter(c => c.trim()).map(c => {
+            const [name, ...rest] = c.trim().split("=");
+            return { name, value: rest.join("=") };
+          });
+        },
+        setAll() {},
+      },
+    }
+  );
+}
+
 export async function POST(req: Request) {
-  const supabase = await createClient();
+  const supabase = createClient(req);
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user?.email) {
@@ -14,7 +33,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "School name required" }, { status: 400 });
   }
 
-  // Create school
   const { data: school, error: schoolErr } = await supabase
     .from("schools")
     .insert({ name: schoolName.trim() })
@@ -25,7 +43,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Failed to create school" }, { status: 500 });
   }
 
-  // Create profile
   const { error: profileErr } = await supabase
     .from("profiles")
     .insert({
@@ -44,8 +61,8 @@ export async function POST(req: Request) {
   return NextResponse.json({ schoolId: school.id });
 }
 
-export async function GET() {
-  const supabase = await createClient();
+export async function GET(req: Request) {
+  const supabase = createClient(req);
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user?.email) {
