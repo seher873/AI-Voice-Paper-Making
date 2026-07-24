@@ -18,14 +18,44 @@ export default function SchoolSetup({ onComplete }: Props) {
     if (!schoolName.trim()) return;
     setLoading(true);
     try {
-      const res = await fetch("/api/setup-school", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ schoolName: schoolName.trim() }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to setup");
-      onComplete(data.schoolId);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { data: existing } = await supabase
+        .from("profiles")
+        .select("school_id")
+        .eq("id", user.id)
+        .single();
+
+      if (existing?.school_id) {
+        onComplete(existing.school_id);
+        return;
+      }
+
+      const { data: school, error: schoolErr } = await supabase
+        .from("schools")
+        .insert({ name: schoolName.trim() })
+        .select("id")
+        .single();
+
+      if (schoolErr || !school) throw new Error("Failed to create school");
+
+      const { error: profileErr } = await supabase
+        .from("profiles")
+        .insert({
+          id: user.id,
+          school_id: school.id,
+          email: user.email,
+          name: user.user_metadata?.name || "",
+          role: "admin",
+        });
+
+      if (profileErr) {
+        await supabase.from("schools").delete().eq("id", school.id);
+        throw new Error("Failed to create profile");
+      }
+
+      onComplete(school.id);
       addToast("School created successfully!", "success");
     } catch (err) {
       addToast(err instanceof Error ? err.message : "Setup failed", "error");
