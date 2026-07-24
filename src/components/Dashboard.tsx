@@ -35,33 +35,31 @@ export default function Dashboard() {
 
   useEffect(() => {
     let mounted = true;
-    const init = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!mounted) return;
+      if (event === "SIGNED_OUT" || (!session && event !== "INITIAL_SESSION")) {
+        window.location.href = "/login";
+        return;
+      }
+      if (session) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user || !mounted) { window.location.href = "/login"; return; }
+        const { data } = await supabase.from("profiles").select("school_id").eq("id", user.id);
+        if (mounted) setSchoolReady(!!data && data.length > 0);
+      }
+    });
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
       if (!session) {
         window.location.href = "/login";
         return;
       }
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        window.location.href = "/login";
-        return;
-      }
-      const { data } = await supabase.from("profiles").select("school_id").eq("id", user.id);
-      if (mounted) setSchoolReady(!!data && data.length > 0);
-    };
-    init();
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (!session) {
-        window.location.href = "/login";
-        return;
-      }
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        window.location.href = "/login";
-        return;
-      }
-      const { data } = await supabase.from("profiles").select("school_id").eq("id", user.id);
-      if (mounted) setSchoolReady(!!data && data.length > 0);
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        if (!user || !mounted) { window.location.href = "/login"; return; }
+        supabase.from("profiles").select("school_id").eq("id", user.id).then(({ data }) => {
+          if (mounted) setSchoolReady(!!data && data.length > 0);
+        });
+      });
     });
     return () => { mounted = false; subscription.unsubscribe(); };
   }, []);
