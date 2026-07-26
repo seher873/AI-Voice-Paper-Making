@@ -1,23 +1,22 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
 
-let _client: SupabaseClient | null = null;
+let browserClient: ReturnType<typeof createClient> | null = null;
 
-export function getSupabase(): SupabaseClient {
-  if (!_client) {
-    _client = createClient(
+export function getSupabase() {
+  if (typeof window === "undefined") {
+    return createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      { auth: { persistSession: true, autoRefreshToken: true } }
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
   }
-  return _client;
+  if (!browserClient) {
+    browserClient = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+  }
+  return browserClient;
 }
-
-export const supabase = new Proxy({} as SupabaseClient, {
-  get(_t, prop) {
-    return (getSupabase() as any)[prop];
-  },
-});
 
 export async function getSchoolId(): Promise<string | null> {
   const client = getSupabase();

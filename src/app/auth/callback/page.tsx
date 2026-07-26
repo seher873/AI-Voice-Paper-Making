@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 import { Suspense } from "react";
 
 function CallbackHandler() {
@@ -19,7 +19,7 @@ function CallbackHandler() {
       return;
     }
 
-    supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+    getSupabase().auth.exchangeCodeForSession(code).then(({ error }) => {
       if (error) {
         console.error("Auth callback error:", error);
         router.replace("/login?error=auth");

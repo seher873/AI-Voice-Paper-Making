@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 import { useToast } from "@/context/ToastContext";
 
 interface Props {
@@ -18,10 +18,11 @@ export default function SchoolSetup({ onComplete }: Props) {
     if (!schoolName.trim()) return;
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const sb = getSupabase();
+      const { data: { user } } = await sb.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      const { data: existing } = await supabase
+      const { data: existing } = await sb
         .from("profiles")
         .select("school_id")
         .eq("id", user.id)
@@ -32,7 +33,7 @@ export default function SchoolSetup({ onComplete }: Props) {
         return;
       }
 
-      const { data: school, error: schoolErr } = await supabase
+      const { data: school, error: schoolErr } = await sb
         .from("schools")
         .insert({ name: schoolName.trim() })
         .select("id")
@@ -40,7 +41,7 @@ export default function SchoolSetup({ onComplete }: Props) {
 
       if (schoolErr || !school) throw new Error("Failed to create school");
 
-      const { error: profileErr } = await supabase
+      const { error: profileErr } = await sb
         .from("profiles")
         .insert({
           id: user.id,
@@ -51,7 +52,7 @@ export default function SchoolSetup({ onComplete }: Props) {
         });
 
       if (profileErr) {
-        await supabase.from("schools").delete().eq("id", school.id);
+        await sb.from("schools").delete().eq("id", school.id);
         throw new Error("Failed to create profile");
       }
 

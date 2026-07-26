@@ -12,7 +12,7 @@ import UpgradeBanner from "./UpgradeBanner";
 import SchoolSetup from "./SchoolSetup";
 import BackupPanel from "./BackupPanel";
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 import { usePaper } from "@/context/PaperContext";
 import { useResult } from "@/context/ResultContext";
 import { TEMPLATES } from "@/lib/paperFormat";
@@ -35,28 +35,29 @@ export default function Dashboard() {
 
   useEffect(() => {
     let mounted = true;
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const sb = getSupabase();
+    const { data: { subscription } } = sb.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
       if (event === "SIGNED_OUT" || (!session && event !== "INITIAL_SESSION")) {
         window.location.href = "/login";
         return;
       }
       if (session) {
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { user } } = await sb.auth.getUser();
         if (!user || !mounted) { window.location.href = "/login"; return; }
-        const { data } = await supabase.from("profiles").select("school_id").eq("id", user.id);
+        const { data } = await sb.from("profiles").select("school_id").eq("id", user.id);
         if (mounted) setSchoolReady(!!data && data.length > 0);
       }
     });
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    sb.auth.getSession().then(({ data: { session } }) => {
       if (!mounted) return;
       if (!session) {
         window.location.href = "/login";
         return;
       }
-      supabase.auth.getUser().then(({ data: { user } }) => {
+      sb.auth.getUser().then(({ data: { user } }) => {
         if (!user || !mounted) { window.location.href = "/login"; return; }
-        supabase.from("profiles").select("school_id").eq("id", user.id).then(({ data }) => {
+        sb.from("profiles").select("school_id").eq("id", user.id).then(({ data }) => {
           if (mounted) setSchoolReady(!!data && data.length > 0);
         });
       });

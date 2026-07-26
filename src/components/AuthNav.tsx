@@ -1,15 +1,14 @@
 "use client";
 
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 
 export default function AuthNav() {
-  const router = useRouter();
   const [user, setUser] = useState<{ email?: string } | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    const sb = getSupabase();
+    sb.auth.getUser().then(({ data }) => setUser(data.user));
   }, []);
 
   if (!user) return null;
@@ -20,7 +19,7 @@ export default function AuthNav() {
       <div className="flex items-center gap-3 text-sm">
         <span className="text-slate-600 font-medium">{user.email}</span>
         <button
-          onClick={async () => { await supabase.auth.signOut({ scope: "global" }); window.location.href = "/login"; }}
+          onClick={async () => { await getSupabase().auth.signOut({ scope: "global" }); window.location.href = "/login"; }}
           className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all text-xs font-medium"
         >
           Logout

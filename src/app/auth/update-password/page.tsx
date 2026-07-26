@@ -1,6 +1,6 @@
 "use client";
 
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -12,7 +12,7 @@ export default function UpdatePasswordPage() {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    getSupabase().auth.getSession().then(({ data: { session } }) => {
       if (!session) router.replace("/login");
     });
   }, [router]);
@@ -22,7 +22,7 @@ export default function UpdatePasswordPage() {
     setError("");
     setLoading(true);
     try {
-      const { error } = await supabase.auth.updateUser({ password });
+      const { error } = await getSupabase().auth.updateUser({ password });
       if (error) throw error;
       setSuccess(true);
       setTimeout(() => router.replace("/"), 2000);
