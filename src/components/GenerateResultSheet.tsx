@@ -21,9 +21,9 @@ export default function GenerateResultSheet() {
 
   const handleExportExcel = () => {
     if (results.length === 0) return;
-    const headers = ["Roll No", "Student Name", ...subjects.map((s) => s.name), "Total Obtained", "Total Marks", "Percentage", "Grade", "Position", "Status"];
+    const headers = ["Roll No", "Student Name", "Father Name", ...subjects.map((s) => s.name), "Total Obtained", "Total Marks", "Percentage", "Grade", "Position", "Status"];
     const data = results.map((r) => [
-      r.rollNo, r.studentName,
+      r.rollNo, r.studentName, r.fatherName,
       ...subjects.map((s) => r.subjectMarks[s.name] ?? "-"),
       r.totalObtained, r.totalMarks, `${r.percentage}%`, r.grade, r.position, r.passed ? "Pass" : "Fail",
     ]);
@@ -93,6 +93,7 @@ export default function GenerateResultSheet() {
               <tr className="bg-slate-50">
                 <th className="text-left px-4 py-2.5 font-semibold text-slate-600 text-xs">Roll No</th>
                 <th className="text-left px-4 py-2.5 font-semibold text-slate-600 text-xs">Student Name</th>
+                <th className="text-left px-4 py-2.5 font-semibold text-slate-600 text-xs">Father Name</th>
                 {subjects.map((s) => (
                   <th key={s.id} className="text-center px-2 py-2.5 font-semibold text-slate-600 text-xs">{s.name}</th>
                 ))}
@@ -108,6 +109,7 @@ export default function GenerateResultSheet() {
                 <tr key={r.rollNo} className={`${i % 2 === 0 ? "bg-white" : "bg-slate-50/50"} border-t border-slate-100`}>
                   <td className="px-4 py-2.5 font-medium text-slate-700">{r.rollNo}</td>
                   <td className="px-4 py-2.5 text-slate-700">{r.studentName}</td>
+                  <td className="px-4 py-2.5 text-slate-700">{r.fatherName || "—"}</td>
                   {subjects.map((s) => (
                     <td key={s.id} className="text-center px-2 py-2.5 text-slate-600">
                       {r.subjectMarks[s.name] ?? "-"}

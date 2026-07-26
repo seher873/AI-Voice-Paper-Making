@@ -16,6 +16,7 @@ export function parseExcelFile(
     const row = rows[i];
     const rollNo = String(row["Roll No"] || row["RollNo"] || "").trim();
     const studentName = String(row["Student Name"] || row["StudentName"] || row["Name"] || "").trim();
+    const fatherName = String(row["Father Name"] || row["FatherName"] || row["Father"] || "").trim();
 
     if (!rollNo || !studentName) {
       errors.push(`Row ${i + 2}: Missing Roll No or Student Name`);
@@ -47,7 +48,7 @@ export function parseExcelFile(
     }
 
     if (!hasError) {
-      students.push({ rollNo, studentName, subjectMarks });
+      students.push({ rollNo, studentName, fatherName, subjectMarks });
     }
   }
 

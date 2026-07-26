@@ -35,12 +35,14 @@ export interface Exam {
 export interface StudentMark {
   rollNo: string;
   studentName: string;
+  fatherName: string;
   subjectMarks: Record<string, number>;
 }
 
 export interface StudentResult {
   rollNo: string;
   studentName: string;
+  fatherName: string;
   subjectMarks: Record<string, number>;
   totalObtained: number;
   totalMarks: number;

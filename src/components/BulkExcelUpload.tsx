@@ -44,7 +44,7 @@ export default function BulkExcelUpload() {
 
   const downloadTemplate = () => {
     if (subjects.length === 0) return;
-    const headers = ["Roll No", "Student Name", ...subjects.map((s) => s.name)];
+    const headers = ["Roll No", "Student Name", "Father Name", ...subjects.map((s) => s.name)];
     const buffer = generateExcelBuffer(headers, []);
     downloadExcel(buffer, "marks-template.xlsx");
   };
@@ -61,7 +61,7 @@ export default function BulkExcelUpload() {
     <div className="max-w-2xl">
       <h2 className="text-lg font-bold text-slate-800 mb-4">Bulk Excel Upload</h2>
       <p className="text-xs text-slate-400 mb-4">
-        Upload an Excel file with student marks. Columns: Roll No, Student Name, {subjects.map((s) => s.name).join(", ")}
+        Upload an Excel file with student marks. Columns: Roll No, Student Name, Father Name, {subjects.map((s) => s.name).join(", ")}
       </p>
 
       <div className="flex flex-wrap gap-3 mb-6">

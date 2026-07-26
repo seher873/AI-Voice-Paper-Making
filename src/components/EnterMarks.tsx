@@ -11,6 +11,7 @@ export default function EnterMarks() {
   const config = state.currentExam?.assessmentConfig;
   const [rollNo, setRollNo] = useState("");
   const [studentName, setStudentName] = useState("");
+  const [fatherName, setFatherName] = useState("");
   const [marks, setMarks] = useState<Record<string, string>>({});
 
   const enabledComponents = config
@@ -27,9 +28,10 @@ export default function EnterMarks() {
       subjectMarks[sub.name] = val ? Number(val) : 0;
     }
 
-    dispatch({ type: "ADD_STUDENT", payload: { rollNo, studentName, subjectMarks } });
+    dispatch({ type: "ADD_STUDENT", payload: { rollNo, studentName, fatherName, subjectMarks } });
     setRollNo("");
     setStudentName("");
+    setFatherName("");
     setMarks({});
   };
 
@@ -49,7 +51,7 @@ export default function EnterMarks() {
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-white rounded-xl border border-slate-200">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className="block text-xs font-semibold text-slate-500 mb-1">Roll Number</label>
             <input value={rollNo} onChange={(e) => setRollNo(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40" placeholder="e.g. 1" required />
@@ -57,6 +59,10 @@ export default function EnterMarks() {
           <div>
             <label className="block text-xs font-semibold text-slate-500 mb-1">Student Name</label>
             <input value={studentName} onChange={(e) => setStudentName(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40" placeholder="Full name" required />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 mb-1">Father Name</label>
+            <input value={fatherName} onChange={(e) => setFatherName(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40" placeholder="Father name" />
           </div>
         </div>
 

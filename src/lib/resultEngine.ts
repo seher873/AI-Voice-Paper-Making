@@ -22,6 +22,7 @@ export function calculateResults(
     return {
       rollNo: s.rollNo,
       studentName: s.studentName,
+      fatherName: s.fatherName,
       subjectMarks: s.subjectMarks,
       totalObtained,
       totalMarks,

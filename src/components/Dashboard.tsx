@@ -229,8 +229,53 @@ export default function Dashboard() {
         {/* School Info (all modes) */}
         {showSchoolInfo && (
           <div className="px-3 sm:px-4 py-3 bg-white border-b border-slate-200 space-y-3">
-            <div className="flex items-start gap-4">
-              <div className="flex-1">
+            {/* Live Preview */}
+            {(resultCtx.state.schoolName || resultCtx.state.schoolLogo) && (
+              <div className="p-3 rounded-xl border-2 border-dashed border-indigo-200 bg-indigo-50/50">
+                <p className="text-[10px] font-bold text-indigo-400 uppercase mb-2">Live Preview — Report Card Header</p>
+                <div className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm">
+                  {resultCtx.state.schoolLogo && (
+                    <img src={resultCtx.state.schoolLogo} alt="Logo" className="h-12 w-12 object-contain rounded-lg flex-shrink-0" />
+                  )}
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-800" style={{ fontFamily: "'Playfair Display', serif" }}>{resultCtx.state.schoolName || "School Name"}</h3>
+                    <p className="text-[10px] text-slate-400">Examination Report Card</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-col sm:flex-row items-start gap-3">
+              <div className="flex-shrink-0">
+                <label className="block text-xs font-semibold mb-1" style={{ color: resultCtx.state.schoolLogo ? "#475569" : "#dc2626" }}>
+                  School Logo
+                </label>
+                <div className="flex items-center gap-2">
+                  {resultCtx.state.schoolLogo ? (
+                    <div className="relative w-20 h-20 rounded-xl border-2 border-slate-200 overflow-hidden flex-shrink-0 bg-white">
+                      <img src={resultCtx.state.schoolLogo} alt="Logo" className="w-full h-full object-contain p-1" />
+                      <button
+                        onClick={() => { resultCtx.dispatch({ type: "SET_SCHOOL_INFO", payload: { name: resultCtx.state.schoolName, logo: "" } }); dispatch({ type: "SET_SCHOOL_LOGO", payload: null }); }}
+                        className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center shadow-md hover:bg-red-600"
+                      >
+                        &times;
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="w-20 h-20 rounded-xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-500 hover:bg-indigo-50 transition-all flex-shrink-0">
+                      <svg className="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <span className="text-[9px] text-slate-400 font-medium mt-0.5">Upload</span>
+                      <input type="file" accept="image/*" onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) { const r = new FileReader(); r.onload = (ev) => { const logo = ev.target?.result as string; resultCtx.dispatch({ type: "SET_SCHOOL_INFO", payload: { name: resultCtx.state.schoolName, logo } }); dispatch({ type: "SET_SCHOOL_LOGO", payload: logo }); }; r.readAsDataURL(file); }
+                      }} className="hidden" />
+                    </label>
+                  )}
+                </div>
+              </div>
+              <div className="flex-1 w-full">
                 <label className="block text-xs font-semibold mb-1" style={{ color: resultCtx.state.schoolName ? "#475569" : "#dc2626" }}>
                   School Name <span className="text-red-500">*</span>
                 </label>
@@ -241,43 +286,16 @@ export default function Dashboard() {
                     resultCtx.dispatch({ type: "SET_SCHOOL_INFO", payload: { name: e.target.value, logo: resultCtx.state.schoolLogo } });
                     dispatch({ type: "SET_SCHOOL_NAME", payload: e.target.value });
                   }}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-400 transition-all"
                   placeholder="e.g. Sunshine Public School"
                 />
-              </div>
-              <div className="flex-shrink-0">
-                <label className="block text-xs font-semibold mb-1" style={{ color: resultCtx.state.schoolLogo ? "#475569" : "#dc2626" }}>
-                  Logo <span className="text-red-500">*</span>
-                </label>
-                <div className="flex items-center gap-2">
-                  {resultCtx.state.schoolLogo ? (
-                    <div className="relative w-16 h-16 rounded-xl border-2 border-slate-300 overflow-hidden flex-shrink-0">
-                      <img src={resultCtx.state.schoolLogo} alt="Logo" className="w-full h-full object-contain" />
-                      <button
-                        onClick={() => { resultCtx.dispatch({ type: "SET_SCHOOL_INFO", payload: { name: resultCtx.state.schoolName, logo: "" } }); dispatch({ type: "SET_SCHOOL_LOGO", payload: null }); }}
-                        className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center shadow-md hover:bg-red-600"
-                      >
-                        &times;
-                      </button>
-                    </div>
-                  ) : (
-                    <label className="w-16 h-16 rounded-xl border-2 border-dashed border-slate-300 flex items-center justify-center cursor-pointer hover:border-indigo-500 hover:bg-indigo-50 transition-all flex-shrink-0">
-                      <svg className="w-7 h-7 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      <input type="file" accept="image/*" onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) { const r = new FileReader(); r.onload = (ev) => { const logo = ev.target?.result as string; resultCtx.dispatch({ type: "SET_SCHOOL_INFO", payload: { name: resultCtx.state.schoolName, logo } }); dispatch({ type: "SET_SCHOOL_LOGO", payload: logo }); }; r.readAsDataURL(file); }
-                      }} className="hidden" />
-                    </label>
-                  )}
-                </div>
+                <p className="text-[10px] text-slate-400 mt-1">Appears on report cards, result sheets & exam papers</p>
               </div>
             </div>
 
             {/* Theme Colors */}
             <div className="border-t border-slate-100 pt-3">
-              <label className="block text-xs font-semibold text-slate-500 mb-2">Theme Colors</label>
+              <label className="block text-xs font-semibold text-slate-500 mb-2">Report Card Theme</label>
               <div className="flex flex-wrap gap-1.5 mb-2">
                 {THEME_PRESETS.map((preset) => (
                   <button
