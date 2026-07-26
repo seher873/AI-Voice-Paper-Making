@@ -175,15 +175,19 @@ export default function Dashboard() {
             <div className="ml-auto flex items-center gap-1.5">
               <button
                   onClick={() => setShowSchoolInfo(!showSchoolInfo)}
-                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
                     showSchoolInfo ? "bg-white/20 text-white" : "text-indigo-200 hover:bg-white/10 hover:text-white"
                   }`}
                   title="School Info"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                  <span>School</span>
+                  {resultCtx.state.schoolLogo ? (
+                    <img src={resultCtx.state.schoolLogo} alt="Logo" className="w-5 h-5 rounded object-contain bg-white" />
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                  )}
+                  <span className="hidden sm:inline">{resultCtx.state.schoolName || "School"}</span>
                 </button>
               {!lockedPlan && availableModes.length > 1 && (
                 <button
@@ -287,7 +291,7 @@ export default function Dashboard() {
                     dispatch({ type: "SET_SCHOOL_NAME", payload: e.target.value });
                   }}
                   className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-400 transition-all"
-                  placeholder="e.g. Sunshine Public School"
+                  placeholder="e.g. Government Higher Secondary School"
                 />
                 <p className="text-[10px] text-slate-400 mt-1">Appears on report cards, result sheets & exam papers</p>
               </div>
