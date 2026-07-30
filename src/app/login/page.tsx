@@ -49,11 +49,15 @@ export default function LoginPage() {
         });
         if (error) throw error;
         localStorage.setItem("subscription_plan", plan);
-        router.replace("/");
+        router.replace(`/?plan=${plan}`);
       } else {
         const { error } = await getSupabase().auth.signInWithPassword({ email, password });
         if (error) throw error;
-        router.replace("/");
+        if (selectedPlan) {
+          localStorage.setItem("subscription_plan", selectedPlan);
+        }
+        const plan = selectedPlan || localStorage.getItem("subscription_plan") || "full";
+        router.replace(`/?plan=${plan}`);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");

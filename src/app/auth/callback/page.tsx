@@ -26,7 +26,8 @@ function CallbackHandler() {
       } else if (type === "recovery") {
         router.replace("/auth/update-password");
       } else {
-        router.replace("/");
+        const plan = localStorage.getItem("subscription_plan");
+        router.replace(plan ? `/?plan=${plan}` : "/");
       }
     });
   }, [searchParams, router]);
