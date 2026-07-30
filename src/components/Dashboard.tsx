@@ -116,6 +116,16 @@ export default function Dashboard() {
           const planObj = PLANS.find((p) => p.id === dbPlan) || PLANS[2];
           setPlanState(planObj);
           setMode(dbPlan);
+        } else if (school?.plan === "full") {
+          const localPlan = localStorage.getItem("subscription_plan") as PlanId | null;
+          if (localPlan && localPlan !== "full") {
+            await sb.from("schools").update({ plan: localPlan }).eq("id", profile.school_id);
+            setLockedPlan(localPlan as "paper" | "results");
+            setPlanFromDb(true);
+            const planObj = PLANS.find((p) => p.id === localPlan) || PLANS[2];
+            setPlanState(planObj);
+            setMode(localPlan as "paper" | "results");
+          }
         }
       } catch {}
     })();
