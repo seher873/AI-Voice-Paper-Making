@@ -21,8 +21,11 @@ export default function LoginPage() {
 
   useEffect(() => {
     getSupabase().auth.getSession().then(({ data: { session } }) => {
-      if (session) router.replace("/");
-      else setChecking(false);
+      if (session) {
+        const params = new URLSearchParams(window.location.search);
+        const planParam = params.get("plan");
+        router.replace(planParam ? `/?plan=${planParam}` : "/");
+      } else setChecking(false);
     });
   }, [router]);
 
