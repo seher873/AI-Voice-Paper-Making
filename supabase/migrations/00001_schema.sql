@@ -90,8 +90,9 @@ ALTER TABLE results ENABLE ROW LEVEL SECURITY;
 ALTER TABLE grade_scales ENABLE ROW LEVEL SECURITY;
 ALTER TABLE papers ENABLE ROW LEVEL SECURITY;
 
+-- Helper: user's school_id
 -- RLS Policies
--- Schools: authenticated users can create, view their own
+-- Schools
 CREATE POLICY "users can insert schools" ON schools
   FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 
@@ -100,13 +101,27 @@ CREATE POLICY "users can view own school" ON schools
     id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
   );
 
--- Profiles: users can create their own, view their own
+CREATE POLICY "users can update own school" ON schools
+  FOR UPDATE USING (
+    id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
+  );
+
+CREATE POLICY "users can delete own school" ON schools
+  FOR DELETE USING (
+    id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
+  );
+
+-- Profiles
 CREATE POLICY "users can insert own profile" ON profiles
   FOR INSERT WITH CHECK (id = auth.uid() OR id::text = auth.email());
 
 CREATE POLICY "users can view own profile" ON profiles
   FOR SELECT USING (id = auth.uid() OR id::text = auth.email());
 
+CREATE POLICY "users can update own profile" ON profiles
+  FOR UPDATE USING (id = auth.uid());
+
+-- Exams
 CREATE POLICY "users can view own school exams" ON exams
   FOR SELECT USING (
     school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
@@ -127,6 +142,7 @@ CREATE POLICY "users can delete own school exams" ON exams
     school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
   );
 
+-- Students
 CREATE POLICY "users can view own school students" ON students
   FOR SELECT USING (
     school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
@@ -147,6 +163,7 @@ CREATE POLICY "users can delete own school students" ON students
     school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
   );
 
+-- Results
 CREATE POLICY "users can view own school results" ON results
   FOR SELECT USING (
     school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
@@ -157,16 +174,38 @@ CREATE POLICY "users can insert own school results" ON results
     school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
   );
 
+CREATE POLICY "users can update own school results" ON results
+  FOR UPDATE USING (
+    school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
+  );
+
 CREATE POLICY "users can delete own school results" ON results
   FOR DELETE USING (
     school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
   );
 
+-- Grade Scales
 CREATE POLICY "users can view own school grade_scales" ON grade_scales
   FOR SELECT USING (
     school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
   );
 
+CREATE POLICY "users can insert own school grade_scales" ON grade_scales
+  FOR INSERT WITH CHECK (
+    school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
+  );
+
+CREATE POLICY "users can update own school grade_scales" ON grade_scales
+  FOR UPDATE USING (
+    school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
+  );
+
+CREATE POLICY "users can delete own school grade_scales" ON grade_scales
+  FOR DELETE USING (
+    school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
+  );
+
+-- Papers
 CREATE POLICY "users can view own school papers" ON papers
   FOR SELECT USING (
     school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
@@ -174,6 +213,16 @@ CREATE POLICY "users can view own school papers" ON papers
 
 CREATE POLICY "users can insert own school papers" ON papers
   FOR INSERT WITH CHECK (
+    school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
+  );
+
+CREATE POLICY "users can update own school papers" ON papers
+  FOR UPDATE USING (
+    school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
+  );
+
+CREATE POLICY "users can delete own school papers" ON papers
+  FOR DELETE USING (
     school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
   );
 

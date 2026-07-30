@@ -19,17 +19,22 @@ function CallbackHandler() {
       return;
     }
 
-    getSupabase().auth.exchangeCodeForSession(code).then(({ error }) => {
-      if (error) {
-        console.error("Auth callback error:", error);
+    getSupabase().auth.exchangeCodeForSession(code)
+      .then(({ error }) => {
+        if (error) {
+          console.error("Auth callback error:", error);
+          router.replace("/login?error=auth");
+        } else if (type === "recovery") {
+          router.replace("/auth/update-password");
+        } else {
+          const plan = localStorage.getItem("subscription_plan");
+          router.replace(plan ? `/?plan=${plan}` : "/");
+        }
+      })
+      .catch((err) => {
+        console.error("Auth callback exception:", err);
         router.replace("/login?error=auth");
-      } else if (type === "recovery") {
-        router.replace("/auth/update-password");
-      } else {
-        const plan = localStorage.getItem("subscription_plan");
-        router.replace(plan ? `/?plan=${plan}` : "/");
-      }
-    });
+      });
   }, [searchParams, router]);
 
   return (

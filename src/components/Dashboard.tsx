@@ -43,27 +43,25 @@ export default function Dashboard() {
         window.location.href = "/login";
         return;
       }
-      if (session) {
+      if (session && mounted) checkAuth(sb);
+    });
+    checkAuth(sb);
+    return () => { mounted = false; subscription.unsubscribe(); };
+
+    async function checkAuth(sb: ReturnType<typeof getSupabase>) {
+      try {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!mounted) return;
+        if (!session) { window.location.href = "/login"; return; }
         const { data: { user } } = await sb.auth.getUser();
         if (!user || !mounted) { window.location.href = "/login"; return; }
         const { data } = await sb.from("profiles").select("school_id").eq("id", user.id);
         if (mounted) setSchoolReady(!!data && data.length > 0);
+      } catch (err) {
+        console.error("Auth check error:", err);
+        if (mounted) window.location.href = "/login";
       }
-    });
-    sb.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
-      if (!session) {
-        window.location.href = "/login";
-        return;
-      }
-      sb.auth.getUser().then(({ data: { user } }) => {
-        if (!user || !mounted) { window.location.href = "/login"; return; }
-        sb.from("profiles").select("school_id").eq("id", user.id).then(({ data }) => {
-          if (mounted) setSchoolReady(!!data && data.length > 0);
-        });
-      });
-    });
-    return () => { mounted = false; subscription.unsubscribe(); };
+    }
   }, []);
 
   useEffect(() => {
@@ -127,11 +125,14 @@ export default function Dashboard() {
             setMode(localPlan as "paper" | "results");
           }
         }
-      } catch {}
+      } catch (err) {
+        console.error("Dashboard plan sync error:", err);
+      }
     })();
   }, [schoolReady, planFromDb]);
 
   const switchPlan = (id: PlanId) => {
+    if (planFromDb) return;
     setPlan(id);
     const newPlan = PLANS.find((p) => p.id === id) || PLANS[2];
     setPlanState(newPlan);

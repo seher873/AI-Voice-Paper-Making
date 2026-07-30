@@ -1,6 +1,9 @@
 import type { GradeScale, StudentResult } from "@/types/result";
 
+const FALLBACK_GRADE: GradeScale = { grade: "F", min: 0, max: 0, remark: "Unknown" };
+
 export function assignGrade(percentage: number, gradeScale: GradeScale[]): GradeScale {
+  if (!gradeScale || gradeScale.length === 0) return FALLBACK_GRADE;
   for (const g of gradeScale) {
     if (percentage >= g.min && percentage <= g.max) return g;
   }

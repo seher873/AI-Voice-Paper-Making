@@ -45,14 +45,18 @@ export default function LoginPage() {
     try {
       if (mode === "signup") {
         const plan = selectedPlan || "full";
-        const { error } = await getSupabase().auth.signUp({
+        const { error, data } = await getSupabase().auth.signUp({
           email,
           password,
           options: { data: { plan } },
         });
         if (error) throw error;
         localStorage.setItem("subscription_plan", plan);
-        router.replace(`/?plan=${plan}`);
+        if (data?.user?.identities?.length === 0) {
+          setError("Check your email for confirmation link");
+        } else {
+          router.replace(`/?plan=${plan}`);
+        }
       } else {
         const { error } = await getSupabase().auth.signInWithPassword({ email, password });
         if (error) throw error;

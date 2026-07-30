@@ -8,7 +8,7 @@ export default function AuthNav() {
 
   useEffect(() => {
     const sb = getSupabase();
-    sb.auth.getUser().then(({ data }) => setUser(data.user));
+    sb.auth.getUser().then(({ data }) => setUser(data.user)).catch(() => setUser(null));
   }, []);
 
   if (!user) return null;
