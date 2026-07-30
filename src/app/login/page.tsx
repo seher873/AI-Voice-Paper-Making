@@ -3,6 +3,8 @@
 import { getSupabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { PLANS } from "@/lib/subscription";
+import type { PlanId } from "@/lib/subscription";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,6 +16,8 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [forgotPassword, setForgotPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<PlanId | null>(null);
+  const [lockedPlan, setLockedPlan] = useState<PlanId | null>(null);
 
   useEffect(() => {
     getSupabase().auth.getSession().then(({ data: { session } }) => {
@@ -22,14 +26,29 @@ export default function LoginPage() {
     });
   }, [router]);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const planParam = params.get("plan");
+    if (planParam === "paper" || planParam === "results" || planParam === "full") {
+      setSelectedPlan(planParam);
+      setLockedPlan(planParam);
+    }
+  }, []);
+
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     try {
       if (mode === "signup") {
-        const { error } = await getSupabase().auth.signUp({ email, password });
+        const plan = selectedPlan || "full";
+        const { error } = await getSupabase().auth.signUp({
+          email,
+          password,
+          options: { data: { plan } },
+        });
         if (error) throw error;
+        localStorage.setItem("subscription_plan", plan);
         router.replace("/");
       } else {
         const { error } = await getSupabase().auth.signInWithPassword({ email, password });
@@ -61,6 +80,8 @@ export default function LoginPage() {
   };
 
   const handleGoogle = async () => {
+    const plan = selectedPlan || "full";
+    localStorage.setItem("subscription_plan", plan);
     await getSupabase().auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo: `${location.origin}/auth/callback` },
@@ -137,6 +158,56 @@ export default function LoginPage() {
           ))}
         </div>
 
+        {/* Plan Selection (Sign Up only) */}
+        {mode === "signup" && !lockedPlan && (
+          <div className="mb-5 space-y-2">
+            <p className="text-xs font-semibold text-slate-500 uppercase">Choose Package</p>
+            <div className="grid gap-2">
+              {PLANS.map((plan) => (
+                <button
+                  key={plan.id}
+                  type="button"
+                  onClick={() => setSelectedPlan(plan.id)}
+                  className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${
+                    selectedPlan === plan.id
+                      ? "border-indigo-500 bg-indigo-50"
+                      : "border-slate-200 hover:border-slate-300 bg-white"
+                  }`}
+                >
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                    selectedPlan === plan.id ? "border-indigo-500" : "border-slate-300"
+                  }`}>
+                    {selectedPlan === plan.id && (
+                      <div className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-slate-800">{plan.label}</p>
+                    <p className="text-xs text-slate-500">{plan.description}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Locked Plan Badge */}
+        {lockedPlan && (
+          <div className="mb-5 p-3 rounded-xl bg-indigo-50 border border-indigo-200">
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4 text-indigo-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              <p className="text-sm font-semibold text-indigo-800">
+                {PLANS.find((p) => p.id === lockedPlan)?.label || "Full Access"}
+              </p>
+            </div>
+            <p className="text-xs text-indigo-600 mt-0.5 ml-6">
+              {PLANS.find((p) => p.id === lockedPlan)?.description}
+            </p>
+          </div>
+        )}
+
         <form onSubmit={handleEmailAuth} className="space-y-4">
           <div>
             <label className="block text-sm font-semibold text-slate-600 mb-1">Email</label>
@@ -190,10 +261,9 @@ export default function LoginPage() {
             </button>
           )}
 
-{error && (
-    <p className={`text-sm font-medium ${error.includes("sent") ? "text-emerald-600" : "text-red-500"}`}>{error}
-    </p>
-  )}
+          {error && (
+            <p className={`text-sm font-medium ${error.includes("sent") ? "text-emerald-600" : "text-red-500"}`}>{error}</p>
+          )}
 
           <button
             type="submit"

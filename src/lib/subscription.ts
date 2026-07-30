@@ -1,4 +1,4 @@
-export type PlanId = "paper" | "results" | "complete";
+export type PlanId = "paper" | "results" | "full";
 
 export interface Plan {
   id: PlanId;
@@ -24,8 +24,8 @@ export const PLANS: Plan[] = [
     features: { paper: false, results: true },
   },
   {
-    id: "complete",
-    label: "Complete Package",
+    id: "full",
+    label: "Full Access",
     description: "Paper Generator + Result Management",
     features: { paper: true, results: true },
   },

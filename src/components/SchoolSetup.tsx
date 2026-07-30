@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getSupabase } from "@/lib/supabase";
 import { useToast } from "@/context/ToastContext";
 
@@ -33,9 +33,11 @@ export default function SchoolSetup({ onComplete }: Props) {
         return;
       }
 
+      const plan = localStorage.getItem("subscription_plan") || "full";
+
       const { data: school, error: schoolErr } = await sb
         .from("schools")
-        .insert({ name: schoolName.trim() })
+        .insert({ name: schoolName.trim(), plan })
         .select("id")
         .single();
 

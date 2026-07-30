@@ -30,7 +30,8 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<"header" | "questions" | "template">("header");
   const [menuOpen, setMenuOpen] = useState(false);
   const [showSchoolInfo, setShowSchoolInfo] = useState(false);
-  const [lockedPlan, setLockedPlan] = useState<"paper" | "results" | null>(null);
+  const [lockedPlan, setLockedPlan] = useState<"paper" | "results" | "full" | null>(null);
+  const [planFromDb, setPlanFromDb] = useState(false);
   const [schoolReady, setSchoolReady] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -70,9 +71,16 @@ export default function Dashboard() {
     const planParam = params.get("plan");
     if (planParam === "paper" || planParam === "results") {
       setLockedPlan(planParam);
+      setPlanFromDb(true);
       const lockedPlanObj = PLANS.find((p) => p.id === planParam) || PLANS[2];
       setPlanState(lockedPlanObj);
       setMode(planParam);
+      return;
+    }
+    if (planParam === "full") {
+      const fullPlan = PLANS.find((p) => p.id === "full") || PLANS[2];
+      setPlanState(fullPlan);
+      setMode("paper");
       return;
     }
     const stored = localStorage.getItem("subscription_plan") as PlanId | null;
@@ -81,6 +89,37 @@ export default function Dashboard() {
     if (!p.features.paper) setMode("results");
     if (!p.features.results) setMode("paper");
   }, []);
+
+  useEffect(() => {
+    if (!schoolReady || planFromDb) return;
+    (async () => {
+      try {
+        const sb = getSupabase();
+        const { data: { user } } = await sb.auth.getUser();
+        if (!user) return;
+        const { data: profile } = await sb
+          .from("profiles")
+          .select("school_id")
+          .eq("id", user.id)
+          .single();
+        if (!profile?.school_id) return;
+        const { data: school } = await sb
+          .from("schools")
+          .select("plan")
+          .eq("id", profile.school_id)
+          .single();
+        if (school?.plan && school.plan !== "full") {
+          const dbPlan = school.plan as "paper" | "results";
+          setLockedPlan(dbPlan);
+          setPlanFromDb(true);
+          localStorage.setItem("subscription_plan", dbPlan);
+          const planObj = PLANS.find((p) => p.id === dbPlan) || PLANS[2];
+          setPlanState(planObj);
+          setMode(dbPlan);
+        }
+      } catch {}
+    })();
+  }, [schoolReady, planFromDb]);
 
   const switchPlan = (id: PlanId) => {
     setPlan(id);
@@ -189,7 +228,7 @@ export default function Dashboard() {
                   )}
                   <span className="hidden sm:inline">{resultCtx.state.schoolName || "School"}</span>
                 </button>
-              {!lockedPlan && availableModes.length > 1 && (
+              {!planFromDb && availableModes.length > 1 && (
                 <button
                   onClick={() => setMode(mode === "paper" ? "results" : "paper")}
                   className={`hidden lg:inline-flex px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
@@ -201,7 +240,7 @@ export default function Dashboard() {
                   {mode === "paper" ? "Results" : "Papers"}
                 </button>
               )}
-              {!lockedPlan && (
+              {!planFromDb && (
                 <div className="relative group hidden lg:block">
                   <button
                     className="px-2 py-1.5 rounded-lg text-xs font-bold text-indigo-200 hover:bg-white/10 hover:text-white transition-all"

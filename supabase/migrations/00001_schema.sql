@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS schools (
   name TEXT NOT NULL DEFAULT '',
   logo TEXT DEFAULT '',
   theme_colors JSONB DEFAULT '{"primary":"#4f46e5","accent":"#10b981","text":"#1e293b","highlight":"#f59e0b"}',
+  plan TEXT DEFAULT 'full' CHECK (plan IN ('paper', 'results', 'full')),
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
@@ -181,12 +182,13 @@ CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 DECLARE
   new_school_id UUID;
+  user_plan TEXT;
 BEGIN
-  -- Create a school for the new user
-  INSERT INTO public.schools (name) VALUES ('My School')
+  user_plan := COALESCE(NEW.raw_user_meta_data->>'plan', 'full');
+
+  INSERT INTO public.schools (name, plan) VALUES ('My School', user_plan)
   RETURNING id INTO new_school_id;
 
-  -- Create profile linked to auth user
   INSERT INTO public.profiles (id, school_id, email, name, role)
   VALUES (NEW.id, new_school_id, NEW.email, NEW.raw_user_meta_data->>'name', 'admin');
 
