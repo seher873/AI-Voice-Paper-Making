@@ -227,20 +227,21 @@ export default function PaperPreview() {
                 <div className={`space-y-3 sm:space-y-5 ${isRTL ? "text-right" : ""}`}>
                   {state.questions.map((question, index) => (
                     <div key={question.id} className="text-[11px] sm:text-[12px] lg:text-[13px] leading-relaxed text-slate-800">
-                      <span className="font-bold text-slate-900">{tpl.numbering(index)}</span>
-                      {!isRTL && <span> </span>}
-                      <span dir={isRTL ? "rtl" : "auto"}>
-                        {question.text || (
-                          <span className="text-slate-300 italic">[Empty question]</span>
+                      <div className="flex items-baseline gap-x-2" dir={isRTL ? "rtl" : "ltr"}>
+                        <span className="font-bold text-slate-900 flex-shrink-0">{tpl.numbering(index)}</span>
+                        <span dir={isRTL ? "rtl" : "auto"}>
+                          {question.text || (
+                            <span className="text-slate-300 italic">[Empty question]</span>
+                          )}
+                          {isRTL && <span> {tpl.questionMark}</span>}
+                          {!isRTL && question.type === "truefalse" && (
+                            <span className="ml-2 text-slate-400 text-[11px] font-medium">{tpl.trueFalseLabel}</span>
+                          )}
+                        </span>
+                        {isRTL && question.type === "truefalse" && (
+                          <span className="mr-2 text-slate-400 text-[11px] font-medium">{tpl.trueFalseLabel}</span>
                         )}
-                        {isRTL && <span> {tpl.questionMark}</span>}
-                        {!isRTL && question.type === "truefalse" && (
-                          <span className="ml-2 text-slate-400 text-[11px] font-medium">{tpl.trueFalseLabel}</span>
-                        )}
-                      </span>
-                      {isRTL && question.type === "truefalse" && (
-                        <span className="mr-2 text-slate-400 text-[11px] font-medium">{tpl.trueFalseLabel}</span>
-                      )}
+                      </div>
                       {question.type === "mcq" && (
                         <div className={`mt-1 ${isRTL ? "mr-4 text-right" : "ml-4"} text-slate-600 text-[11px] flex flex-wrap gap-x-5 gap-y-1`}>
                           {[0, 1, 2, 3].map((i) => (
