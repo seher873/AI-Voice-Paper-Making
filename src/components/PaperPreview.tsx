@@ -226,7 +226,7 @@ export default function PaperPreview() {
               ) : (
                 <div className={`space-y-3 sm:space-y-5 ${isRTL ? "text-right" : ""}`}>
                   {state.questions.map((question, index) => (
-                    <div key={question.id} className="text-[11px] sm:text-[12px] lg:text-[13px] leading-relaxed text-slate-800">
+                    <div key={question.id} className={`text-[11px] sm:text-[12px] lg:text-[13px] leading-relaxed text-slate-800 ${isRTL ? "urdu-font" : ""}`}>
                       <div className="flex items-baseline gap-x-2" dir={isRTL ? "rtl" : "ltr"}>
                         <span className="font-bold text-slate-900 flex-shrink-0">{tpl.numbering(index)}</span>
                         <span dir={isRTL ? "rtl" : "auto"}>
