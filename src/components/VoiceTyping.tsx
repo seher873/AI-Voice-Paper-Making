@@ -59,11 +59,15 @@ export default function VoiceTyping({ onTranscriptReady }: VoiceTypingProps) {
       } else {
         cleaned = result.text;
       }
+      const hasUrduScript = /[\u0600-\u06FF]/.test(result.text);
+      if (language === "ur-PK" && !hasUrduScript && result.text.trim()) {
+        addToast("Browser Urdu support weak hai — Roman Urdu aayi. Google Chrome use karein.", "warning");
+      }
       setPendingText(cleaned);
       setPendingConfidence(result.confidence);
       setEditing(true);
     },
-    [language, mathsMode]
+    [language, mathsMode, addToast]
   );
 
   const handleStart = useCallback(() => {

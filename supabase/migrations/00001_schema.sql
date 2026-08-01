@@ -91,136 +91,164 @@ ALTER TABLE grade_scales ENABLE ROW LEVEL SECURITY;
 ALTER TABLE papers ENABLE ROW LEVEL SECURITY;
 
 -- Helper: user's school_id
--- RLS Policies
+-- RLS Policies (all use DROP IF EXISTS first for idempotent re-runs)
+
 -- Schools
+DROP POLICY IF EXISTS "users can insert schools" ON schools;
 CREATE POLICY "users can insert schools" ON schools
   FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 
+DROP POLICY IF EXISTS "users can view own school" ON schools;
 CREATE POLICY "users can view own school" ON schools
   FOR SELECT USING (
     id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "users can update own school" ON schools;
 CREATE POLICY "users can update own school" ON schools
   FOR UPDATE USING (
     id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "users can delete own school" ON schools;
 CREATE POLICY "users can delete own school" ON schools
   FOR DELETE USING (
     id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
   );
 
 -- Profiles
+DROP POLICY IF EXISTS "users can insert own profile" ON profiles;
 CREATE POLICY "users can insert own profile" ON profiles
   FOR INSERT WITH CHECK (id = auth.uid() OR id::text = auth.email());
 
+DROP POLICY IF EXISTS "users can view own profile" ON profiles;
 CREATE POLICY "users can view own profile" ON profiles
   FOR SELECT USING (id = auth.uid() OR id::text = auth.email());
 
+DROP POLICY IF EXISTS "users can update own profile" ON profiles;
 CREATE POLICY "users can update own profile" ON profiles
   FOR UPDATE USING (id = auth.uid());
 
 -- Exams
+DROP POLICY IF EXISTS "users can view own school exams" ON exams;
 CREATE POLICY "users can view own school exams" ON exams
   FOR SELECT USING (
     school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "users can insert own school exams" ON exams;
 CREATE POLICY "users can insert own school exams" ON exams
   FOR INSERT WITH CHECK (
     school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "users can update own school exams" ON exams;
 CREATE POLICY "users can update own school exams" ON exams
   FOR UPDATE USING (
     school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "users can delete own school exams" ON exams;
 CREATE POLICY "users can delete own school exams" ON exams
   FOR DELETE USING (
     school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
   );
 
 -- Students
+DROP POLICY IF EXISTS "users can view own school students" ON students;
 CREATE POLICY "users can view own school students" ON students
   FOR SELECT USING (
     school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "users can insert own school students" ON students;
 CREATE POLICY "users can insert own school students" ON students
   FOR INSERT WITH CHECK (
     school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "users can update own school students" ON students;
 CREATE POLICY "users can update own school students" ON students
   FOR UPDATE USING (
     school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "users can delete own school students" ON students;
 CREATE POLICY "users can delete own school students" ON students
   FOR DELETE USING (
     school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
   );
 
 -- Results
+DROP POLICY IF EXISTS "users can view own school results" ON results;
 CREATE POLICY "users can view own school results" ON results
   FOR SELECT USING (
     school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "users can insert own school results" ON results;
 CREATE POLICY "users can insert own school results" ON results
   FOR INSERT WITH CHECK (
     school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "users can update own school results" ON results;
 CREATE POLICY "users can update own school results" ON results
   FOR UPDATE USING (
     school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "users can delete own school results" ON results;
 CREATE POLICY "users can delete own school results" ON results
   FOR DELETE USING (
     school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
   );
 
 -- Grade Scales
+DROP POLICY IF EXISTS "users can view own school grade_scales" ON grade_scales;
 CREATE POLICY "users can view own school grade_scales" ON grade_scales
   FOR SELECT USING (
     school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "users can insert own school grade_scales" ON grade_scales;
 CREATE POLICY "users can insert own school grade_scales" ON grade_scales
   FOR INSERT WITH CHECK (
     school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "users can update own school grade_scales" ON grade_scales;
 CREATE POLICY "users can update own school grade_scales" ON grade_scales
   FOR UPDATE USING (
     school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "users can delete own school grade_scales" ON grade_scales;
 CREATE POLICY "users can delete own school grade_scales" ON grade_scales
   FOR DELETE USING (
     school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
   );
 
 -- Papers
+DROP POLICY IF EXISTS "users can view own school papers" ON papers;
 CREATE POLICY "users can view own school papers" ON papers
   FOR SELECT USING (
     school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "users can insert own school papers" ON papers;
 CREATE POLICY "users can insert own school papers" ON papers
   FOR INSERT WITH CHECK (
     school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "users can update own school papers" ON papers;
 CREATE POLICY "users can update own school papers" ON papers
   FOR UPDATE USING (
     school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "users can delete own school papers" ON papers;
 CREATE POLICY "users can delete own school papers" ON papers
   FOR DELETE USING (
     school_id IN (SELECT school_id FROM profiles WHERE id = auth.uid())
