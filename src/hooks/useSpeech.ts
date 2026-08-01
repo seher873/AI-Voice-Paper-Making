@@ -34,9 +34,9 @@ export function useSpeech() {
       }
 
       const recognition = new SpeechRecognitionAPI()
-      recognition.continuous = true
+      recognition.continuous = false
       recognition.interimResults = true
-      recognition.maxAlternatives = 3
+      recognition.maxAlternatives = 1
       const effectiveLang = lang === "sd-PK" ? "ur-PK" : lang
       recognition.lang = effectiveLang
 
