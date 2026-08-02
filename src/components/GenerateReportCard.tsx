@@ -12,6 +12,10 @@ export default function GenerateReportCard() {
     dispatch({ type: "SET_REPORT_CARD_STATE", payload: { rollNo, remarks } });
 
   const handlePositionChange = (rollNo: string, position: string) => {
+    if (position.trim() === "") {
+      dispatch({ type: "UPDATE_STUDENT_RESULT", payload: { rollNo, position: 0, overridden: false } });
+      return;
+    }
     const p = parseInt(position, 10);
     if (!isNaN(p) && p > 0) {
       dispatch({ type: "UPDATE_STUDENT_RESULT", payload: { rollNo, position: p, overridden: true } });
@@ -59,11 +63,13 @@ export default function GenerateReportCard() {
                   <label className="block text-xs font-semibold text-slate-500 mb-1">Position / Rank (override)</label>
                   <input
                     type="number"
-                    min="1"
+                    min="0"
                     value={selectedStudent.position || ""}
+                    onFocus={(e) => e.target.select()}
                     onChange={(e) => handlePositionChange(selectedStudent.rollNo, e.target.value)}
                     className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
                   />
+                  <p className="text-[10px] text-slate-400 mt-1">Leave empty to auto-assign on next calculate</p>
                 </div>
                 <textarea
                   value={state.reportCardRemarks}

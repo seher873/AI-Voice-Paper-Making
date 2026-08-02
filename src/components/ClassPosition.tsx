@@ -7,6 +7,10 @@ export default function ClassPosition() {
   const { results, classStats } = state;
 
   const handlePositionChange = (rollNo: string, value: string) => {
+    if (value.trim() === "") {
+      dispatch({ type: "UPDATE_STUDENT_RESULT", payload: { rollNo, position: 0, overridden: false } });
+      return;
+    }
     const p = parseInt(value, 10);
     const valid = !isNaN(p) && p > 0;
     dispatch({
@@ -81,6 +85,7 @@ export default function ClassPosition() {
                       type="number"
                       min={0}
                       value={r.position || ""}
+                      onFocus={(e) => e.target.select()}
                       onChange={(e) => handlePositionChange(r.rollNo, e.target.value)}
                       placeholder="—"
                       className={`w-14 px-1.5 py-1 text-center text-xs font-bold rounded-lg border focus:outline-none focus:ring-2 focus:ring-indigo-500/40 ${

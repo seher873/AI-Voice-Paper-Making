@@ -95,6 +95,7 @@ export default function EnterMarks() {
               type="number"
               min={0}
               value={position}
+              onFocus={(e) => e.target.select()}
               onChange={(e) => setPosition(e.target.value)}
               className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
               placeholder="e.g. 1, 2, 3"
