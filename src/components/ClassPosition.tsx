@@ -46,9 +46,20 @@ export default function ClassPosition() {
       </div>
 
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-        <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+        <div className="p-4 border-b border-slate-200 flex items-center justify-between gap-2 flex-wrap">
           <h3 className="text-sm font-bold text-slate-700">Ranking</h3>
-          <span className="text-[10px] text-indigo-500 font-medium">Click position numbers to edit</span>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] text-indigo-500 font-medium">Click position numbers to edit</span>
+            <button
+              onClick={() => {
+                dispatch({ type: "RESET_POSITIONS" });
+                dispatch({ type: "CALCULATE_RESULTS" });
+              }}
+              className="px-2.5 py-1 text-[10px] font-bold text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-all"
+            >
+              Reset Positions
+            </button>
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">

@@ -2,7 +2,16 @@
 
 import { useState } from "react";
 import { useResult } from "@/context/ResultContext";
+import { DEFAULT_SUBJECTS } from "@/types/result";
 import type { Subject } from "@/types/result";
+
+const TERM_MARKS_SCALE: Record<string, number | null> = {
+  "1st Term": 75,
+  "2nd Term": 75,
+  "3rd Term": 100,
+  "Final Term": 100,
+  "Annual Examination": 100,
+};
 
 export default function ManageSubjects() {
   const { state, dispatch } = useResult();
@@ -49,14 +58,38 @@ export default function ManageSubjects() {
 
   return (
     <div className="max-w-2xl">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <h2 className="text-lg font-bold text-slate-800">Manage Subjects</h2>
-        <button
-          onClick={() => { setShowForm(true); setEditing(null); setForm({ name: "", code: "", totalMarks: 100, passingMarks: 33 }); }}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 text-sm font-medium transition-all"
-        >
-          Add Subject
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              const scale = state.currentExam ? TERM_MARKS_SCALE[state.currentExam.name] : null;
+              dispatch({
+                type: "SET_SUBJECTS",
+                payload: DEFAULT_SUBJECTS.map((s, i) => {
+                  const totalMarks = scale ? Math.round(s.totalMarks * (scale / 100)) : s.totalMarks;
+                  const passingMarks = scale ? Math.min(totalMarks, Math.round(s.passingMarks * (scale / 100))) : s.passingMarks;
+                  return {
+                    ...s,
+                    id: `subj-default-${i}-${crypto.randomUUID().slice(0, 4)}`,
+                    totalMarks,
+                    passingMarks,
+                  };
+                }),
+              });
+            }}
+            className="px-4 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 text-sm font-medium transition-all"
+            title="Restore English, English Grammar, Urdu, Urdu Grammar, Mathematics, Science, Social Studies, Islamiat, Drawing"
+          >
+            Reset to Default Subjects
+          </button>
+          <button
+            onClick={() => { setShowForm(true); setEditing(null); setForm({ name: "", code: "", totalMarks: 100, passingMarks: 33 }); }}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 text-sm font-medium transition-all"
+          >
+            Add Subject
+          </button>
+        </div>
       </div>
 
       {showForm && (

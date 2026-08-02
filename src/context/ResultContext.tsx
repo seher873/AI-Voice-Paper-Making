@@ -20,6 +20,7 @@ type ResultAction =
   | { type: "SET_THEME_COLORS"; payload: ThemeColors }
   | { type: "CALCULATE_RESULTS" }
   | { type: "UPDATE_STUDENT_RESULT"; payload: { rollNo: string; position: number } }
+  | { type: "RESET_POSITIONS" }
   | { type: "HYDRATE"; payload: Partial<ResultState> }
   | { type: "RESET" };
 
@@ -106,6 +107,12 @@ function resultReducer(state: ResultState, action: ResultAction): ResultState {
       const classStats = calculateClassStats(results, subjects);
       return { ...snapshotExam(state.students, results), classStats };
     }
+    case "RESET_POSITIONS":
+      return {
+        ...state,
+        students: state.students.map((s) => ({ ...s, position: undefined })),
+        results: state.results.map((r) => ({ ...r, position: 0 })),
+      };
     case "HYDRATE":
       return {
         ...initialState,
