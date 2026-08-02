@@ -223,6 +223,16 @@ export default function Dashboard() {
             {mode === "paper" ? "AI Voice Paper" : "Result Management"}
           </span>
         </button>
+        {availableModes.length > 1 && (
+          <button
+            onClick={() => setMode(mode === "paper" ? "results" : "paper")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              mode === "results" ? "bg-indigo-600 text-white" : "bg-indigo-50 text-indigo-600"
+            }`}
+          >
+            {mode === "paper" ? "Results" : "Papers"}
+          </button>
+        )}
       </div>
 
       {/* Mobile backdrop */}
@@ -292,7 +302,7 @@ export default function Dashboard() {
               {!planFromDb && availableModes.length > 1 && (
                 <button
                   onClick={() => setMode(mode === "paper" ? "results" : "paper")}
-                  className={`hidden lg:inline-flex px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  className={`inline-flex px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
                     mode === "results"
                       ? "bg-white/20 text-white"
                       : "bg-white/10 text-indigo-200 hover:bg-white/20 hover:text-white"
