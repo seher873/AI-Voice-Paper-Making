@@ -491,7 +491,7 @@ export default function Dashboard() {
       )}
       {mode === "results" && plan.features.results && resultCtx.activeTab === "report-cards" && (
         <div className="flex-1 overflow-y-auto overflow-x-auto bg-gradient-to-b from-slate-100 to-slate-50 p-3 sm:p-4 lg:p-6">
-          <div className="max-w-[210mm] mx-auto">
+          <div className="max-w-[210mm] mx-auto min-w-[640px] lg:min-w-0">
             <div id="report-card-preview-content">
               <ReportCardPreview
                 student={resultCtx.state.results.find((r) => r.rollNo === resultCtx.state.reportCardRollNo) || null}

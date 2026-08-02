@@ -18,6 +18,7 @@ export function calculateResults(
 
     const percentage = totalMarks > 0 ? Math.round((totalObtained / totalMarks) * 100) : 0;
     const gradeInfo = assignGrade(percentage, gradeScale);
+    const passed = subjects.length > 0 && subjects.every((sub) => (s.subjectMarks[sub.name] ?? 0) >= sub.passingMarks);
 
     return {
       rollNo: s.rollNo,
@@ -27,9 +28,9 @@ export function calculateResults(
       totalObtained,
       totalMarks,
       percentage,
-      grade: gradeInfo.grade,
-      remark: gradeInfo.remark,
-      passed: gradeInfo.grade !== "F",
+      grade: passed ? gradeInfo.grade : "F",
+      remark: passed ? gradeInfo.remark : "Failed in one or more subjects",
+      passed,
       position: 1,
     };
   });
