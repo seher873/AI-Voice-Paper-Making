@@ -11,6 +11,7 @@ import GenerateResultSheet from "./GenerateResultSheet";
 import UpgradeBanner from "./UpgradeBanner";
 import SchoolSetup from "./SchoolSetup";
 import BackupPanel from "./BackupPanel";
+import SchoolsOverview from "./SchoolsOverview";
 import { useState, useEffect, useRef } from "react";
 import { getSupabase, getSchoolId } from "@/lib/supabase";
 import { loadSchoolState, saveSchoolState } from "@/lib/schoolData";
@@ -34,6 +35,8 @@ export default function Dashboard() {
   const [lockedPlan, setLockedPlan] = useState<"paper" | "results" | "full" | null>(null);
   const [planFromDb, setPlanFromDb] = useState(false);
   const [schoolReady, setSchoolReady] = useState<boolean | null>(null);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [showSchools, setShowSchools] = useState(false);
   const dbLoaded = useRef(false);
 
   useEffect(() => {
@@ -82,6 +85,16 @@ export default function Dashboard() {
         if (!user || !mounted) { window.location.href = "/login"; return; }
         const { data } = await sb.from("profiles").select("school_id").eq("id", user.id);
         if (mounted) setSchoolReady(!!data && data.length > 0);
+        try {
+          const { data: adminRow } = await sb
+            .from("profiles")
+            .select("super_admin")
+            .eq("id", user.id)
+            .maybeSingle();
+          if (mounted) setIsSuperAdmin(!!adminRow?.super_admin);
+        } catch {
+          // super_admin column may not exist yet
+        }
       } catch (err) {
         console.error("Auth check error:", err);
         if (mounted) window.location.href = "/login";
@@ -248,6 +261,18 @@ export default function Dashboard() {
               </p>
             </div>
             <div className="ml-auto flex items-center gap-1.5">
+              {isSuperAdmin && (
+                <button
+                  onClick={() => setShowSchools(true)}
+                  className="px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 bg-white/10 text-white hover:bg-white/20"
+                  title="School Overview"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10M9 21h6" />
+                  </svg>
+                  <span className="hidden sm:inline">Schools</span>
+                </button>
+              )}
               <button
                   onClick={() => setShowSchoolInfo(!showSchoolInfo)}
                   className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
@@ -523,6 +548,7 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+      {showSchools && isSuperAdmin && <SchoolsOverview onClose={() => setShowSchools(false)} />}
     </div>
   );
 }
