@@ -1,4 +1,4 @@
--- Per-school persisted state (papers + results) so each school sees its own data
+ye kia grade f or position 1st ara -- Per-school persisted state (papers + results) so each school sees its own data
 CREATE TABLE IF NOT EXISTS school_state (
   school_id UUID REFERENCES schools(id) ON DELETE CASCADE PRIMARY KEY,
   paper_state JSONB DEFAULT 'null',

@@ -108,10 +108,10 @@ export default function ResultAnalytics() {
             {classStats.weakStudents.slice(0, 5).map((r) => (
               <div key={r.rollNo} className="flex items-center justify-between p-2.5 bg-red-50 rounded-lg border border-red-200">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-red-400">#{r.position}</span>
+                  <span className="text-xs font-bold text-red-400">{r.position === 0 ? "—" : `#${r.position}`}</span>
                   <span className="text-sm font-medium text-slate-700">{r.studentName}</span>
                 </div>
-                <span className="text-sm font-bold text-red-600">{r.percentage}%</span>
+                <span className="text-sm font-bold text-red-600">{r.passed ? `${r.percentage}%` : "/"}</span>
               </div>
             ))}
           </div>

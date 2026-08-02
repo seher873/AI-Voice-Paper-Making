@@ -71,7 +71,7 @@ const ReportCardPreview = forwardRef<HTMLDivElement, Props>(
                 <div className="flex gap-2 justify-end">
                   <span className="font-semibold" style={{ color: c.primary }}>Rank:</span>
                   <span className="font-bold" style={{ fontFamily: "'Playfair Display', 'Georgia', serif", color: c.accent }}>
-                    {student.position + (student.position >= 11 && student.position <= 13 ? "th" : ["th","st","nd","rd"][student.position % 10 > 3 ? 0 : student.position % 10])}
+                    {student.position === 0 ? "—" : student.position + (student.position >= 11 && student.position <= 13 ? "th" : ["th","st","nd","rd"][student.position % 10 > 3 ? 0 : student.position % 10])}
                   </span>
                 </div>
                 <div className="flex gap-2 justify-end">
@@ -84,10 +84,8 @@ const ReportCardPreview = forwardRef<HTMLDivElement, Props>(
             {/* Terms */}
             {exam?.name && (
               <div className="flex items-center gap-1.5 mb-3 text-xs flex-wrap">
-                <span className="font-semibold" style={{ color: c.primary }}>Terms:</span>
-                <span className="inline-flex px-2 py-0.5 rounded-full font-medium" style={{ background: `${c.primary}18`, color: c.primary, border: `1px solid ${c.primary}40` }}>1st Term</span>
-                <span className="inline-flex px-2 py-0.5 rounded-full font-medium" style={{ background: `${c.accent}18`, color: c.accent, border: `1px solid ${c.accent}40` }}>Mid Term</span>
-                <span className="inline-flex px-2 py-0.5 rounded-full font-medium" style={{ background: `${c.highlight}18`, color: c.highlight, border: `1px solid ${c.highlight}40` }}>Final Term</span>
+                <span className="font-semibold" style={{ color: c.primary }}>Term:</span>
+                <span className="inline-flex px-2 py-0.5 rounded-full font-medium" style={{ background: `${c.primary}18`, color: c.primary, border: `1px solid ${c.primary}40` }}>{exam.name}</span>
               </div>
             )}
 
@@ -149,7 +147,7 @@ const ReportCardPreview = forwardRef<HTMLDivElement, Props>(
             <div className="grid grid-cols-3 gap-3 mb-4 text-sm">
               <div className="p-3 rounded-lg text-center" style={{ background: `${c.primary}18`, border: `1px solid ${c.primary}30` }}>
                 <p className="text-xs font-semibold" style={{ color: c.primary }}>Percentage</p>
-                <p className="text-lg font-bold" style={{ color: c.primary }}>{student!.percentage}%</p>
+                <p className="text-lg font-bold" style={{ color: c.primary }}>{student!.passed ? `${student!.percentage}%` : "/"}</p>
               </div>
               <div className="p-3 rounded-lg text-center" style={{ background: `${c.accent}18`, border: `1px solid ${c.accent}30` }}>
                 <p className="text-xs font-semibold" style={{ color: c.accent }}>Grade</p>
@@ -157,7 +155,7 @@ const ReportCardPreview = forwardRef<HTMLDivElement, Props>(
               </div>
               <div className="p-3 rounded-lg text-center" style={{ background: `${c.highlight}18`, border: `1px solid ${c.highlight}30` }}>
                 <p className="text-xs font-semibold" style={{ color: c.highlight }}>Position</p>
-                <p className="text-lg font-bold" style={{ color: c.highlight }}>{student!.position}{["th","st","nd","rd"][student!.position % 10 > 3 ? 0 : student!.position % 10] || "th"}</p>
+                <p className="text-lg font-bold" style={{ color: c.highlight }}>{student!.position === 0 ? "—" : student!.position + (["th","st","nd","rd"][student!.position % 10 > 3 ? 0 : student!.position % 10] || "th")}</p>
               </div>
             </div>
 

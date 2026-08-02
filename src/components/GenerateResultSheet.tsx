@@ -25,7 +25,7 @@ export default function GenerateResultSheet() {
     const data = results.map((r) => [
       r.rollNo, r.studentName, r.fatherName,
       ...subjects.map((s) => r.subjectMarks[s.name] ?? "-"),
-      r.totalObtained, r.totalMarks, `${r.percentage}%`, r.grade, r.position, r.passed ? "Pass" : "Fail",
+      r.totalObtained, r.totalMarks, r.passed ? `${r.percentage}%` : "/", r.grade, r.position === 0 ? "—" : r.position, r.passed ? "Pass" : "Fail",
     ]);
     const buffer = generateExcelBuffer(headers, data, "Result Sheet");
     downloadExcel(buffer, `${state.currentExam?.name || "result"}-result-sheet.xlsx`);
@@ -116,7 +116,7 @@ export default function GenerateResultSheet() {
                     </td>
                   ))}
                   <td className="text-center px-3 py-2.5 font-medium text-slate-700">{r.totalObtained}/{r.totalMarks}</td>
-                  <td className="text-center px-3 py-2.5 font-medium text-slate-700">{r.percentage}%</td>
+                  <td className="text-center px-3 py-2.5 font-medium text-slate-700">{r.passed ? `${r.percentage}%` : "/"}</td>
                   <td className="text-center px-3 py-2.5">
                     <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-bold ${
                       r.grade === "A+" ? "bg-emerald-100 text-emerald-700" :
@@ -127,7 +127,7 @@ export default function GenerateResultSheet() {
                       "bg-red-100 text-red-700"
                     }`}>{r.grade}</span>
                   </td>
-                  <td className="text-center px-3 py-2.5 text-slate-600">{r.position}</td>
+                  <td className="text-center px-3 py-2.5 text-slate-600">{r.position === 0 ? "—" : r.position}</td>
                   <td className="text-center px-3 py-2.5">
                     <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-bold ${
                       r.passed ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"

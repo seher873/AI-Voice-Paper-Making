@@ -57,15 +57,16 @@ export default function ClassPosition() {
                 <tr key={r.rollNo} className={`${i % 2 === 0 ? "bg-white" : "bg-slate-50/50"} border-t border-slate-100`}>
                   <td className="px-4 py-2.5">
                     <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${
+                      r.position === 0 ? "text-slate-300" :
                       r.position === 1 ? "bg-yellow-100 text-yellow-700 ring-2 ring-yellow-300" :
                       r.position === 2 ? "bg-slate-100 text-slate-600 ring-2 ring-slate-300" :
                       r.position === 3 ? "bg-orange-100 text-orange-700 ring-2 ring-orange-300" :
                       "text-slate-500"
-                    }`}>{r.position}</span>
+                    }`}>{r.position === 0 ? "—" : r.position}</span>
                   </td>
                   <td className="px-4 py-2.5 text-slate-600">{r.rollNo}</td>
                   <td className="px-4 py-2.5 font-medium text-slate-700">{r.studentName}</td>
-                  <td className="text-center px-3 py-2.5 font-medium text-slate-700">{r.percentage}%</td>
+                  <td className="text-center px-3 py-2.5 font-medium text-slate-700">{r.passed ? `${r.percentage}%` : "/"}</td>
                   <td className="text-center px-3 py-2.5">
                     <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-bold ${
                       r.grade === "A+" ? "bg-emerald-100 text-emerald-700" :

@@ -5,6 +5,14 @@ import { useResult } from "@/context/ResultContext";
 import { DEFAULT_SUBJECTS, ASSESSMENT_PRESETS, ASSESSMENT_LABELS, DEFAULT_ASSESSMENT } from "@/types/result";
 import type { AssessmentConfig } from "@/types/result";
 
+const TERM_MARKS_SCALE: Record<string, number | null> = {
+  "1st Term": 75,
+  "2nd Term": 75,
+  "3rd Term": 100,
+  "Final Term": 100,
+  "Annual Examination": 100,
+};
+
 export default function CreateExam() {
   const { state, dispatch } = useResult();
   const [form, setForm] = useState({
@@ -34,6 +42,7 @@ export default function CreateExam() {
     e.preventDefault();
     if (!form.name || !form.session || !form.className) return;
 
+    const scale = TERM_MARKS_SCALE[form.name];
     const exam = {
       id: crypto.randomUUID(),
       name: form.name,
@@ -41,10 +50,16 @@ export default function CreateExam() {
       className: form.className,
       section: form.section,
       date: form.date,
-      subjects: DEFAULT_SUBJECTS.map((s, i) => ({
-        ...s,
-        id: `subj-${i}-${crypto.randomUUID().slice(0, 4)}`,
-      })),
+      subjects: DEFAULT_SUBJECTS.map((s, i) => {
+        const totalMarks = scale ? Math.round(s.totalMarks * (scale / 100)) : s.totalMarks;
+        const passingMarks = scale ? Math.min(totalMarks, Math.round(s.passingMarks * (scale / 100))) : s.passingMarks;
+        return {
+          ...s,
+          id: `subj-${i}-${crypto.randomUUID().slice(0, 4)}`,
+          totalMarks,
+          passingMarks,
+        };
+      }),
       assessmentConfig: assessment,
     };
 
@@ -78,12 +93,19 @@ export default function CreateExam() {
               required
             >
               <option value="">Select Exam Type</option>
+              <option value="1st Term">1st Term</option>
+              <option value="2nd Term">2nd Term</option>
+              <option value="3rd Term">3rd Term</option>
+              <option value="Final Term">Final Term</option>
               <option value="Monthly Test">Monthly Test</option>
               <option value="Unit Test">Unit Test</option>
-              <option value="Mid-Term Exam">Mid-Term Exam</option>
-              <option value="Final Term Exam">Final Term Exam</option>
               <option value="Annual Examination">Annual Examination</option>
             </select>
+            {TERM_MARKS_SCALE[form.name] && (
+              <p className="text-[11px] text-indigo-500 mt-1.5 font-medium">
+                Subjects will be out of {TERM_MARKS_SCALE[form.name]} marks
+              </p>
+            )}
           </div>
           <div>
             <label className="block text-xs font-semibold text-slate-500 mb-1.5">Academic Session</label>

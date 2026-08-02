@@ -86,11 +86,11 @@ export default function PaperPreview() {
       </div>
 
       <div className="overflow-x-auto -mx-3 sm:-mx-4 lg:mx-0">
-        <div className="flex justify-center min-w-[360px] px-3 sm:px-4 lg:px-0">
+        <div className="flex justify-start lg:justify-center min-w-[360px] px-3 sm:px-4 lg:px-0">
           <div
             ref={previewRef}
             id="paper-preview"
-            className="bg-white shadow-xl border border-slate-200 mx-auto print-font"
+            className="bg-white shadow-xl border border-slate-200 print-font"
             dir={isRTL ? "rtl" : "ltr"}
             style={{
               width: "min(210mm, 100%)",

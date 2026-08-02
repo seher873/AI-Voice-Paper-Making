@@ -34,14 +34,21 @@ export function calculateResults(
     };
   });
 
-  results.sort((a, b) => b.percentage - a.percentage);
+  results.sort((a, b) => Number(b.passed) - Number(a.passed) || b.percentage - a.percentage);
 
   let currentPos = 1;
+  let passIndex = 0;
   for (let i = 0; i < results.length; i++) {
-    if (i > 0 && results[i].percentage < results[i - 1].percentage) {
-      currentPos = i + 1;
+    const r = results[i];
+    if (r.passed) {
+      if (passIndex > 0 && r.percentage < results[i - 1].percentage) {
+        currentPos = passIndex + 1;
+      }
+      r.position = currentPos;
+      passIndex++;
+    } else {
+      r.position = 0;
     }
-    results[i].position = currentPos;
   }
 
   return results;
