@@ -19,7 +19,7 @@ type ResultAction =
   | { type: "SET_REPORT_CARD_STATE"; payload: { rollNo: string; remarks: string } }
   | { type: "SET_THEME_COLORS"; payload: ThemeColors }
   | { type: "CALCULATE_RESULTS" }
-  | { type: "UPDATE_STUDENT_RESULT"; payload: { rollNo: string; position: number } }
+  | { type: "UPDATE_STUDENT_RESULT"; payload: { rollNo: string; position: number; overridden: boolean } }
   | { type: "RESET_POSITIONS" }
   | { type: "HYDRATE"; payload: Partial<ResultState> }
   | { type: "RESET" };
@@ -98,7 +98,11 @@ function resultReducer(state: ResultState, action: ResultAction): ResultState {
       return { ...state, reportCardRollNo: action.payload.rollNo, reportCardRemarks: action.payload.remarks };
     case "UPDATE_STUDENT_RESULT":
       return snapshotExam(
-        state.students.map((s) => (s.rollNo === action.payload.rollNo ? { ...s, position: action.payload.position } : s)),
+        state.students.map((s) =>
+          s.rollNo === action.payload.rollNo
+            ? { ...s, position: action.payload.overridden ? action.payload.position : undefined, positionOverridden: action.payload.overridden }
+            : s
+        ),
         state.results.map((r) => (r.rollNo === action.payload.rollNo ? { ...r, position: action.payload.position } : r))
       );
     case "CALCULATE_RESULTS": {
@@ -110,7 +114,7 @@ function resultReducer(state: ResultState, action: ResultAction): ResultState {
     case "RESET_POSITIONS":
       return {
         ...state,
-        students: state.students.map((s) => ({ ...s, position: undefined })),
+        students: state.students.map((s) => ({ ...s, position: undefined, positionOverridden: false })),
         results: state.results.map((r) => ({ ...r, position: 0 })),
       };
     case "HYDRATE":

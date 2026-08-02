@@ -33,9 +33,9 @@ export default function EnterMarks() {
     const pos = position.trim() !== "" ? Number(position) : undefined;
 
     if (editingRollNo) {
-      dispatch({ type: "UPDATE_STUDENT", payload: { rollNo: editingRollNo, studentName, fatherName, subjectMarks, position: pos } });
+      dispatch({ type: "UPDATE_STUDENT", payload: { rollNo: editingRollNo, studentName, fatherName, subjectMarks, position: pos, positionOverridden: pos !== undefined } });
     } else {
-      dispatch({ type: "ADD_STUDENT", payload: { rollNo, studentName, fatherName, subjectMarks, position: pos } });
+      dispatch({ type: "ADD_STUDENT", payload: { rollNo, studentName, fatherName, subjectMarks, position: pos, positionOverridden: pos !== undefined } });
     }
     setRollNo("");
     setStudentName("");

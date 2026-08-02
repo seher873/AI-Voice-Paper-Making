@@ -8,9 +8,10 @@ export default function ClassPosition() {
 
   const handlePositionChange = (rollNo: string, value: string) => {
     const p = parseInt(value, 10);
+    const valid = !isNaN(p) && p > 0;
     dispatch({
       type: "UPDATE_STUDENT_RESULT",
-      payload: { rollNo, position: !isNaN(p) && p > 0 ? p : 0 },
+      payload: { rollNo, position: valid ? p : 0, overridden: valid },
     });
   };
 

@@ -40,6 +40,7 @@ export interface StudentMark {
   fatherName: string;
   subjectMarks: Record<string, number>;
   position?: number;
+  positionOverridden?: boolean;
 }
 
 export interface StudentResult {

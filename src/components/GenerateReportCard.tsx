@@ -14,7 +14,7 @@ export default function GenerateReportCard() {
   const handlePositionChange = (rollNo: string, position: string) => {
     const p = parseInt(position, 10);
     if (!isNaN(p) && p > 0) {
-      dispatch({ type: "UPDATE_STUDENT_RESULT", payload: { rollNo, position: p } });
+      dispatch({ type: "UPDATE_STUDENT_RESULT", payload: { rollNo, position: p, overridden: true } });
     }
   };
 

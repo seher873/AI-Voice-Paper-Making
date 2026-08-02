@@ -35,7 +35,9 @@ export function calculateResults(
     };
   });
 
-  const manualPositions = new Map(students.map((s) => [s.rollNo, s.position && s.position > 0 ? s.position : 0]));
+  const manualPositions = new Map(
+    students.filter((s) => s.positionOverridden).map((s) => [s.rollNo, s.position && s.position > 0 ? s.position : 0])
+  );
 
   results.sort((a, b) => Number(b.passed) - Number(a.passed) || b.percentage - a.percentage);
 
