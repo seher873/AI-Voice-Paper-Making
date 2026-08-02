@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useToast } from "@/context/ToastContext";
+import { getSupabase } from "@/lib/supabase";
 
 interface SchoolRow {
   school_id: string;
@@ -22,13 +23,9 @@ export default function SchoolsOverview({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("/api/admin/schools");
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          throw new Error(data.error || "Not allowed");
-        }
-        const data = await res.json();
-        setSchools(data.schools || []);
+        const { data, error } = await getSupabase().rpc("get_admin_school_stats");
+        if (error) throw new Error("Not allowed");
+        setSchools((data || []) as SchoolRow[]);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load");
         addToast(err instanceof Error ? err.message : "Failed to load schools", "error");
