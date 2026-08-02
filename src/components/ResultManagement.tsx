@@ -9,6 +9,7 @@ import GenerateResultSheet from "./GenerateResultSheet";
 import GenerateReportCard from "./GenerateReportCard";
 import ClassPosition from "./ClassPosition";
 import ResultAnalytics from "./ResultAnalytics";
+import type { ResultTab } from "@/types/result";
 
 const menuItems: { id: string; label: string; icon: string }[] = [
   { id: "create-exam", label: "Create Exam", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" },
@@ -54,7 +55,7 @@ export default function ResultManagement() {
         {menuItems.map((item) => (
           <button
             key={item.id}
-            onClick={() => setActiveTab(item.id as any)}
+            onClick={() => setActiveTab(item.id as ResultTab)}
             className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium whitespace-nowrap border-b-2 transition-all ${
               activeTab === item.id
                 ? "border-indigo-600 text-indigo-700 bg-white"

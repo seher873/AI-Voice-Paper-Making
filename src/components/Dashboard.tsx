@@ -19,21 +19,55 @@ import { usePaper } from "@/context/PaperContext";
 import { useResult } from "@/context/ResultContext";
 import { TEMPLATES } from "@/lib/paperFormat";
 import { PLANS, setPlan } from "@/lib/subscription";
-import { THEME_PRESETS, DEFAULT_THEME } from "@/types/result";
+import { THEME_PRESETS } from "@/types/result";
 import type { PaperTemplate } from "@/lib/paperFormat";
 import type { PlanId } from "@/lib/subscription";
 import type { ThemeColors } from "@/types/result";
 
+function initialPlanState(): {
+  plan: (typeof PLANS)[2];
+  mode: "paper" | "results";
+  lockedPlan: "paper" | "results" | "full" | null;
+  planFromDb: boolean;
+} {
+  if (typeof window === "undefined") {
+    return { plan: PLANS[2], mode: "paper" as const, lockedPlan: null, planFromDb: false };
+  }
+  const planParam = new URLSearchParams(window.location.search).get("plan");
+  if (planParam === "paper" || planParam === "results") {
+    return {
+      plan: PLANS.find((p) => p.id === planParam) || PLANS[2],
+      mode: planParam as "paper" | "results",
+      lockedPlan: planParam,
+      planFromDb: true,
+    };
+  }
+  if (planParam === "full") {
+    return {
+      plan: PLANS.find((p) => p.id === "full") || PLANS[2],
+      mode: "paper" as const,
+      lockedPlan: null,
+      planFromDb: false,
+    };
+  }
+  const stored = localStorage.getItem("subscription_plan") as PlanId | null;
+  const p = PLANS.find((x) => x.id === stored) || PLANS[2];
+  let mode: "paper" | "results" = "paper";
+  if (!p.features.paper) mode = "results";
+  if (!p.features.results) mode = "paper";
+  return { plan: p, mode, lockedPlan: null, planFromDb: false };
+}
+
 export default function Dashboard() {
   const { state, dispatch } = usePaper();
   const resultCtx = useResult();
-  const [plan, setPlanState] = useState(PLANS[2]);
-  const [mode, setMode] = useState<"paper" | "results">("paper");
+  const [plan, setPlanState] = useState(() => initialPlanState().plan);
+  const [mode, setMode] = useState<"paper" | "results">(() => initialPlanState().mode);
   const [activeTab, setActiveTab] = useState<"header" | "questions" | "template">("header");
   const [menuOpen, setMenuOpen] = useState(false);
   const [showSchoolInfo, setShowSchoolInfo] = useState(false);
-  const [lockedPlan, setLockedPlan] = useState<"paper" | "results" | "full" | null>(null);
-  const [planFromDb, setPlanFromDb] = useState(false);
+  const [, setLockedPlan] = useState<"paper" | "results" | "full" | null>(() => initialPlanState().lockedPlan);
+  const [planFromDb, setPlanFromDb] = useState(() => initialPlanState().planFromDb);
   const [schoolReady, setSchoolReady] = useState<boolean | null>(null);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [showSchools, setShowSchools] = useState(false);
@@ -52,7 +86,7 @@ export default function Dashboard() {
       dbLoaded.current = true;
     })();
     return () => { mounted = false; };
-  }, [schoolReady]);
+  }, [schoolReady, dispatch, resultCtx]);
 
   useEffect(() => {
     if (!dbLoaded.current) return;
@@ -100,30 +134,6 @@ export default function Dashboard() {
         if (mounted) window.location.href = "/login";
       }
     }
-  }, []);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const planParam = params.get("plan");
-    if (planParam === "paper" || planParam === "results") {
-      setLockedPlan(planParam);
-      setPlanFromDb(true);
-      const lockedPlanObj = PLANS.find((p) => p.id === planParam) || PLANS[2];
-      setPlanState(lockedPlanObj);
-      setMode(planParam);
-      return;
-    }
-    if (planParam === "full") {
-      const fullPlan = PLANS.find((p) => p.id === "full") || PLANS[2];
-      setPlanState(fullPlan);
-      setMode("paper");
-      return;
-    }
-    const stored = localStorage.getItem("subscription_plan") as PlanId | null;
-    const p = PLANS.find((x) => x.id === stored) || PLANS[2];
-    setPlanState(p);
-    if (!p.features.paper) setMode("results");
-    if (!p.features.results) setMode("paper");
   }, []);
 
   useEffect(() => {
@@ -203,7 +213,7 @@ export default function Dashboard() {
   }
 
   if (!schoolReady) {
-    return <SchoolSetup onComplete={(id) => setSchoolReady(true)} />;
+    return <SchoolSetup onComplete={() => setSchoolReady(true)} />;
   }
 
   return (

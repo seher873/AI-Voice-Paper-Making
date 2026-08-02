@@ -41,24 +41,40 @@ export function calculateResults(
 
   results.sort((a, b) => Number(b.passed) - Number(a.passed) || b.percentage - a.percentage);
 
-  let currentPos = 1;
-  let passIndex = 0;
-  for (let i = 0; i < results.length; i++) {
-    const r = results[i];
+  const used = new Set<number>();
+  for (const r of results) {
     const manual = manualPositions.get(r.rollNo) || 0;
-    if (r.passed) {
-      if (manual > 0) {
-        r.position = manual;
-      } else {
-        if (passIndex > 0 && r.percentage < results[i - 1].percentage) {
-          currentPos = passIndex + 1;
-        }
-        r.position = currentPos;
-      }
-      passIndex++;
-    } else {
-      r.position = manual > 0 ? manual : 0;
+    if (manual > 0) used.add(manual);
+  }
+
+  let nextPos = 1;
+  let i = 0;
+  while (i < results.length) {
+    const r = results[i];
+    if (!r.passed) {
+      r.position = manualPositions.get(r.rollNo) || 0;
+      i++;
+      continue;
     }
+    let j = i;
+    const group: StudentResult[] = [];
+    while (j < results.length && results[j].passed && results[j].percentage === r.percentage) {
+      group.push(results[j]);
+      j++;
+    }
+    while (used.has(nextPos)) nextPos++;
+    const groupPos = nextPos;
+    for (const g of group) {
+      const manual = manualPositions.get(g.rollNo) || 0;
+      if (manual > 0) {
+        g.position = manual;
+      } else {
+        g.position = groupPos;
+        used.add(groupPos);
+      }
+    }
+    nextPos = groupPos + group.length;
+    i = j;
   }
 
   return results;
@@ -83,6 +99,9 @@ export function calculateClassStats(
     gradeDistribution[r.grade] = (gradeDistribution[r.grade] || 0) + 1;
   }
 
+  const topPerformers = results.filter((r) => r.passed).sort((a, b) => b.percentage - a.percentage).slice(0, 10);
+  const weakStudents = results.filter((r) => !r.passed).sort((a, b) => a.percentage - b.percentage).slice(0, 10);
+
   const subjectStats: SubjectStat[] = subjects.map((sub) => {
     const marks = results.map((r) => r.subjectMarks[sub.name] ?? 0);
     const subAverage = marks.length > 0 ? Math.round(marks.reduce((a, b) => a + b, 0) / marks.length) : 0;
@@ -106,8 +125,8 @@ export function calculateClassStats(
     average,
     highest,
     lowest,
-    topPerformers: sorted.slice(0, 10),
-    weakStudents: sorted.slice(-10).reverse(),
+    topPerformers,
+    weakStudents,
     gradeDistribution,
     subjectStats,
   };

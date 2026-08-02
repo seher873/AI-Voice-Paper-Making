@@ -16,8 +16,12 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [forgotPassword, setForgotPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<PlanId | null>(null);
-  const [lockedPlan, setLockedPlan] = useState<PlanId | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<PlanId | null>(() => {
+    if (typeof window === "undefined") return null;
+    const p = new URLSearchParams(window.location.search).get("plan");
+    return p === "paper" || p === "results" || p === "full" ? (p as PlanId) : null;
+  });
+  const [lockedPlan] = useState<PlanId | null>(selectedPlan);
 
   useEffect(() => {
     getSupabase().auth.getSession().then(({ data: { session } }) => {
@@ -28,15 +32,6 @@ export default function LoginPage() {
       } else setChecking(false);
     });
   }, [router]);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const planParam = params.get("plan");
-    if (planParam === "paper" || planParam === "results" || planParam === "full") {
-      setSelectedPlan(planParam);
-      setLockedPlan(planParam);
-    }
-  }, []);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();

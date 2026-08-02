@@ -19,7 +19,7 @@ interface VoiceTypingProps {
 }
 
 export default function VoiceTyping({ onTranscriptReady }: VoiceTypingProps) {
-  const { isListening, transcript, confidence, startListening, stopListening } = useSpeech();
+  const { isListening, startListening, stopListening } = useSpeech();
   const { addToast } = useToast();
   const [pendingText, setPendingText] = useState("");
   const [pendingConfidence, setPendingConfidence] = useState(0);

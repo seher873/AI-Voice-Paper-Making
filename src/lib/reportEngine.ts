@@ -1,5 +1,3 @@
-import type { StudentResult, Subject, Exam, GradeScale } from "@/types/result";
-
 export async function generateResultSheetPDF(
   element: HTMLElement,
   examName: string,

@@ -1,5 +1,4 @@
 import { PLANS } from "@/lib/subscription";
-import type { PlanId } from "@/lib/subscription";
 
 export default function UpgradeBanner({ feature }: { feature: string }) {
   return (

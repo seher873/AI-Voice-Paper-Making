@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { getSupabase } from "@/lib/supabase";
 import { useToast } from "@/context/ToastContext";
 

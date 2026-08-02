@@ -5,7 +5,6 @@ import { useResult } from "@/context/ResultContext";
 export default function ResultAnalytics() {
   const { state } = useResult();
   const { classStats, results } = state;
-  const subjects = state.currentExam?.subjects || [];
 
   if (!classStats || results.length === 0) {
     return (

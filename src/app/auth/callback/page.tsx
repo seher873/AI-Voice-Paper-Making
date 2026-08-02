@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSupabase } from "@/lib/supabase";
 import { Suspense } from "react";
@@ -8,7 +8,6 @@ import { Suspense } from "react";
 function CallbackHandler() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [status, setStatus] = useState("Completing sign in...");
 
   useEffect(() => {
     const code = searchParams.get("code");
@@ -44,7 +43,7 @@ function CallbackHandler() {
           <circle cx="12" cy="12" r="10" strokeWidth={3} className="opacity-25" />
           <path d="M4 12a8 8 0 018-8" strokeWidth={3} className="opacity-75" />
         </svg>
-        <span className="font-medium">{status}</span>
+        <span className="font-medium">Completing sign in...</span>
       </div>
     </div>
   );

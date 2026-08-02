@@ -38,13 +38,17 @@ const initialState: ResultState = {
   themeColors: DEFAULT_THEME,
 };
 
-function resultReducer(state: ResultState, action: ResultAction): ResultState {
-  const snapshotExam = (students: StudentMark[], results: StudentResult[]): ResultState => ({
-    ...state,
-    students,
-    results,
-    currentExam: state.currentExam ? { ...state.currentExam, students, results } : state.currentExam,
-  });
+export function resultReducer(state: ResultState, action: ResultAction): ResultState {
+  const snapshotExam = (students: StudentMark[], results: StudentResult[]): ResultState => {
+    const currentExam = state.currentExam ? { ...state.currentExam, students, results } : null;
+    return {
+      ...state,
+      students,
+      results,
+      currentExam,
+      exams: currentExam ? state.exams.map((e) => (e.id === currentExam.id ? currentExam : e)) : state.exams,
+    };
+  };
   switch (action.type) {
     case "CREATE_EXAM":
       return { ...state, exams: [...state.exams, action.payload], currentExam: action.payload, students: [], results: [], classStats: null };

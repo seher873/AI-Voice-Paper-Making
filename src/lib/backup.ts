@@ -4,11 +4,11 @@ export interface SchoolBackup {
   version: 1;
   exportedAt: string;
   schoolName: string;
-  exams: any[];
-  students: any[];
-  results: any[];
-  gradeScales: any[];
-  papers: any[];
+  exams: Record<string, unknown>[];
+  students: Record<string, unknown>[];
+  results: Record<string, unknown>[];
+  gradeScales: Record<string, unknown>[];
+  papers: Record<string, unknown>[];
 }
 
 export async function exportSchoolData(): Promise<SchoolBackup> {
@@ -79,35 +79,35 @@ export async function importSchoolData(backup: SchoolBackup): Promise<{ success:
   let imported = 0;
 
   if (backup.exams.length > 0) {
-    const records = backup.exams.map((e: any) => ({ ...e, school_id: schoolId, created_at: e.created_at || now }));
+    const records = backup.exams.map((e: Record<string, unknown>) => ({ ...e, school_id: schoolId, created_at: e.created_at || now }));
     const { error } = await sb.from("exams").upsert(records, { onConflict: "id" });
     if (error) throw new Error(`Failed to import exams: ${error.message}`);
     imported += records.length;
   }
 
   if (backup.students.length > 0) {
-    const records = backup.students.map((s: any) => ({ ...s, school_id: schoolId, created_at: s.created_at || now }));
+    const records = backup.students.map((s: Record<string, unknown>) => ({ ...s, school_id: schoolId, created_at: s.created_at || now }));
     const { error } = await sb.from("students").upsert(records, { onConflict: "id" });
     if (error) throw new Error(`Failed to import students: ${error.message}`);
     imported += records.length;
   }
 
   if (backup.results.length > 0) {
-    const records = backup.results.map((r: any) => ({ ...r, school_id: schoolId, created_at: r.created_at || now }));
+    const records = backup.results.map((r: Record<string, unknown>) => ({ ...r, school_id: schoolId, created_at: r.created_at || now }));
     const { error } = await sb.from("results").upsert(records, { onConflict: "id" });
     if (error) throw new Error(`Failed to import results: ${error.message}`);
     imported += records.length;
   }
 
   if (backup.gradeScales.length > 0) {
-    const records = backup.gradeScales.map((g: any) => ({ ...g, school_id: schoolId }));
+    const records = backup.gradeScales.map((g: Record<string, unknown>) => ({ ...g, school_id: schoolId }));
     const { error } = await sb.from("grade_scales").upsert(records, { onConflict: "id" });
     if (error) throw new Error(`Failed to import grade scales: ${error.message}`);
     imported += records.length;
   }
 
   if (backup.papers.length > 0) {
-    const records = backup.papers.map((p: any) => ({ ...p, school_id: schoolId, created_at: p.created_at || now, updated_at: now }));
+    const records = backup.papers.map((p: Record<string, unknown>) => ({ ...p, school_id: schoolId, created_at: p.created_at || now, updated_at: now }));
     const { error } = await sb.from("papers").upsert(records, { onConflict: "id" });
     if (error) throw new Error(`Failed to import papers: ${error.message}`);
     imported += records.length;

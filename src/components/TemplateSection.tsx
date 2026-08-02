@@ -16,7 +16,6 @@ interface TagEntry {
 export default function TemplateSection() {
   const [file, setFile] = useState<File | null>(null)
   const [fileName, setFileName] = useState("")
-  const [zipData, setZipData] = useState<ArrayBuffer | null>(null)
   const [tags, setTags] = useState<TagEntry[]>([])
   const [selectedTag, setSelectedTag] = useState("")
   const [textareaValue, setTextareaValue] = useState("")
@@ -28,7 +27,7 @@ export default function TemplateSection() {
   const [showPending, setShowPending] = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const { isListening, startListening, stopListening, transcript } = useSpeech()
+  const { isListening, startListening, stopListening } = useSpeech()
   const { addToast } = useToast()
 
   const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,7 +44,6 @@ export default function TemplateSection() {
       const result = await parseDocx(f)
       setFile(f)
       setFileName(f.name)
-      setZipData(result.zipData)
 
       if (result.tags.length === 0) {
         addToast("No tags { } found in the file", "warning")
@@ -123,7 +121,6 @@ export default function TemplateSection() {
   const handleReset = useCallback(() => {
     setFile(null)
     setFileName("")
-    setZipData(null)
     setTags([])
     setSelectedTag("")
     setTextareaValue("")

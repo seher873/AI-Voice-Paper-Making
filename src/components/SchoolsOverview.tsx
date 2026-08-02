@@ -18,6 +18,7 @@ interface SchoolRow {
 export default function SchoolsOverview({ onClose }: { onClose: () => void }) {
   const [schools, setSchools] = useState<SchoolRow[] | null>(null);
   const [error, setError] = useState("");
+  const [now] = useState(() => Date.now());
   const { addToast } = useToast();
 
   useEffect(() => {
@@ -38,7 +39,7 @@ export default function SchoolsOverview({ onClose }: { onClose: () => void }) {
 
   const fmtAgo = (iso: string | null) => {
     if (!iso) return "—";
-    const diff = Date.now() - new Date(iso).getTime();
+    const diff = now - new Date(iso).getTime();
     const days = Math.floor(diff / 86400000);
     if (days <= 0) return "Today";
     if (days === 1) return "Yesterday";

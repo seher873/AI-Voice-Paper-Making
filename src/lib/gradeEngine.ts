@@ -1,4 +1,4 @@
-import type { GradeScale, StudentResult } from "@/types/result";
+import type { GradeScale } from "@/types/result";
 
 const FALLBACK_GRADE: GradeScale = { grade: "F", min: 0, max: 0, remark: "Unknown" };
 

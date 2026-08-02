@@ -22,17 +22,6 @@ export default function GenerateReportCard() {
     }
   };
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        dispatch({ type: "SET_SCHOOL_INFO", payload: { name: state.schoolName, logo: ev.target?.result as string } });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   return (
     <div className="space-y-4">
       {results.length > 0 ? (
