@@ -10,7 +10,7 @@ type ResultAction =
   | { type: "SET_CURRENT_EXAM"; payload: Exam | null }
   | { type: "SET_SUBJECTS"; payload: Subject[] }
   | { type: "SET_STUDENTS"; payload: StudentMark[] }
-  | { type: "UPDATE_STUDENT"; payload: { rollNo: string; subjectMarks: Record<string, number> } }
+  | { type: "UPDATE_STUDENT"; payload: StudentMark }
   | { type: "ADD_STUDENT"; payload: StudentMark }
   | { type: "REMOVE_STUDENT"; payload: string }
   | { type: "SET_GRADE_SCALE"; payload: GradeScale[] }
@@ -19,6 +19,7 @@ type ResultAction =
   | { type: "SET_THEME_COLORS"; payload: ThemeColors }
   | { type: "CALCULATE_RESULTS" }
   | { type: "UPDATE_STUDENT_RESULT"; payload: { rollNo: string; position: number } }
+  | { type: "HYDRATE"; payload: Partial<ResultState> }
   | { type: "RESET" };
 
 const initialState: ResultState = {
@@ -49,7 +50,7 @@ function resultReducer(state: ResultState, action: ResultAction): ResultState {
       return {
         ...state,
         students: state.students.map((s) =>
-          s.rollNo === action.payload.rollNo ? { ...s, subjectMarks: action.payload.subjectMarks } : s
+          s.rollNo === action.payload.rollNo ? { ...action.payload } : s
         ),
       };
     case "ADD_STUDENT":
@@ -77,6 +78,15 @@ function resultReducer(state: ResultState, action: ResultAction): ResultState {
       const classStats = calculateClassStats(results, subjects);
       return { ...state, results, classStats };
     }
+    case "HYDRATE":
+      return {
+        ...initialState,
+        ...action.payload,
+        exams: action.payload.exams || [],
+        students: action.payload.students || [],
+        results: action.payload.results || [],
+        gradeScale: action.payload.gradeScale || DEFAULT_GRADE_SCALE,
+      };
     case "RESET":
       return initialState;
     default:

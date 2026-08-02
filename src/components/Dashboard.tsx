@@ -11,8 +11,9 @@ import GenerateResultSheet from "./GenerateResultSheet";
 import UpgradeBanner from "./UpgradeBanner";
 import SchoolSetup from "./SchoolSetup";
 import BackupPanel from "./BackupPanel";
-import { useState, useEffect } from "react";
-import { getSupabase } from "@/lib/supabase";
+import { useState, useEffect, useRef } from "react";
+import { getSupabase, getSchoolId } from "@/lib/supabase";
+import { loadSchoolState, saveSchoolState } from "@/lib/schoolData";
 import { usePaper } from "@/context/PaperContext";
 import { useResult } from "@/context/ResultContext";
 import { TEMPLATES } from "@/lib/paperFormat";
@@ -33,6 +34,30 @@ export default function Dashboard() {
   const [lockedPlan, setLockedPlan] = useState<"paper" | "results" | "full" | null>(null);
   const [planFromDb, setPlanFromDb] = useState(false);
   const [schoolReady, setSchoolReady] = useState<boolean | null>(null);
+  const dbLoaded = useRef(false);
+
+  useEffect(() => {
+    if (schoolReady !== true || dbLoaded.current) return;
+    let mounted = true;
+    (async () => {
+      const schoolId = await getSchoolId();
+      if (!schoolId || !mounted) return;
+      const data = await loadSchoolState();
+      if (!mounted) return;
+      if (data?.paper) dispatch({ type: "HYDRATE", payload: data.paper });
+      if (data?.result) resultCtx.dispatch({ type: "HYDRATE", payload: data.result });
+      dbLoaded.current = true;
+    })();
+    return () => { mounted = false; };
+  }, [schoolReady]);
+
+  useEffect(() => {
+    if (!dbLoaded.current) return;
+    const timer = setTimeout(() => {
+      saveSchoolState(state, resultCtx.state);
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, [state, resultCtx.state]);
 
   useEffect(() => {
     let mounted = true;

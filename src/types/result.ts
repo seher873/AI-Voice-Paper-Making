@@ -124,9 +124,9 @@ export const DEFAULT_GRADE_SCALE: GradeScale[] = [
 
 export const DEFAULT_SUBJECTS: Omit<Subject, "id">[] = [
   { name: "English", code: "ENG", totalMarks: 100, passingMarks: 33 },
-  { name: "English Grammar", code: "EGR", totalMarks: 100, passingMarks: 33 },
+  { name: "English Grammar", code: "EGR", totalMarks: 50, passingMarks: 17 },
   { name: "Urdu", code: "URD", totalMarks: 100, passingMarks: 33 },
-  { name: "Urdu Grammar", code: "UGR", totalMarks: 100, passingMarks: 33 },
+  { name: "Urdu Grammar", code: "UGR", totalMarks: 50, passingMarks: 17 },
   { name: "Mathematics", code: "MTH", totalMarks: 100, passingMarks: 33 },
   { name: "Science", code: "SCI", totalMarks: 100, passingMarks: 33 },
   { name: "Social Studies", code: "SST", totalMarks: 100, passingMarks: 33 },

@@ -13,6 +13,7 @@ export default function EnterMarks() {
   const [studentName, setStudentName] = useState("");
   const [fatherName, setFatherName] = useState("");
   const [marks, setMarks] = useState<Record<string, string>>({});
+  const [editingRollNo, setEditingRollNo] = useState<string | null>(null);
 
   const enabledComponents = config
     ? (Object.keys(ASSESSMENT_LABELS) as (keyof AssessmentConfig)[]).filter((k) => config[k])
@@ -28,11 +29,30 @@ export default function EnterMarks() {
       subjectMarks[sub.name] = val ? Number(val) : 0;
     }
 
-    dispatch({ type: "ADD_STUDENT", payload: { rollNo, studentName, fatherName, subjectMarks } });
+    if (editingRollNo) {
+      dispatch({ type: "UPDATE_STUDENT", payload: { rollNo: editingRollNo, studentName, fatherName, subjectMarks } });
+    } else {
+      dispatch({ type: "ADD_STUDENT", payload: { rollNo, studentName, fatherName, subjectMarks } });
+    }
     setRollNo("");
     setStudentName("");
     setFatherName("");
     setMarks({});
+    setEditingRollNo(null);
+  };
+
+  const startEdit = (roll: string) => {
+    const student = state.students.find((s) => s.rollNo === roll);
+    if (!student) return;
+    setEditingRollNo(roll);
+    setRollNo(student.rollNo);
+    setStudentName(student.studentName);
+    setFatherName(student.fatherName);
+    setMarks(
+      Object.fromEntries(
+        subjects.map((sub) => [sub.name, String(student.subjectMarks[sub.name] ?? "")])
+      )
+    );
   };
 
   if (!state.currentExam) {
@@ -93,9 +113,20 @@ export default function EnterMarks() {
           </div>
         </div>
 
-        <button type="submit" className="px-6 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-medium text-sm transition-all">
-          Add Student
-        </button>
+        <div className="flex items-center gap-3">
+          <button type="submit" className="px-6 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-medium text-sm transition-all">
+            {editingRollNo ? "Update Student" : "Add Student"}
+          </button>
+          {editingRollNo && (
+            <button
+              type="button"
+              onClick={() => { setEditingRollNo(null); setRollNo(""); setStudentName(""); setFatherName(""); setMarks({}); }}
+              className="px-4 py-2.5 text-sm font-medium text-slate-500 hover:bg-slate-100 rounded-xl transition-all"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
 
       {state.students.length > 0 && (
@@ -108,12 +139,20 @@ export default function EnterMarks() {
                   <span className="text-xs font-bold text-slate-400 w-6">#{s.rollNo}</span>
                   <span className="text-sm font-medium text-slate-700">{s.studentName}</span>
                 </div>
-                <button
-                  onClick={() => dispatch({ type: "REMOVE_STUDENT", payload: s.rollNo })}
-                  className="text-xs text-red-500 hover:bg-red-50 px-2 py-1 rounded-lg transition-all"
-                >
-                  Remove
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => startEdit(s.rollNo)}
+                    className="text-xs text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded-lg transition-all"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => dispatch({ type: "REMOVE_STUDENT", payload: s.rollNo })}
+                    className="text-xs text-red-500 hover:bg-red-50 px-2 py-1 rounded-lg transition-all"
+                  >
+                    Remove
+                  </button>
+                </div>
               </div>
             ))}
           </div>
