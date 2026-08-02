@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useReducer, useCallback, useMemo, type ReactNode } from "react";
-import type { ResultState, Exam, Subject, StudentMark, GradeScale, ResultTab, ThemeColors } from "@/types/result";
+import type { ResultState, Exam, Subject, StudentMark, StudentResult, GradeScale, ResultTab, ThemeColors } from "@/types/result";
 import { DEFAULT_GRADE_SCALE, DEFAULT_THEME } from "@/types/result";
 import { calculateResults, calculateClassStats } from "@/lib/resultEngine";
 
@@ -38,38 +38,55 @@ const initialState: ResultState = {
 };
 
 function resultReducer(state: ResultState, action: ResultAction): ResultState {
+  const snapshotExam = (students: StudentMark[], results: StudentResult[]): ResultState => ({
+    ...state,
+    students,
+    results,
+    currentExam: state.currentExam ? { ...state.currentExam, students, results } : state.currentExam,
+  });
   switch (action.type) {
     case "CREATE_EXAM":
       return { ...state, exams: [...state.exams, action.payload], currentExam: action.payload, students: [], results: [], classStats: null };
     case "DELETE_EXAM": {
       const remaining = state.exams.filter((e) => e.id !== action.payload);
       const wasCurrent = state.currentExam?.id === action.payload;
+      if (!wasCurrent) return { ...state, exams: remaining };
+      const next = remaining[remaining.length - 1] || null;
       return {
         ...state,
         exams: remaining,
-        currentExam: wasCurrent ? remaining[remaining.length - 1] || null : state.currentExam,
-        students: wasCurrent ? [] : state.students,
-        results: wasCurrent ? [] : state.results,
-        classStats: wasCurrent ? null : state.classStats,
+        currentExam: next,
+        students: next?.students || [],
+        results: next?.results || [],
+        classStats: next?.results?.length ? calculateClassStats(next.results, next.subjects) : null,
       };
     }
     case "SET_CURRENT_EXAM":
-      return { ...state, currentExam: action.payload, students: [], results: [], classStats: null };
+      return {
+        ...state,
+        currentExam: action.payload,
+        students: action.payload?.students || [],
+        results: action.payload?.results || [],
+        classStats: action.payload?.results?.length
+          ? calculateClassStats(action.payload.results, action.payload.subjects)
+          : null,
+      };
     case "SET_SUBJECTS":
       return { ...state, currentExam: state.currentExam ? { ...state.currentExam, subjects: action.payload } : null };
     case "SET_STUDENTS":
-      return { ...state, students: action.payload };
+      return snapshotExam(action.payload, state.results);
     case "UPDATE_STUDENT":
-      return {
-        ...state,
-        students: state.students.map((s) =>
-          s.rollNo === action.payload.rollNo ? { ...action.payload } : s
-        ),
-      };
+      return snapshotExam(
+        state.students.map((s) => (s.rollNo === action.payload.rollNo ? { ...action.payload } : s)),
+        state.results
+      );
     case "ADD_STUDENT":
-      return { ...state, students: [...state.students, action.payload] };
+      return snapshotExam([...state.students, action.payload], state.results);
     case "REMOVE_STUDENT":
-      return { ...state, students: state.students.filter((s) => s.rollNo !== action.payload) };
+      return snapshotExam(
+        state.students.filter((s) => s.rollNo !== action.payload),
+        state.results
+      );
     case "SET_GRADE_SCALE":
       return { ...state, gradeScale: action.payload };
     case "SET_SCHOOL_INFO":
@@ -79,20 +96,15 @@ function resultReducer(state: ResultState, action: ResultAction): ResultState {
     case "SET_REPORT_CARD_STATE":
       return { ...state, reportCardRollNo: action.payload.rollNo, reportCardRemarks: action.payload.remarks };
     case "UPDATE_STUDENT_RESULT":
-      return {
-        ...state,
-        students: state.students.map((s) =>
-          s.rollNo === action.payload.rollNo ? { ...s, position: action.payload.position } : s
-        ),
-        results: state.results.map((r) =>
-          r.rollNo === action.payload.rollNo ? { ...r, position: action.payload.position } : r
-        ),
-      };
+      return snapshotExam(
+        state.students.map((s) => (s.rollNo === action.payload.rollNo ? { ...s, position: action.payload.position } : s)),
+        state.results.map((r) => (r.rollNo === action.payload.rollNo ? { ...r, position: action.payload.position } : r))
+      );
     case "CALCULATE_RESULTS": {
       const subjects = state.currentExam?.subjects || [];
       const results = calculateResults(state.students, subjects, state.gradeScale);
       const classStats = calculateClassStats(results, subjects);
-      return { ...state, results, classStats };
+      return { ...snapshotExam(state.students, results), classStats };
     }
     case "HYDRATE":
       return {

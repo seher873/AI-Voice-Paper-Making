@@ -30,6 +30,8 @@ export interface Exam {
   date: string;
   subjects: Subject[];
   assessmentConfig: AssessmentConfig;
+  students?: StudentMark[];
+  results?: StudentResult[];
 }
 
 export interface StudentMark {
