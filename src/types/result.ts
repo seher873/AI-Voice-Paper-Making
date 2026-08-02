@@ -37,6 +37,7 @@ export interface StudentMark {
   studentName: string;
   fatherName: string;
   subjectMarks: Record<string, number>;
+  position?: number;
 }
 
 export interface StudentResult {

@@ -3,8 +3,16 @@
 import { useResult } from "@/context/ResultContext";
 
 export default function ClassPosition() {
-  const { state } = useResult();
+  const { state, dispatch } = useResult();
   const { results, classStats } = state;
+
+  const handlePositionChange = (rollNo: string, value: string) => {
+    const p = parseInt(value, 10);
+    dispatch({
+      type: "UPDATE_STUDENT_RESULT",
+      payload: { rollNo, position: !isNaN(p) && p > 0 ? p : 0 },
+    });
+  };
 
   if (!classStats || results.length === 0) {
     return (
@@ -38,8 +46,9 @@ export default function ClassPosition() {
       </div>
 
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-        <div className="p-4 border-b border-slate-200">
+        <div className="p-4 border-b border-slate-200 flex items-center justify-between">
           <h3 className="text-sm font-bold text-slate-700">Ranking</h3>
+          <span className="text-[10px] text-indigo-500 font-medium">Click position numbers to edit</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -56,13 +65,24 @@ export default function ClassPosition() {
               {results.map((r, i) => (
                 <tr key={r.rollNo} className={`${i % 2 === 0 ? "bg-white" : "bg-slate-50/50"} border-t border-slate-100`}>
                   <td className="px-4 py-2.5">
-                    <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${
-                      r.position === 0 ? "text-slate-300" :
-                      r.position === 1 ? "bg-yellow-100 text-yellow-700 ring-2 ring-yellow-300" :
-                      r.position === 2 ? "bg-slate-100 text-slate-600 ring-2 ring-slate-300" :
-                      r.position === 3 ? "bg-orange-100 text-orange-700 ring-2 ring-orange-300" :
-                      "text-slate-500"
-                    }`}>{r.position === 0 ? "—" : r.position}</span>
+                    <input
+                      type="number"
+                      min={0}
+                      value={r.position || ""}
+                      onChange={(e) => handlePositionChange(r.rollNo, e.target.value)}
+                      placeholder="—"
+                      className={`w-14 px-1.5 py-1 text-center text-xs font-bold rounded-lg border focus:outline-none focus:ring-2 focus:ring-indigo-500/40 ${
+                        r.position === 0
+                          ? "text-slate-300 border-slate-200 bg-slate-50"
+                          : r.position === 1
+                          ? "bg-yellow-50 border-yellow-300 text-yellow-700"
+                          : r.position === 2
+                          ? "bg-slate-100 border-slate-300 text-slate-600"
+                          : r.position === 3
+                          ? "bg-orange-50 border-orange-300 text-orange-700"
+                          : "text-slate-600 border-slate-200"
+                      }`}
+                    />
                   </td>
                   <td className="px-4 py-2.5 text-slate-600">{r.rollNo}</td>
                   <td className="px-4 py-2.5 font-medium text-slate-700">{r.studentName}</td>

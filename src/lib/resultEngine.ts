@@ -31,9 +31,11 @@ export function calculateResults(
       grade: passed ? gradeInfo.grade : "F",
       remark: passed ? gradeInfo.remark : "Failed in one or more subjects",
       passed,
-      position: 1,
+      position: s.position && s.position > 0 ? s.position : 0,
     };
   });
+
+  const manualPositions = new Map(students.map((s) => [s.rollNo, s.position && s.position > 0 ? s.position : 0]));
 
   results.sort((a, b) => Number(b.passed) - Number(a.passed) || b.percentage - a.percentage);
 
@@ -41,14 +43,19 @@ export function calculateResults(
   let passIndex = 0;
   for (let i = 0; i < results.length; i++) {
     const r = results[i];
+    const manual = manualPositions.get(r.rollNo) || 0;
     if (r.passed) {
-      if (passIndex > 0 && r.percentage < results[i - 1].percentage) {
-        currentPos = passIndex + 1;
+      if (manual > 0) {
+        r.position = manual;
+      } else {
+        if (passIndex > 0 && r.percentage < results[i - 1].percentage) {
+          currentPos = passIndex + 1;
+        }
+        r.position = currentPos;
       }
-      r.position = currentPos;
       passIndex++;
     } else {
-      r.position = 0;
+      r.position = manual > 0 ? manual : 0;
     }
   }
 

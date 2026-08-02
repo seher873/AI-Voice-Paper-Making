@@ -68,6 +68,9 @@ function resultReducer(state: ResultState, action: ResultAction): ResultState {
     case "UPDATE_STUDENT_RESULT":
       return {
         ...state,
+        students: state.students.map((s) =>
+          s.rollNo === action.payload.rollNo ? { ...s, position: action.payload.position } : s
+        ),
         results: state.results.map((r) =>
           r.rollNo === action.payload.rollNo ? { ...r, position: action.payload.position } : r
         ),
