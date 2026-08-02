@@ -76,8 +76,14 @@ export function resultReducer(state: ResultState, action: ResultAction): ResultS
           ? calculateClassStats(action.payload.results, action.payload.subjects)
           : null,
       };
-    case "SET_SUBJECTS":
-      return { ...state, currentExam: state.currentExam ? { ...state.currentExam, subjects: action.payload } : null };
+    case "SET_SUBJECTS": {
+      const currentExam = state.currentExam ? { ...state.currentExam, subjects: action.payload } : null;
+      return {
+        ...state,
+        currentExam,
+        exams: currentExam ? state.exams.map((e) => (e.id === currentExam.id ? currentExam : e)) : state.exams,
+      };
+    }
     case "SET_STUDENTS":
       return snapshotExam(action.payload, state.results);
     case "UPDATE_STUDENT":
@@ -116,11 +122,10 @@ export function resultReducer(state: ResultState, action: ResultAction): ResultS
       return { ...snapshotExam(state.students, results), classStats };
     }
     case "RESET_POSITIONS":
-      return {
-        ...state,
-        students: state.students.map((s) => ({ ...s, position: undefined, positionOverridden: false })),
-        results: state.results.map((r) => ({ ...r, position: 0 })),
-      };
+      return snapshotExam(
+        state.students.map((s) => ({ ...s, position: undefined, positionOverridden: false })),
+        state.results.map((r) => ({ ...r, position: 0 }))
+      );
     case "HYDRATE":
       return {
         ...initialState,

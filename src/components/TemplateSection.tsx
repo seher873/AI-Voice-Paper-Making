@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useCallback } from "react"
-import { parseDocx } from "@/lib/docx"
+import { parseDocx, generateDocx } from "@/lib/docx"
 import { useSpeech } from "@/hooks/useSpeech"
 
 import { useToast } from "@/context/ToastContext"
@@ -128,6 +128,29 @@ export default function TemplateSection() {
     if (fileInputRef.current) fileInputRef.current.value = ""
   }, [])
 
+  const handleDownload = useCallback(async () => {
+    if (!file || tags.length === 0) return
+    const tagValues: Record<string, string> = {}
+    for (const t of tags) {
+      if (t.value.trim()) tagValues[t.name] = t.value
+    }
+    try {
+      const zipData = await file.arrayBuffer()
+      const blob = generateDocx(zipData, tagValues)
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `${fileName.replace(/\.docx$/i, "")}-filled.docx`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+      addToast("Filled document downloaded", "success")
+    } catch (err) {
+      addToast(err instanceof Error ? err.message : "Failed to generate document", "error")
+    }
+  }, [file, tags, fileName, addToast])
+
   return (
     <div className="space-y-4 sm:space-y-5">
       <div className="flex items-center gap-2.5">
@@ -168,6 +191,16 @@ export default function TemplateSection() {
               <button onClick={handleReset} className="text-xs text-red-500 hover:text-red-700 font-semibold px-3 py-1.5 bg-red-50 hover:bg-red-100 rounded-lg transition-colors">Change</button>
             </div>
             {parsing && <p className="text-sm text-slate-500">Parsing tags...</p>}
+            <button
+              onClick={handleDownload}
+              disabled={tags.length === 0}
+              className="flex items-center justify-center gap-2 w-full min-h-[48px] px-5 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all text-sm font-bold shadow-sm"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Download Filled Document
+            </button>
           </div>
         )}
       </div>
