@@ -7,6 +7,7 @@ import { calculateResults, calculateClassStats } from "@/lib/resultEngine";
 
 type ResultAction =
   | { type: "CREATE_EXAM"; payload: Exam }
+  | { type: "DELETE_EXAM"; payload: string }
   | { type: "SET_CURRENT_EXAM"; payload: Exam | null }
   | { type: "SET_SUBJECTS"; payload: Subject[] }
   | { type: "SET_STUDENTS"; payload: StudentMark[] }
@@ -40,6 +41,18 @@ function resultReducer(state: ResultState, action: ResultAction): ResultState {
   switch (action.type) {
     case "CREATE_EXAM":
       return { ...state, exams: [...state.exams, action.payload], currentExam: action.payload, students: [], results: [], classStats: null };
+    case "DELETE_EXAM": {
+      const remaining = state.exams.filter((e) => e.id !== action.payload);
+      const wasCurrent = state.currentExam?.id === action.payload;
+      return {
+        ...state,
+        exams: remaining,
+        currentExam: wasCurrent ? remaining[remaining.length - 1] || null : state.currentExam,
+        students: wasCurrent ? [] : state.students,
+        results: wasCurrent ? [] : state.results,
+        classStats: wasCurrent ? null : state.classStats,
+      };
+    }
     case "SET_CURRENT_EXAM":
       return { ...state, currentExam: action.payload, students: [], results: [], classStats: null };
     case "SET_SUBJECTS":

@@ -75,10 +75,25 @@ export default function CreateExam() {
 
       {state.exams.length > 0 && (
         <div className="mb-6 p-4 bg-indigo-50 rounded-xl border border-indigo-200">
-          <p className="text-sm font-semibold text-indigo-700 mb-2">Current Exam</p>
-          <p className="text-sm text-indigo-600">
-            {state.currentExam?.name} — {state.currentExam?.className} ({state.currentExam?.session})
-          </p>
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <p className="text-sm font-semibold text-indigo-700 mb-1">Current Exam</p>
+              <p className="text-sm text-indigo-600">
+                {state.currentExam?.name} — {state.currentExam?.className} ({state.currentExam?.session})
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                if (state.currentExam && confirm(`Delete "${state.currentExam.name}"? This will also remove its students & results.`)) {
+                  dispatch({ type: "DELETE_EXAM", payload: state.currentExam.id });
+                }
+              }}
+              className="flex-shrink-0 px-3 py-1.5 text-xs font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 transition-all"
+            >
+              Delete Exam
+            </button>
+          </div>
         </div>
       )}
 
@@ -226,12 +241,24 @@ export default function CreateExam() {
                   <p className="text-sm font-semibold text-slate-700">{exam.name}</p>
                   <p className="text-xs text-slate-400">{exam.className} — {exam.session}</p>
                 </div>
-                <button
-                  onClick={() => dispatch({ type: "SET_CURRENT_EXAM", payload: exam })}
-                  className="px-3 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
-                >
-                  Load
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => dispatch({ type: "SET_CURRENT_EXAM", payload: exam })}
+                    className="px-3 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                  >
+                    Load
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (confirm(`Delete "${exam.name}"? This will also remove its students & results.`)) {
+                        dispatch({ type: "DELETE_EXAM", payload: exam.id });
+                      }
+                    }}
+                    className="px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             ))}
           </div>
