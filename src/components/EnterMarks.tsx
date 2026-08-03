@@ -25,6 +25,10 @@ export default function EnterMarks() {
     e.preventDefault();
     if (!rollNo || !studentName || subjects.length === 0) return;
 
+    const cleanName = (n: string) => n.trim().replace(/\s*:+\s*$/g, "");
+    const sName = cleanName(studentName);
+    const fName = cleanName(fatherName);
+
     const subjectMarks: Record<string, number> = {};
     for (const sub of subjects) {
       const val = marks[sub.name];
@@ -34,9 +38,9 @@ export default function EnterMarks() {
     const pos = position.trim() !== "" ? Number(position) : undefined;
 
     if (editingRollNo) {
-      dispatch({ type: "UPDATE_STUDENT", payload: { rollNo: editingRollNo, studentName, fatherName, photo, subjectMarks, position: pos, positionOverridden: pos !== undefined } });
+      dispatch({ type: "UPDATE_STUDENT", payload: { rollNo: editingRollNo, studentName: sName, fatherName: fName, photo, subjectMarks, position: pos, positionOverridden: pos !== undefined } });
     } else {
-      dispatch({ type: "ADD_STUDENT", payload: { rollNo, studentName, fatherName, photo, subjectMarks, position: pos, positionOverridden: pos !== undefined } });
+      dispatch({ type: "ADD_STUDENT", payload: { rollNo, studentName: sName, fatherName: fName, photo, subjectMarks, position: pos, positionOverridden: pos !== undefined } });
     }
     setRollNo("");
     setStudentName("");

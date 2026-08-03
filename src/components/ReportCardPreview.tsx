@@ -73,26 +73,42 @@ const ReportCardPreview = forwardRef<HTMLDivElement, Props>(
         ) : (
           <div className="p-5 bg-white relative isolate">
             {watermark && schoolLogo && (
-              <img
-                src={schoolLogo}
-                alt=""
-                aria-hidden
-                className="absolute inset-0 w-full h-full object-contain opacity-[0.06] pointer-events-none select-none z-[-1]"
-                style={{ filter: watermarkColor ? "none" : "grayscale(1)" }}
-              />
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-[-1]">
+                <img
+                  src={schoolLogo}
+                  alt=""
+                  aria-hidden
+                  className="max-w-[45%] max-h-[45%] object-contain opacity-[0.06]"
+                  style={{ filter: watermarkColor ? "none" : "grayscale(1)" }}
+                />
+              </div>
             )}
             {/* Info - name dotted lines */}
             <div className="mb-3 text-sm">
               <div className="flex items-center gap-2 mb-1.5">
                 <span className="font-semibold whitespace-nowrap" style={{ color: c.primary }}>Student's Name</span>
                 <span className="flex-1 font-medium border-b-2 border-dotted text-right min-w-0" style={{ color: c.text, borderColor: `${c.text}55`, paddingBottom: 1 }}>
-                  {student.studentName}
+                  {student.studentName.replace(/\s*:+\s*$/g, "")}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 mb-1.5">
                 <span className="font-semibold whitespace-nowrap" style={{ color: c.primary }}>Father's Name</span>
                 <span className="flex-1 font-medium border-b-2 border-dotted text-right min-w-0" style={{ color: c.text, borderColor: `${c.text}55`, paddingBottom: 1 }}>
-                  {student.fatherName || ""}
+                  {student.fatherName ? student.fatherName.replace(/\s*:+\s*$/g, "") : ""}
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-x-6 gap-y-1.5">
+                <span className="flex items-center gap-2">
+                  <span className="font-semibold whitespace-nowrap" style={{ color: c.primary }}>Class</span>
+                  <span className="font-medium border-b-2 border-dotted px-2 min-w-[60px] text-right" style={{ color: c.text, borderColor: `${c.text}55` }}>{exam?.className || ""}</span>
+                </span>
+                <span className="flex items-center gap-2">
+                  <span className="font-semibold whitespace-nowrap" style={{ color: c.primary }}>Section</span>
+                  <span className="font-medium border-b-2 border-dotted px-2 min-w-[60px] text-right" style={{ color: c.text, borderColor: `${c.text}55` }}>{exam?.section || ""}</span>
+                </span>
+                <span className="flex items-center gap-2">
+                  <span className="font-semibold whitespace-nowrap" style={{ color: c.primary }}>Roll No</span>
+                  <span className="font-bold border-b-2 border-dotted px-2 min-w-[60px] text-right" style={{ fontFamily: "'Playfair Display', 'Georgia', serif", color: c.accent, borderColor: `${c.accent}55` }}>{student.rollNo}</span>
                 </span>
               </div>
             </div>
