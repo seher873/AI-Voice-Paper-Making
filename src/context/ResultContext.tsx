@@ -18,6 +18,7 @@ type ResultAction =
   | { type: "SET_SCHOOL_INFO"; payload: { name: string; logo: string } }
   | { type: "SET_REPORT_CARD_STATE"; payload: { rollNo: string; remarks: string } }
   | { type: "SET_THEME_COLORS"; payload: ThemeColors }
+  | { type: "SET_WATERMARK"; payload: boolean }
   | { type: "CALCULATE_RESULTS" }
   | { type: "UPDATE_STUDENT_RESULT"; payload: { rollNo: string; position: number; overridden: boolean } }
   | { type: "RESET_POSITIONS" }
@@ -36,6 +37,7 @@ const initialState: ResultState = {
   reportCardRollNo: "",
   reportCardRemarks: "",
   themeColors: DEFAULT_THEME,
+  reportCardWatermark: true,
 };
 
 export function resultReducer(state: ResultState, action: ResultAction): ResultState {
@@ -104,6 +106,8 @@ export function resultReducer(state: ResultState, action: ResultAction): ResultS
       return { ...state, schoolName: action.payload.name, schoolLogo: action.payload.logo };
     case "SET_THEME_COLORS":
       return { ...state, themeColors: action.payload };
+    case "SET_WATERMARK":
+      return { ...state, reportCardWatermark: action.payload };
     case "SET_REPORT_CARD_STATE":
       return { ...state, reportCardRollNo: action.payload.rollNo, reportCardRemarks: action.payload.remarks };
     case "UPDATE_STUDENT_RESULT":

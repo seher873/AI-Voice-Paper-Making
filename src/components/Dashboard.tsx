@@ -417,6 +417,27 @@ export default function Dashboard() {
               </div>
             </div>
 
+            {/* Watermark toggle */}
+            <div className="flex items-center justify-between border-t border-slate-100 pt-3">
+              <div>
+                <p className="text-xs font-semibold text-slate-600">Watermark on report card</p>
+                <p className="text-[10px] text-slate-400">School logo lightly in the background</p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={resultCtx.state.reportCardWatermark}
+                onClick={() => resultCtx.dispatch({ type: "SET_WATERMARK", payload: !resultCtx.state.reportCardWatermark })}
+                className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ${
+                  resultCtx.state.reportCardWatermark ? "bg-indigo-600" : "bg-slate-300"
+                }`}
+              >
+                <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                  resultCtx.state.reportCardWatermark ? "translate-x-5" : ""
+                }`} />
+              </button>
+            </div>
+
             {/* Theme Colors */}
             <div className="border-t border-slate-100 pt-3">
               <label className="block text-xs font-semibold text-slate-500 mb-2">Report Card Theme</label>
@@ -545,6 +566,7 @@ export default function Dashboard() {
                 schoolLogo={resultCtx.state.schoolLogo}
                 remarks={resultCtx.state.reportCardRemarks}
                 themeColors={resultCtx.state.themeColors}
+                watermark={resultCtx.state.reportCardWatermark}
               />
             </div>
           </div>

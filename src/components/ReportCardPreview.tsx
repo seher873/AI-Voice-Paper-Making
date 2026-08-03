@@ -9,10 +9,11 @@ interface Props {
   schoolLogo: string;
   remarks: string;
   themeColors: ThemeColors;
+  watermark: boolean;
 }
 
 const ReportCardPreview = forwardRef<HTMLDivElement, Props>(
-  ({ student, exam, schoolName, schoolLogo, remarks, themeColors: c }, ref) => {
+  ({ student, exam, schoolName, schoolLogo, remarks, themeColors: c, watermark }, ref) => {
     const subjects = exam?.subjects || [];
     const config = exam?.assessmentConfig;
     const enabledComponents = config
@@ -47,7 +48,7 @@ const ReportCardPreview = forwardRef<HTMLDivElement, Props>(
           </div>
         ) : (
           <div className="p-5 bg-white relative isolate">
-            {schoolLogo && (
+            {watermark && schoolLogo && (
               <img
                 src={schoolLogo}
                 alt=""

@@ -93,6 +93,7 @@ export interface ResultState {
   reportCardRollNo: string;
   reportCardRemarks: string;
   themeColors: ThemeColors;
+  reportCardWatermark: boolean;
 }
 
 export interface ThemeColors {
