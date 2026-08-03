@@ -29,8 +29,8 @@ const ReportCardPreview = forwardRef<HTMLDivElement, Props>(
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1 flex justify-start">
               {schoolLogo && (
-                <div className="inline-flex p-2 bg-white rounded-xl shadow-md ring-1 ring-black/5" style={{ border: `1.5px solid ${c.accent}55` }}>
-                  <img src={schoolLogo} alt="School Logo" className="h-14 sm:h-16 max-w-[140px] object-contain" />
+                <div className="inline-flex p-2.5 bg-white rounded-xl shadow-md ring-1 ring-black/5" style={{ border: `1.5px solid ${c.accent}55` }}>
+                  <img src={schoolLogo} alt="School Logo" className="h-16 sm:h-20 max-w-[160px] object-contain" />
                 </div>
               )}
             </div>
@@ -51,10 +51,10 @@ const ReportCardPreview = forwardRef<HTMLDivElement, Props>(
             <div className="flex-1 flex justify-end">
               {student?.photo ? (
                 <div className="inline-flex p-1.5 bg-white rounded-xl shadow-md ring-1 ring-black/5" style={{ border: `1.5px solid ${c.accent}55` }}>
-                  <img src={student.photo} alt="Student" className="h-14 sm:h-16 w-14 sm:w-16 object-cover rounded-lg" />
+                  <img src={student.photo} alt="Student" className="h-16 sm:h-20 w-16 sm:w-20 object-cover rounded-lg" />
                 </div>
               ) : (
-                <div className="w-14 sm:w-16 h-14 sm:h-16 border-2 border-dashed border-white/40 rounded-xl flex items-center justify-center text-white/50 text-[9px] font-medium">
+                <div className="w-16 sm:w-20 h-16 sm:h-20 border-2 border-dashed border-white/40 rounded-xl flex items-center justify-center text-white/50 text-[9px] font-medium">
                   Photo
                 </div>
               )}
@@ -81,26 +81,18 @@ const ReportCardPreview = forwardRef<HTMLDivElement, Props>(
                 style={{ filter: watermarkColor ? "none" : "grayscale(1)" }}
               />
             )}
-            {/* Info - dotted form style */}
+            {/* Info - name dotted lines */}
             <div className="mb-3 text-sm">
               <div className="flex items-center gap-2 mb-1.5">
-                <span className="font-semibold whitespace-nowrap" style={{ color: c.primary }}>Student Name</span>
+                <span className="font-semibold whitespace-nowrap" style={{ color: c.primary }}>Student's Name</span>
                 <span className="flex-1 font-medium border-b-2 border-dotted text-right min-w-0" style={{ color: c.text, borderColor: `${c.text}55`, paddingBottom: 1 }}>
                   {student.studentName}
                 </span>
               </div>
-              <div className="flex flex-wrap gap-x-6 gap-y-1.5">
-                <span className="flex items-center gap-2">
-                  <span className="font-semibold whitespace-nowrap" style={{ color: c.primary }}>Class</span>
-                  <span className="font-medium border-b-2 border-dotted px-2 min-w-[60px] text-right" style={{ color: c.text, borderColor: `${c.text}55` }}>{exam?.className || ""}</span>
-                </span>
-                <span className="flex items-center gap-2">
-                  <span className="font-semibold whitespace-nowrap" style={{ color: c.primary }}>Section</span>
-                  <span className="font-medium border-b-2 border-dotted px-2 min-w-[60px] text-right" style={{ color: c.text, borderColor: `${c.text}55` }}>{exam?.section || ""}</span>
-                </span>
-                <span className="flex items-center gap-2">
-                  <span className="font-semibold whitespace-nowrap" style={{ color: c.primary }}>Roll No</span>
-                  <span className="font-bold border-b-2 border-dotted px-2 min-w-[60px] text-right" style={{ fontFamily: "'Playfair Display', 'Georgia', serif", color: c.accent, borderColor: `${c.accent}55` }}>{student.rollNo}</span>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold whitespace-nowrap" style={{ color: c.primary }}>Father's Name</span>
+                <span className="flex-1 font-medium border-b-2 border-dotted text-right min-w-0" style={{ color: c.text, borderColor: `${c.text}55`, paddingBottom: 1 }}>
+                  {student.fatherName || ""}
                 </span>
               </div>
             </div>
