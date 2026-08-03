@@ -62,11 +62,11 @@ const ReportCardPreview = forwardRef<HTMLDivElement, Props>(
             <div className="flex gap-4 items-start mb-3">
               <div className="flex-1 space-y-1 text-sm">
                 <div className="flex gap-2 items-center">
-                  <span className="font-semibold whitespace-nowrap" style={{ color: c.primary, minWidth: 100 }}>Student Name:</span>
+                  <span className="font-semibold whitespace-nowrap" style={{ color: c.primary, minWidth: 100 }}>Student Name</span>
                   <span className="font-medium whitespace-nowrap" style={{ color: c.text }}>{student.studentName}</span>
                 </div>
                 <div className="flex gap-2 items-center">
-                  <span className="font-semibold whitespace-nowrap" style={{ color: c.primary, minWidth: 100 }}>Father Name:</span>
+                  <span className="font-semibold whitespace-nowrap" style={{ color: c.primary, minWidth: 100 }}>Father Name</span>
                   <span className="font-medium whitespace-nowrap" style={{ color: c.text }}>{student.fatherName || "—"}</span>
                 </div>
                 <div className="flex gap-2">
