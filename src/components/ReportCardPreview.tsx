@@ -10,10 +10,11 @@ interface Props {
   remarks: string;
   themeColors: ThemeColors;
   watermark: boolean;
+  watermarkColor: boolean;
 }
 
 const ReportCardPreview = forwardRef<HTMLDivElement, Props>(
-  ({ student, exam, schoolName, schoolLogo, remarks, themeColors: c, watermark }, ref) => {
+  ({ student, exam, schoolName, schoolLogo, remarks, themeColors: c, watermark, watermarkColor }, ref) => {
     const subjects = exam?.subjects || [];
     const config = exam?.assessmentConfig;
     const enabledComponents = config
@@ -54,7 +55,7 @@ const ReportCardPreview = forwardRef<HTMLDivElement, Props>(
                 alt=""
                 aria-hidden
                 className="absolute inset-0 w-full h-full object-contain opacity-[0.06] pointer-events-none select-none z-[-1]"
-                style={{ filter: "grayscale(1)" }}
+                style={{ filter: watermarkColor ? "none" : "grayscale(1)" }}
               />
             )}
             {/* Info - compact side by side */}

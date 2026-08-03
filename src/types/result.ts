@@ -94,6 +94,7 @@ export interface ResultState {
   reportCardRemarks: string;
   themeColors: ThemeColors;
   reportCardWatermark: boolean;
+  reportCardWatermarkColor: boolean;
 }
 
 export interface ThemeColors {

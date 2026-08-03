@@ -438,6 +438,28 @@ export default function Dashboard() {
               </button>
             </div>
 
+            {resultCtx.state.reportCardWatermark && (
+              <div className="flex items-center justify-between pt-2 pl-1">
+                <div>
+                  <p className="text-xs font-medium text-slate-600">Original colors</p>
+                  <p className="text-[10px] text-slate-400">Show logo watermark in full color</p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={resultCtx.state.reportCardWatermarkColor}
+                  onClick={() => resultCtx.dispatch({ type: "SET_WATERMARK_COLOR", payload: !resultCtx.state.reportCardWatermarkColor })}
+                  className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ${
+                    resultCtx.state.reportCardWatermarkColor ? "bg-indigo-600" : "bg-slate-300"
+                  }`}
+                >
+                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                    resultCtx.state.reportCardWatermarkColor ? "translate-x-5" : ""
+                  }`} />
+                </button>
+              </div>
+            )}
+
             {/* Theme Colors */}
             <div className="border-t border-slate-100 pt-3">
               <label className="block text-xs font-semibold text-slate-500 mb-2">Report Card Theme</label>
@@ -567,6 +589,7 @@ export default function Dashboard() {
                 remarks={resultCtx.state.reportCardRemarks}
                 themeColors={resultCtx.state.themeColors}
                 watermark={resultCtx.state.reportCardWatermark}
+                watermarkColor={resultCtx.state.reportCardWatermarkColor}
               />
             </div>
           </div>
