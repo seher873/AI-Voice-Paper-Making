@@ -72,6 +72,20 @@ export default function HeaderSection() {
 
           <div className="sm:col-span-2">
             <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+              School Address
+            </label>
+            <input
+              type="text"
+              value={state.schoolAddress}
+              onChange={(e) => dispatch({ type: "SET_SCHOOL_ADDRESS", payload: e.target.value })}
+              dir="auto"
+              placeholder="e.g. Lyari, Karachi near Sadr"
+              className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-base text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all"
+            />
+          </div>
+
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
               Paper Title
             </label>
             <input

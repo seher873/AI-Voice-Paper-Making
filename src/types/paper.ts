@@ -12,6 +12,7 @@ export interface Question {
 export interface PaperState {
   schoolName: string;
   schoolLogo: string | null;
+  schoolAddress: string;
   time: string;
   totalMarks: string;
   obtainedMarks: string;
@@ -31,6 +32,7 @@ export interface PaperState {
 
 export type PaperAction =
   | { type: "SET_SCHOOL_NAME"; payload: string }
+  | { type: "SET_SCHOOL_ADDRESS"; payload: string }
   | { type: "SET_SCHOOL_LOGO"; payload: string | null }
   | { type: "SET_TIME"; payload: string }
   | { type: "SET_TOTAL_MARKS"; payload: string }
@@ -58,6 +60,7 @@ export type PaperAction =
 export const initialState: PaperState = {
   schoolName: "",
   schoolLogo: null,
+  schoolAddress: "",
   time: "3 Hours",
   totalMarks: "",
   obtainedMarks: "",

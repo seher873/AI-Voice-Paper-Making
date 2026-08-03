@@ -31,6 +31,8 @@ function paperReducer(state: PaperState, action: PaperAction): PaperState {
   switch (action.type) {
     case "SET_SCHOOL_NAME":
       return { ...state, schoolName: action.payload };
+    case "SET_SCHOOL_ADDRESS":
+      return { ...state, schoolAddress: action.payload };
     case "SET_SCHOOL_LOGO":
       return { ...state, schoolLogo: action.payload };
     case "SET_TIME":

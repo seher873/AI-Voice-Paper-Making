@@ -116,6 +116,11 @@ export default function PaperPreview() {
                     <span className="text-slate-300 font-normal normal-case">School Name</span>
                   )}
                 </h1>
+                {state.schoolAddress && (
+                  <p className="text-[11px] sm:text-xs lg:text-sm text-slate-600 mt-0.5 break-words">
+                    {state.schoolAddress}
+                  </p>
+                )}
                 {state.paperTitle && (
                   <h2 className="text-sm sm:text-base lg:text-lg font-semibold mt-0.5 sm:mt-1 text-slate-700 break-words">
                     {state.paperTitle}
