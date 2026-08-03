@@ -7,6 +7,7 @@ interface Props {
   exam: Exam | null;
   schoolName: string;
   schoolLogo: string;
+  schoolAddress: string;
   remarks: string;
   themeColors: ThemeColors;
   watermark: boolean;
@@ -14,7 +15,7 @@ interface Props {
 }
 
 const ReportCardPreview = forwardRef<HTMLDivElement, Props>(
-  ({ student, exam, schoolName, schoolLogo, remarks, themeColors: c, watermark, watermarkColor }, ref) => {
+  ({ student, exam, schoolName, schoolLogo, schoolAddress, remarks, themeColors: c, watermark, watermarkColor }, ref) => {
     const subjects = exam?.subjects || [];
     const config = exam?.assessmentConfig;
     const enabledComponents = config
@@ -37,8 +38,15 @@ const ReportCardPreview = forwardRef<HTMLDivElement, Props>(
               {schoolName && (
                 <h1 className="text-xl sm:text-2xl font-bold text-white break-words" style={{ fontFamily: "'Playfair Display', serif" }}>{schoolName}</h1>
               )}
-              <h2 className="text-base font-bold text-white/90">{exam?.name || "Examination"} — Report Card</h2>
-              <p className="text-xs text-white/70">{exam?.session || "Session"} | {exam?.className || "Class"}</p>
+              {schoolAddress && (
+                <p className="text-xs sm:text-sm text-white/70 mt-0.5 break-words">{schoolAddress}</p>
+              )}
+              <h2 className="text-sm sm:text-base font-bold text-white/90 mt-1">
+                {exam?.name || "Annual Examination"}{exam?.session ? ` ${exam.session}` : ""}
+              </h2>
+              <h3 className="text-base sm:text-lg font-black tracking-wide mt-0.5" style={{ color: "#FFD700", fontFamily: "'Playfair Display', serif" }}>
+                MARKSHEET
+              </h3>
             </div>
             <div className="flex-shrink-0">
               {student?.photo ? (

@@ -15,7 +15,7 @@ type ResultAction =
   | { type: "ADD_STUDENT"; payload: StudentMark }
   | { type: "REMOVE_STUDENT"; payload: string }
   | { type: "SET_GRADE_SCALE"; payload: GradeScale[] }
-  | { type: "SET_SCHOOL_INFO"; payload: { name: string; logo: string } }
+  | { type: "SET_SCHOOL_INFO"; payload: { name: string; logo: string; address?: string } }
   | { type: "SET_REPORT_CARD_STATE"; payload: { rollNo: string; remarks: string } }
   | { type: "SET_THEME_COLORS"; payload: ThemeColors }
   | { type: "SET_WATERMARK"; payload: boolean }
@@ -35,6 +35,7 @@ const initialState: ResultState = {
   gradeScale: DEFAULT_GRADE_SCALE,
   schoolName: "",
   schoolLogo: "",
+  schoolAddress: "",
   reportCardRollNo: "",
   reportCardRemarks: "",
   themeColors: DEFAULT_THEME,
@@ -105,7 +106,7 @@ export function resultReducer(state: ResultState, action: ResultAction): ResultS
     case "SET_GRADE_SCALE":
       return { ...state, gradeScale: action.payload };
     case "SET_SCHOOL_INFO":
-      return { ...state, schoolName: action.payload.name, schoolLogo: action.payload.logo };
+      return { ...state, schoolName: action.payload.name, schoolLogo: action.payload.logo, schoolAddress: action.payload.address ?? state.schoolAddress };
     case "SET_THEME_COLORS":
       return { ...state, themeColors: action.payload };
     case "SET_WATERMARK":

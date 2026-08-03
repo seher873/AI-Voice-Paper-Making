@@ -92,6 +92,7 @@ export interface ResultState {
   gradeScale: GradeScale[];
   schoolName: string;
   schoolLogo: string;
+  schoolAddress: string;
   reportCardRollNo: string;
   reportCardRemarks: string;
   themeColors: ThemeColors;

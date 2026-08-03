@@ -379,7 +379,7 @@ export default function Dashboard() {
                     <div className="relative w-20 h-20 rounded-xl border-2 border-slate-200 overflow-hidden flex-shrink-0 bg-white">
                       <img src={resultCtx.state.schoolLogo} alt="Logo" className="w-full h-full object-contain p-1" />
                       <button
-                        onClick={() => { resultCtx.dispatch({ type: "SET_SCHOOL_INFO", payload: { name: resultCtx.state.schoolName, logo: "" } }); dispatch({ type: "SET_SCHOOL_LOGO", payload: null }); }}
+                        onClick={() => { resultCtx.dispatch({ type: "SET_SCHOOL_INFO", payload: { name: resultCtx.state.schoolName, logo: "", address: resultCtx.state.schoolAddress } }); dispatch({ type: "SET_SCHOOL_LOGO", payload: null }); }}
                         className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center shadow-md hover:bg-red-600"
                       >
                         &times;
@@ -393,7 +393,7 @@ export default function Dashboard() {
                       <span className="text-[9px] text-slate-400 font-medium mt-0.5">Upload</span>
                       <input type="file" accept="image/*" onChange={(e) => {
                         const file = e.target.files?.[0];
-                        if (file) { const r = new FileReader(); r.onload = (ev) => { const logo = ev.target?.result as string; resultCtx.dispatch({ type: "SET_SCHOOL_INFO", payload: { name: resultCtx.state.schoolName, logo } }); dispatch({ type: "SET_SCHOOL_LOGO", payload: logo }); }; r.readAsDataURL(file); }
+                        if (file) { const r = new FileReader(); r.onload = (ev) => { const logo = ev.target?.result as string; resultCtx.dispatch({ type: "SET_SCHOOL_INFO", payload: { name: resultCtx.state.schoolName, logo, address: resultCtx.state.schoolAddress } }); dispatch({ type: "SET_SCHOOL_LOGO", payload: logo }); }; r.readAsDataURL(file); }
                       }} className="hidden" />
                     </label>
                   )}
@@ -407,13 +407,23 @@ export default function Dashboard() {
                   type="text"
                   value={resultCtx.state.schoolName}
                   onChange={(e) => {
-                    resultCtx.dispatch({ type: "SET_SCHOOL_INFO", payload: { name: e.target.value, logo: resultCtx.state.schoolLogo } });
+                    resultCtx.dispatch({ type: "SET_SCHOOL_INFO", payload: { name: e.target.value, logo: resultCtx.state.schoolLogo, address: resultCtx.state.schoolAddress } });
                     dispatch({ type: "SET_SCHOOL_NAME", payload: e.target.value });
                   }}
                   className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-400 transition-all"
                   placeholder="e.g. Government Higher Secondary School"
                 />
-                <p className="text-[10px] text-slate-400 mt-1">Appears on report cards, result sheets & exam papers</p>
+                <label className="block text-xs font-semibold text-slate-500 mb-1 mt-3">School Address</label>
+                <input
+                  type="text"
+                  value={resultCtx.state.schoolAddress}
+                  onChange={(e) => {
+                    resultCtx.dispatch({ type: "SET_SCHOOL_INFO", payload: { name: resultCtx.state.schoolName, logo: resultCtx.state.schoolLogo, address: e.target.value } });
+                  }}
+                  className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-400 transition-all"
+                  placeholder="e.g. Lyari, Karachi near Sadr"
+                />
+                <p className="text-[10px] text-slate-400 mt-1">Shown under school name on report card</p>
               </div>
             </div>
 
@@ -586,6 +596,7 @@ export default function Dashboard() {
                 exam={resultCtx.state.currentExam}
                 schoolName={resultCtx.state.schoolName}
                 schoolLogo={resultCtx.state.schoolLogo}
+                schoolAddress={resultCtx.state.schoolAddress}
                 remarks={resultCtx.state.reportCardRemarks}
                 themeColors={resultCtx.state.themeColors}
                 watermark={resultCtx.state.reportCardWatermark}
