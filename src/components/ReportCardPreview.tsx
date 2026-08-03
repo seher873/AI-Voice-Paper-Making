@@ -78,7 +78,7 @@ const ReportCardPreview = forwardRef<HTMLDivElement, Props>(
                   src={schoolLogo}
                   alt=""
                   aria-hidden
-                  className="max-w-[75%] max-h-[70%] object-contain opacity-[0.06]"
+                  className="max-w-[90%] max-h-[85%] object-contain opacity-[0.06]"
                   style={{ filter: watermarkColor ? "none" : "grayscale(1)" }}
                 />
               </div>
@@ -87,13 +87,13 @@ const ReportCardPreview = forwardRef<HTMLDivElement, Props>(
             <div className="mb-3 text-sm">
               <div className="flex items-center gap-2 mb-1.5">
                 <span className="font-semibold whitespace-nowrap" style={{ color: c.primary }}>Student's Name</span>
-                <span className="flex-1 font-medium border-b-2 border-dotted text-left min-w-0" style={{ color: c.text, borderColor: `${c.text}55`, paddingBottom: 1 }}>
+                <span className="flex-1 font-medium border-b-2 border-dotted text-center min-w-0" style={{ color: c.text, borderColor: `${c.text}55`, paddingBottom: 1 }}>
                   {student.studentName.replace(/\s*:+\s*$/g, "")}
                 </span>
               </div>
               <div className="flex items-center gap-2 mb-1.5">
                 <span className="font-semibold whitespace-nowrap" style={{ color: c.primary }}>Father's Name</span>
-                <span className="flex-1 font-medium border-b-2 border-dotted text-left min-w-0" style={{ color: c.text, borderColor: `${c.text}55`, paddingBottom: 1 }}>
+                <span className="flex-1 font-medium border-b-2 border-dotted text-center min-w-0" style={{ color: c.text, borderColor: `${c.text}55`, paddingBottom: 1 }}>
                   {student.fatherName ? student.fatherName.replace(/\s*:+\s*$/g, "") : ""}
                 </span>
               </div>
