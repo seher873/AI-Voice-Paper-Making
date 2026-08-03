@@ -58,38 +58,34 @@ const ReportCardPreview = forwardRef<HTMLDivElement, Props>(
                 style={{ filter: watermarkColor ? "none" : "grayscale(1)" }}
               />
             )}
-            {/* Info - compact side by side */}
-            <div className="flex gap-4 items-start mb-3">
-              <div className="flex-1 space-y-1 text-sm">
-                <div className="flex gap-2 items-center">
-                  <span className="font-semibold whitespace-nowrap" style={{ color: c.primary, minWidth: 100 }}>Student Name</span>
-                  <span className="font-medium whitespace-nowrap" style={{ color: c.text }}>{student.studentName}</span>
-                </div>
-                <div className="flex gap-2 items-center">
-                  <span className="font-semibold whitespace-nowrap" style={{ color: c.primary, minWidth: 100 }}>Father Name</span>
-                  <span className="font-medium whitespace-nowrap" style={{ color: c.text }}>{student.fatherName || "—"}</span>
-                </div>
-                <div className="flex gap-2">
-                  <span className="font-semibold" style={{ color: c.primary, minWidth: 100 }}>Class:</span>
-                  <span className="font-medium" style={{ color: c.text }}>{exam?.className}</span>
-                </div>
-              </div>
-              <div className="flex-1 space-y-1 text-sm text-right">
-                <div className="flex gap-2 justify-end">
-                  <span className="font-semibold" style={{ color: c.primary }}>Roll No:</span>
-                  <span className="font-bold" style={{ fontFamily: "'Playfair Display', 'Georgia', serif", fontSize: "15px", color: c.accent }}>{student.rollNo}</span>
-                </div>
-                <div className="flex gap-2 justify-end">
-                  <span className="font-semibold" style={{ color: c.primary }}>Rank:</span>
-                  <span className="font-bold" style={{ fontFamily: "'Playfair Display', 'Georgia', serif", color: c.accent }}>
-                    {student.position === 0 ? "—" : student.position + (student.position >= 11 && student.position <= 13 ? "th" : ["th","st","nd","rd"][student.position % 10 > 3 ? 0 : student.position % 10])}
-                  </span>
-                </div>
-                <div className="flex gap-2 justify-end">
-                  <span className="font-semibold" style={{ color: c.primary }}>Section:</span>
-                  <span className="font-bold" style={{ fontFamily: "'Playfair Display', 'Georgia', serif", color: c.accent }}>{exam?.section || "—"}</span>
-                </div>
-              </div>
+            {/* Info - inline side by side */}
+            <div className="flex flex-wrap gap-x-5 gap-y-1 items-center mb-3 text-sm">
+              <span>
+                <span className="font-semibold whitespace-nowrap" style={{ color: c.primary }}>Student Name </span>
+                <span className="font-medium whitespace-nowrap" style={{ color: c.text }}>{student.studentName}</span>
+              </span>
+              <span>
+                <span className="font-semibold whitespace-nowrap" style={{ color: c.primary }}>Father Name </span>
+                <span className="font-medium whitespace-nowrap" style={{ color: c.text }}>{student.fatherName || "—"}</span>
+              </span>
+              <span>
+                <span className="font-semibold whitespace-nowrap" style={{ color: c.primary }}>Class: </span>
+                <span className="font-medium whitespace-nowrap" style={{ color: c.text }}>{exam?.className}</span>
+              </span>
+              <span>
+                <span className="font-semibold whitespace-nowrap" style={{ color: c.primary }}>Roll No: </span>
+                <span className="font-bold whitespace-nowrap" style={{ fontFamily: "'Playfair Display', 'Georgia', serif", fontSize: "15px", color: c.accent }}>{student.rollNo}</span>
+              </span>
+              <span>
+                <span className="font-semibold whitespace-nowrap" style={{ color: c.primary }}>Rank: </span>
+                <span className="font-bold whitespace-nowrap" style={{ fontFamily: "'Playfair Display', 'Georgia', serif", color: c.accent }}>
+                  {student.position === 0 ? "—" : student.position + (student.position >= 11 && student.position <= 13 ? "th" : ["th","st","nd","rd"][student.position % 10 > 3 ? 0 : student.position % 10])}
+                </span>
+              </span>
+              <span>
+                <span className="font-semibold whitespace-nowrap" style={{ color: c.primary }}>Section: </span>
+                <span className="font-bold whitespace-nowrap" style={{ fontFamily: "'Playfair Display', 'Georgia', serif", color: c.accent }}>{exam?.section || "—"}</span>
+              </span>
             </div>
 
             {/* Terms */}
