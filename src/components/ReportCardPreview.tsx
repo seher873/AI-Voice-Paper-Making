@@ -27,14 +27,14 @@ const ReportCardPreview = forwardRef<HTMLDivElement, Props>(
         {/* School Header */}
         <div className="px-6 pt-5 pb-3" style={{ background: `linear-gradient(135deg, ${c.primary}, ${c.primary}dd)` }}>
           <div className="flex items-center justify-between gap-4">
-            <div className="flex-shrink-0">
+            <div className="flex-1 flex justify-start">
               {schoolLogo && (
                 <div className="inline-flex p-2 bg-white rounded-xl shadow-md ring-1 ring-black/5" style={{ border: `1.5px solid ${c.accent}55` }}>
                   <img src={schoolLogo} alt="School Logo" className="h-14 sm:h-16 max-w-[140px] object-contain" />
                 </div>
               )}
             </div>
-            <div className="flex-1 min-w-0 text-center">
+            <div className="min-w-0 text-center">
               {schoolName && (
                 <h1 className="text-xl sm:text-2xl font-bold text-white break-words" style={{ fontFamily: "'Playfair Display', serif" }}>{schoolName}</h1>
               )}
@@ -48,7 +48,7 @@ const ReportCardPreview = forwardRef<HTMLDivElement, Props>(
                 MARKSHEET
               </h3>
             </div>
-            <div className="flex-shrink-0">
+            <div className="flex-1 flex justify-end">
               {student?.photo ? (
                 <div className="inline-flex p-1.5 bg-white rounded-xl shadow-md ring-1 ring-black/5" style={{ border: `1.5px solid ${c.accent}55` }}>
                   <img src={student.photo} alt="Student" className="h-14 sm:h-16 w-14 sm:w-16 object-cover rounded-lg" />
