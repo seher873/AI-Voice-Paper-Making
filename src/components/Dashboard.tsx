@@ -421,7 +421,7 @@ export default function Dashboard() {
                     resultCtx.dispatch({ type: "SET_SCHOOL_INFO", payload: { name: resultCtx.state.schoolName, logo: resultCtx.state.schoolLogo, address: e.target.value } });
                   }}
                   className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-400 transition-all"
-                  placeholder="e.g. Lyari, Karachi near Sadr"
+                  placeholder="Lyari Karachi, Phato Karachi Pakistan"
                 />
                 <p className="text-[10px] text-slate-400 mt-1">Shown under school name on report card</p>
               </div>

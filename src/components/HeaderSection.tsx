@@ -79,7 +79,7 @@ export default function HeaderSection() {
               value={state.schoolAddress}
               onChange={(e) => dispatch({ type: "SET_SCHOOL_ADDRESS", payload: e.target.value })}
               dir="auto"
-              placeholder="e.g. Lyari, Karachi near Sadr"
+              placeholder="Lyari Karachi, Phato Karachi Pakistan"
               className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-base text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all"
             />
           </div>
