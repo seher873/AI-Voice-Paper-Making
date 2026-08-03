@@ -27,6 +27,7 @@ export interface PaperState {
   paperTemplate: PaperTemplate;
   watermark: string;
   showWatermark: boolean;
+  showLogoWatermark: boolean;
   questions: Question[];
 }
 
@@ -48,6 +49,7 @@ export type PaperAction =
   | { type: "SET_PAPER_TEMPLATE"; payload: PaperTemplate }
   | { type: "SET_WATERMARK"; payload: string }
   | { type: "SET_SHOW_WATERMARK"; payload: boolean }
+  | { type: "SET_SHOW_LOGO_WATERMARK"; payload: boolean }
   | { type: "ADD_QUESTION"; payload: Question }
   | { type: "UPDATE_QUESTION"; payload: { id: string; text: string } }
   | { type: "UPDATE_QUESTION_TYPE"; payload: { id: string; type: QuestionType } }
@@ -75,6 +77,7 @@ export const initialState: PaperState = {
   paperTemplate: "english",
   watermark: "DRAFT",
   showWatermark: false,
+  showLogoWatermark: false,
   questions: [],
 };
 

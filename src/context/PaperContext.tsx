@@ -79,6 +79,8 @@ function paperReducer(state: PaperState, action: PaperAction): PaperState {
       return { ...state, watermark: action.payload };
     case "SET_SHOW_WATERMARK":
       return { ...state, showWatermark: action.payload };
+    case "SET_SHOW_LOGO_WATERMARK":
+      return { ...state, showLogoWatermark: action.payload };
     case "ADD_QUESTION":
       return { ...state, questions: [...state.questions, action.payload] };
     case "UPDATE_QUESTION":

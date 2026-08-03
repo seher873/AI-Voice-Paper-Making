@@ -278,6 +278,15 @@ export default function HeaderSection() {
                 />
                 <span className="text-sm font-medium text-slate-600">Show</span>
               </label>
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={state.showLogoWatermark}
+                  onChange={(e) => dispatch({ type: "SET_SHOW_LOGO_WATERMARK", payload: e.target.checked })}
+                  className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                />
+                <span className="text-sm font-medium text-slate-600">Logo</span>
+              </label>
             </div>
           </div>
         </div>
