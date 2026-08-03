@@ -25,8 +25,6 @@ export interface PaperState {
   fatherNameLabel: string;
   paperLanguage: "en" | "ur" | "sd";
   paperTemplate: PaperTemplate;
-  watermark: string;
-  showWatermark: boolean;
   showLogoWatermark: boolean;
   questions: Question[];
 }
@@ -47,8 +45,6 @@ export type PaperAction =
   | { type: "SET_FATHER_NAME_LABEL"; payload: string }
   | { type: "SET_PAPER_LANGUAGE"; payload: "en" | "ur" | "sd" }
   | { type: "SET_PAPER_TEMPLATE"; payload: PaperTemplate }
-  | { type: "SET_WATERMARK"; payload: string }
-  | { type: "SET_SHOW_WATERMARK"; payload: boolean }
   | { type: "SET_SHOW_LOGO_WATERMARK"; payload: boolean }
   | { type: "ADD_QUESTION"; payload: Question }
   | { type: "UPDATE_QUESTION"; payload: { id: string; text: string } }
@@ -75,8 +71,6 @@ export const initialState: PaperState = {
   fatherNameLabel: "Father's Name",
   paperLanguage: "en",
   paperTemplate: "english",
-  watermark: "DRAFT",
-  showWatermark: false,
   showLogoWatermark: false,
   questions: [],
 };

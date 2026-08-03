@@ -75,10 +75,6 @@ function paperReducer(state: PaperState, action: PaperAction): PaperState {
         fatherNameLabel: tpl.fatherNameLabel,
       };
     }
-    case "SET_WATERMARK":
-      return { ...state, watermark: action.payload };
-    case "SET_SHOW_WATERMARK":
-      return { ...state, showWatermark: action.payload };
     case "SET_SHOW_LOGO_WATERMARK":
       return { ...state, showLogoWatermark: action.payload };
     case "ADD_QUESTION":

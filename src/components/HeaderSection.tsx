@@ -259,25 +259,9 @@ export default function HeaderSection() {
 
           <div className="sm:col-span-2">
             <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
-              Watermark
+              Logo Watermark
             </label>
             <div className="flex items-center gap-3">
-              <input
-                type="text"
-                value={state.watermark}
-                onChange={(e) => dispatch({ type: "SET_WATERMARK", payload: e.target.value })}
-                placeholder="e.g. DRAFT, SAMPLE, CONFIDENTIAL"
-                className="flex-1 px-4 py-3 bg-white border border-slate-200 rounded-xl text-base text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all"
-              />
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={state.showWatermark}
-                  onChange={(e) => dispatch({ type: "SET_SHOW_WATERMARK", payload: e.target.checked })}
-                  className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                />
-                <span className="text-sm font-medium text-slate-600">Show</span>
-              </label>
               <label className="flex items-center gap-2 cursor-pointer select-none">
                 <input
                   type="checkbox"
@@ -285,7 +269,7 @@ export default function HeaderSection() {
                   onChange={(e) => dispatch({ type: "SET_SHOW_LOGO_WATERMARK", payload: e.target.checked })}
                   className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                 />
-                <span className="text-sm font-medium text-slate-600">Logo</span>
+                <span className="text-sm font-medium text-slate-600">Show school logo in background</span>
               </label>
             </div>
           </div>

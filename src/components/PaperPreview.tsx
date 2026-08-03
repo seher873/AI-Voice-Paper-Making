@@ -99,30 +99,6 @@ export default function PaperPreview() {
               position: "relative",
             }}
           >
-            {/* Watermark */}
-            {state.showWatermark && state.watermark && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none" style={{ zIndex: 0 }}>
-                <span
-                  className="text-[100px] sm:text-[140px] lg:text-[180px] font-black uppercase tracking-[0.3em] opacity-[0.06] text-slate-600"
-                  style={{ transform: "rotate(-30deg)", whiteSpace: "nowrap" }}
-                >
-                  {state.watermark}
-                </span>
-              </div>
-            )}
-            {/* Logo Watermark */}
-            {state.showLogoWatermark && state.schoolLogo && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none" style={{ zIndex: 0 }}>
-                <img
-                  src={state.schoolLogo}
-                  alt=""
-                  aria-hidden
-                  className="w-1/2 max-w-[200px] object-contain opacity-[0.07]"
-                  style={{ transform: "rotate(-20deg)", filter: "grayscale(1)" }}
-                />
-              </div>
-            )}
-
             {/* Header */}
             <div className={`flex items-center gap-x-6 sm:gap-x-10 mb-3 sm:mb-4 relative ${isRTL ? "flex-row" : ""}`}>
               <div className={`w-[70px] sm:w-[90px] lg:w-[110px] h-[70px] sm:h-[90px] lg:h-[110px] flex-shrink-0`}>
@@ -225,7 +201,18 @@ export default function PaperPreview() {
             </div>
 
             {/* Questions */}
-            <div className="mb-6 sm:mb-8 min-h-[120px] sm:min-h-[200px]">
+            <div className="relative isolate mb-6 sm:mb-8 min-h-[120px] sm:min-h-[200px]">
+              {state.showLogoWatermark && state.schoolLogo && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-[-1]">
+                  <img
+                    src={state.schoolLogo}
+                    alt=""
+                    aria-hidden
+                    className="max-w-[65%] max-h-[80%] object-contain opacity-[0.07]"
+                    style={{ filter: "grayscale(1)" }}
+                  />
+                </div>
+              )}
               {questionCount === 0 ? (
                 <div className="flex items-center justify-center h-[120px] sm:h-[200px] border-2 border-dashed border-slate-200 rounded-xl">
                   <div className="text-center">
