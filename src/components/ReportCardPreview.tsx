@@ -46,7 +46,16 @@ const ReportCardPreview = forwardRef<HTMLDivElement, Props>(
             <p className="text-xs mt-1" style={{ color: c.text }}>School name & logo appear live above</p>
           </div>
         ) : (
-          <div className="p-5 bg-white">
+          <div className="p-5 bg-white relative isolate">
+            {schoolLogo && (
+              <img
+                src={schoolLogo}
+                alt=""
+                aria-hidden
+                className="absolute inset-0 w-full h-full object-contain opacity-[0.06] pointer-events-none select-none z-[-1]"
+                style={{ filter: "grayscale(1)" }}
+              />
+            )}
             {/* Info - compact side by side */}
             <div className="flex gap-4 items-start mb-3">
               <div className="flex-1 space-y-1 text-sm">
