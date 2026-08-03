@@ -27,8 +27,8 @@ const ReportCardPreview = forwardRef<HTMLDivElement, Props>(
         <div className="text-center px-6 pt-5 pb-3" style={{ background: `linear-gradient(135deg, ${c.primary}, ${c.primary}dd)` }}>
           {schoolLogo && (
             <div className="flex justify-center mb-3">
-              <div className="p-2.5 bg-white/95 rounded-full shadow-sm">
-                <img src={schoolLogo} alt="School Logo" className="h-20 w-auto object-contain" />
+              <div className="inline-flex p-2 bg-white rounded-xl shadow-md ring-1 ring-black/5" style={{ border: `1.5px solid ${c.accent}55` }}>
+                <img src={schoolLogo} alt="School Logo" className="h-16 sm:h-20 max-w-[180px] object-contain" />
               </div>
             </div>
           )}
