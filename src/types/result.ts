@@ -38,6 +38,7 @@ export interface StudentMark {
   rollNo: string;
   studentName: string;
   fatherName: string;
+  photo?: string;
   subjectMarks: Record<string, number>;
   position?: number;
   positionOverridden?: boolean;
@@ -47,6 +48,7 @@ export interface StudentResult {
   rollNo: string;
   studentName: string;
   fatherName: string;
+  photo?: string;
   subjectMarks: Record<string, number>;
   totalObtained: number;
   totalMarks: number;

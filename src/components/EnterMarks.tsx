@@ -12,6 +12,7 @@ export default function EnterMarks() {
   const [rollNo, setRollNo] = useState("");
   const [studentName, setStudentName] = useState("");
   const [fatherName, setFatherName] = useState("");
+  const [photo, setPhoto] = useState("");
   const [marks, setMarks] = useState<Record<string, string>>({});
   const [editingRollNo, setEditingRollNo] = useState<string | null>(null);
   const [position, setPosition] = useState("");
@@ -33,13 +34,14 @@ export default function EnterMarks() {
     const pos = position.trim() !== "" ? Number(position) : undefined;
 
     if (editingRollNo) {
-      dispatch({ type: "UPDATE_STUDENT", payload: { rollNo: editingRollNo, studentName, fatherName, subjectMarks, position: pos, positionOverridden: pos !== undefined } });
+      dispatch({ type: "UPDATE_STUDENT", payload: { rollNo: editingRollNo, studentName, fatherName, photo, subjectMarks, position: pos, positionOverridden: pos !== undefined } });
     } else {
-      dispatch({ type: "ADD_STUDENT", payload: { rollNo, studentName, fatherName, subjectMarks, position: pos, positionOverridden: pos !== undefined } });
+      dispatch({ type: "ADD_STUDENT", payload: { rollNo, studentName, fatherName, photo, subjectMarks, position: pos, positionOverridden: pos !== undefined } });
     }
     setRollNo("");
     setStudentName("");
     setFatherName("");
+    setPhoto("");
     setMarks({});
     setPosition("");
     setEditingRollNo(null);
@@ -52,6 +54,7 @@ export default function EnterMarks() {
     setRollNo(student.rollNo);
     setStudentName(student.studentName);
     setFatherName(student.fatherName);
+    setPhoto(student.photo || "");
     setPosition(student.position ? String(student.position) : "");
     setMarks(
       Object.fromEntries(
@@ -102,6 +105,39 @@ export default function EnterMarks() {
             />
             <p className="text-[10px] text-slate-400 mt-1">Leave empty to auto-assign</p>
           </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 mb-1">Student Photo (optional)</label>
+            <div className="flex items-center gap-3">
+              {photo ? (
+                <img src={photo} alt="Student" className="w-14 h-14 rounded-lg object-cover border border-slate-200 flex-shrink-0" />
+              ) : (
+                <div className="w-14 h-14 rounded-lg border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-300 text-[9px] font-medium flex-shrink-0">Photo</div>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const r = new FileReader();
+                    r.onload = (ev) => setPhoto((ev.target?.result as string) || "");
+                    r.readAsDataURL(file);
+                  }
+                }}
+                className="text-xs text-slate-500"
+              />
+              {photo && (
+                <button
+                  type="button"
+                  onClick={() => setPhoto("")}
+                  className="text-xs text-red-500 hover:bg-red-50 px-2 py-1 rounded-lg transition-all"
+                >
+                  Remove
+                </button>
+              )}
+            </div>
+            <p className="text-[10px] text-slate-400 mt-1">Shows on report card header</p>
+          </div>
         </div>
 
         <div>
@@ -138,7 +174,7 @@ export default function EnterMarks() {
           {editingRollNo && (
             <button
               type="button"
-              onClick={() => { setEditingRollNo(null); setRollNo(""); setStudentName(""); setFatherName(""); setMarks({}); }}
+              onClick={() => { setEditingRollNo(null); setRollNo(""); setStudentName(""); setFatherName(""); setPhoto(""); setMarks({}); }}
               className="px-4 py-2.5 text-sm font-medium text-slate-500 hover:bg-slate-100 rounded-xl transition-all"
             >
               Cancel

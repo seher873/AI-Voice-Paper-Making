@@ -24,6 +24,7 @@ export function calculateResults(
       rollNo: s.rollNo,
       studentName: s.studentName,
       fatherName: s.fatherName,
+      photo: s.photo,
       subjectMarks: s.subjectMarks,
       totalObtained,
       totalMarks,
