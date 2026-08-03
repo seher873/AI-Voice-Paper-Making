@@ -24,19 +24,21 @@ const ReportCardPreview = forwardRef<HTMLDivElement, Props>(
     return (
       <div ref={ref} className="bg-white rounded-xl border-2 shadow-sm overflow-hidden" style={{ borderColor: c.accent }}>
         {/* School Header */}
-        <div className="text-center px-6 pt-5 pb-3" style={{ background: `linear-gradient(135deg, ${c.primary}, ${c.primary}dd)` }}>
-          {schoolLogo && (
-            <div className="flex justify-center mb-3">
-              <div className="inline-flex p-2 bg-white rounded-xl shadow-md ring-1 ring-black/5" style={{ border: `1.5px solid ${c.accent}55` }}>
-                <img src={schoolLogo} alt="School Logo" className="h-16 sm:h-20 max-w-[180px] object-contain" />
+        <div className="px-6 pt-5 pb-3" style={{ background: `linear-gradient(135deg, ${c.primary}, ${c.primary}dd)` }}>
+          <div className="flex items-center justify-center gap-4 mb-1">
+            {schoolLogo && (
+              <div className="inline-flex p-2 bg-white rounded-xl shadow-md ring-1 ring-black/5 flex-shrink-0" style={{ border: `1.5px solid ${c.accent}55` }}>
+                <img src={schoolLogo} alt="School Logo" className="h-14 sm:h-16 max-w-[140px] object-contain" />
               </div>
+            )}
+            <div className={`min-w-0 ${schoolLogo ? "text-left" : "text-center"}`}>
+              {schoolName && (
+                <h1 className="text-xl sm:text-2xl font-bold text-white break-words" style={{ fontFamily: "'Playfair Display', serif" }}>{schoolName}</h1>
+              )}
+              <h2 className="text-base font-bold text-white/90">{exam?.name || "Examination"} — Report Card</h2>
+              <p className="text-xs text-white/70">{exam?.session || "Session"} | {exam?.className || "Class"}</p>
             </div>
-          )}
-          {schoolName && (
-            <h1 className="text-2xl font-bold text-white mb-0.5" style={{ fontFamily: "'Playfair Display', serif" }}>{schoolName}</h1>
-          )}
-          <h2 className="text-base font-bold text-white/90">{exam?.name || "Examination"} — Report Card</h2>
-          <p className="text-xs text-white/70">{exam?.session || "Session"} | {exam?.className || "Class"}</p>
+          </div>
         </div>
 
         {!student ? (
