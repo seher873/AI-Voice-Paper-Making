@@ -352,7 +352,7 @@ export default function Dashboard() {
 
         {/* School Info (all modes) */}
         {showSchoolInfo && (
-          <div className="px-3 sm:px-4 py-3 bg-white border-b border-slate-200 space-y-3">
+          <div className="px-3 sm:px-4 py-3 bg-white border-b border-slate-200 space-y-3 flex-shrink-0 max-h-[45vh] overflow-y-auto">
             {/* Live Preview */}
             {(resultCtx.state.schoolName || resultCtx.state.schoolLogo) && (
               <div className="p-3 rounded-xl border-2 border-dashed border-indigo-200 bg-indigo-50/50">

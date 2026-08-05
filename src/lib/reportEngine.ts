@@ -86,7 +86,9 @@ export function printElement(elementId: string) {
 
   w.document.write(`
     <html><head><title>Print</title>
-    <style>${styles} @page { margin: 10mm; } body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }</style>
+    <style>${styles} @page { margin: 10mm; } body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    @media print { body * { visibility: visible !important; } }
+    </style>
     </head><body>${el.innerHTML}</body></html>
   `);
   w.document.close();
