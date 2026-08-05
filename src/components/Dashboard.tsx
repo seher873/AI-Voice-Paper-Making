@@ -218,7 +218,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row h-dvh bg-gradient-to-br from-slate-50 to-indigo-50/50">
+    <div className="flex flex-col lg:flex-row app-h bg-gradient-to-br from-slate-50 to-indigo-50/50">
       {/* Mobile top bar */}
       <div className="lg:hidden flex items-center justify-between bg-white border-b border-slate-200 px-4 py-2 z-30 shadow-sm">
         <button
@@ -258,7 +258,7 @@ export default function Dashboard() {
       <div
         className={`${
           menuOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0 fixed lg:relative top-0 left-0 z-30           w-[92vw] max-w-[480px] h-dvh lg:h-auto lg:w-[520px] lg:min-w-[520px] xl:w-[560px] xl:min-w-[560px] bg-white/95 backdrop-blur-sm border-r border-slate-200 flex flex-col shadow-2xl lg:shadow-lg transition-transform duration-300 ease-in-out`}
+        } lg:translate-x-0 fixed lg:relative top-0 left-0 z-30           w-[92vw] max-w-[480px] app-h lg:h-auto lg:w-[520px] lg:min-w-[520px] xl:w-[560px] xl:min-w-[560px] bg-white/95 backdrop-blur-sm border-r border-slate-200 flex flex-col shadow-2xl lg:shadow-lg transition-transform duration-300 ease-in-out`}
       >
         {/* Header */}
         <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 px-5 py-2.5 flex-shrink-0">

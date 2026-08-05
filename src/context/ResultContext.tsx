@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useReducer, useCallback, useMemo, type ReactNode } from "react";
+import { createContext, useContext, useReducer, useCallback, useMemo, useEffect, useRef, type ReactNode } from "react";
 import type { ResultState, Exam, Subject, StudentMark, StudentResult, GradeScale, ResultTab, ThemeColors } from "@/types/result";
 import { DEFAULT_GRADE_SCALE, DEFAULT_THEME } from "@/types/result";
 import { calculateResults, calculateClassStats } from "@/lib/resultEngine";
@@ -44,6 +44,22 @@ const initialState: ResultState = {
   reportCardWatermark: true,
   reportCardWatermarkColor: false,
 };
+
+const STORAGE_KEY = "paper-maker-results-state";
+
+function loadResultState(): Partial<ResultState> {
+  if (typeof window === "undefined") return {};
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed && Array.isArray(parsed.exams)) return parsed;
+    }
+  } catch {
+    // ignore
+  }
+  return {};
+}
 
 export function resultReducer(state: ResultState, action: ResultAction): ResultState {
   const snapshotExam = (students: StudentMark[], results: StudentResult[]): ResultState => {
@@ -179,6 +195,31 @@ const ResultContext = createContext<ResultContextType | undefined>(undefined);
 export function ResultProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(resultReducer, initialState);
   const [activeTab, setActiveTabState] = useReducer((_: ResultTab, tab: ResultTab) => tab, "create-exam" as ResultTab);
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      const saved = loadResultState();
+      if (saved.exams && saved.exams.length > 0) {
+        dispatch({ type: "HYDRATE", payload: saved });
+      } else if (saved.schoolName || saved.schoolLogo || (saved.students && saved.students.length > 0)) {
+        dispatch({ type: "HYDRATE", payload: saved });
+      }
+    }
+  }, []);
+
+  const prevState = useRef(state);
+  useEffect(() => {
+    if (prevState.current === state) return;
+    prevState.current = state;
+    try {
+      const { reportCardRollNo, reportCardRemarks, classStats, ...toSave } = state;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+    } catch {
+      // ignore
+    }
+  }, [state]);
 
   const setActiveTab = useCallback((tab: ResultTab) => setActiveTabState(tab), []);
 
