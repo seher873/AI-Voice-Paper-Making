@@ -269,11 +269,11 @@ export default function Dashboard() {
               </svg>
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <h1 className="text-base font-bold text-white tracking-tight truncate">
+              <div className="flex items-center gap-2 min-w-0">
+                <h1 className="flex-1 min-w-0 text-base font-bold text-white tracking-tight truncate">
                   {mode === "paper" ? "AI Voice Paper" : "Result Management"}
                 </h1>
-                <span className="inline-flex px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-white/15 text-indigo-200 leading-none">
+                <span className="flex-shrink-0 inline-flex px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-white/15 text-indigo-200 leading-none whitespace-nowrap">
                   {plan.label}
                 </span>
               </div>
@@ -286,12 +286,12 @@ export default function Dashboard() {
                 <button
                   onClick={() => setShowSchools(true)}
                   className="px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 bg-white/10 text-white hover:bg-white/20 flex-shrink-0"
-                  title="School Overview"
+                  title="Admin"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10M9 21h6" />
                   </svg>
-                  <span className="hidden sm:inline">Schools</span>
+                  <span className="hidden sm:inline">Admin</span>
                 </button>
               )}
               <button
@@ -308,7 +308,7 @@ export default function Dashboard() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
                   )}
-                  <span className="hidden sm:inline truncate max-w-[110px]">{resultCtx.state.schoolName || "School"}</span>
+                  <span className="hidden sm:inline">Info</span>
                 </button>
               {!planFromDb && availableModes.length > 1 && (
                 <button
