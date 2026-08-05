@@ -66,6 +66,7 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<"header" | "questions" | "template">("header");
   const [menuOpen, setMenuOpen] = useState(false);
   const [showSchoolInfo, setShowSchoolInfo] = useState(false);
+  const [schoolInfoCollapsed, setSchoolInfoCollapsed] = useState(false);
   const [, setLockedPlan] = useState<"paper" | "results" | "full" | null>(() => initialPlanState().lockedPlan);
   const [planFromDb, setPlanFromDb] = useState(() => initialPlanState().planFromDb);
   const [schoolReady, setSchoolReady] = useState<boolean | null>(null);
@@ -350,9 +351,31 @@ export default function Dashboard() {
           </div>
         </div>
 
+        <div className="flex-1 min-h-0 overflow-y-auto">
         {/* School Info (all modes) */}
         {showSchoolInfo && (
-          <div className="px-3 sm:px-4 py-3 bg-white border-b border-slate-200 space-y-3 flex-shrink-0 max-h-[45vh] overflow-y-auto">
+          <div className="bg-white border-b border-slate-200">
+            <button
+              onClick={() => setSchoolInfoCollapsed(!schoolInfoCollapsed)}
+              className="sticky top-0 z-10 w-full flex items-center justify-between px-3 sm:px-4 py-2.5 text-left bg-white hover:bg-slate-50 transition-colors shadow-sm"
+            >
+              <span className="text-xs font-bold text-slate-700 flex items-center gap-2">
+                <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+                School Info
+              </span>
+              <svg
+                className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${schoolInfoCollapsed ? "" : "rotate-180"}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+              </svg>
+            </button>
+            {!schoolInfoCollapsed && (
+          <div className="px-3 sm:px-4 py-3 space-y-3">
             {/* Live Preview */}
             {(resultCtx.state.schoolName || resultCtx.state.schoolLogo) && (
               <div className="p-3 rounded-xl border-2 border-dashed border-indigo-200 bg-indigo-50/50">
@@ -514,6 +537,8 @@ export default function Dashboard() {
             </div>
             <BackupPanel />
           </div>
+            )}
+          </div>
         )}
 
         {/* Template Selector */}
@@ -562,7 +587,7 @@ export default function Dashboard() {
         )}
 
         {/* Tab Content */}
-        <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4">
+        <div className="p-3 sm:p-4 space-y-4">
           {mode === "paper" && !plan.features.paper && <UpgradeBanner feature="Paper Generator" />}
           {mode === "results" && !plan.features.results && <UpgradeBanner feature="Result Management" />}
           {mode === "paper" && plan.features.paper && activeTab === "header" && <HeaderSection />}
@@ -573,10 +598,11 @@ export default function Dashboard() {
 
         {/* Export */}
         {mode === "paper" && plan.features.paper && (
-          <div className="flex-shrink-0 bg-white border-t border-slate-200 px-3 sm:px-4 py-3">
+          <div className="bg-white border-t border-slate-200 px-3 sm:px-4 py-3">
             <ExportBar />
           </div>
         )}
+        </div>
       </div>
 
       {/* Right Panel - Preview */}

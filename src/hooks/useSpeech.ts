@@ -16,6 +16,21 @@ export function useSpeech() {
 
   const recognitionRef = useRef<SpeechRecognition | null>(null)
   const manualStopRef = useRef(false)
+  const restartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const safeStop = useCallback(() => {
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop()
+      } catch {
+        // already stopped/ended — ignore
+      }
+    }
+    if (restartTimerRef.current) {
+      clearTimeout(restartTimerRef.current)
+      restartTimerRef.current = null
+    }
+  }, [])
 
   const startListening = useCallback(
     (onResult: (result: SpeechResult) => void, lang: string = "ur-PK") => {
@@ -29,9 +44,7 @@ export function useSpeech() {
         w.SpeechRecognition || w.webkitSpeechRecognition
       if (!SpeechRecognitionAPI) return
 
-      if (recognitionRef.current) {
-        recognitionRef.current.stop()
-      }
+      safeStop()
 
       const recognition = new SpeechRecognitionAPI()
       recognition.continuous = false
@@ -45,29 +58,37 @@ export function useSpeech() {
 
       recognition.onstart = () => setIsListening(true)
       recognition.onend = () => {
-        if (!manualStopRef.current) {
-          setTimeout(() => {
-            try {
-              const api = new SpeechRecognitionAPI()
-              api.continuous = false
-              api.interimResults = true
-              api.maxAlternatives = 1
-              api.lang = effectiveLang
-              api.onstart = recognition.onstart
-              api.onend = recognition.onend
-              api.onerror = recognition.onerror
-              api.onresult = recognition.onresult
-              recognitionRef.current = api
-              api.start()
-            } catch {
-              setIsListening(false)
-            }
-          }, 300)
-        } else {
+        if (manualStopRef.current) {
           setIsListening(false)
+          return
         }
+        restartTimerRef.current = setTimeout(() => {
+          restartTimerRef.current = null
+          if (manualStopRef.current) {
+            setIsListening(false)
+            return
+          }
+          try {
+            const api = new SpeechRecognitionAPI()
+            api.continuous = false
+            api.interimResults = true
+            api.maxAlternatives = 1
+            api.lang = effectiveLang
+            api.onstart = recognition.onstart
+            api.onend = recognition.onend
+            api.onerror = recognition.onerror
+            api.onresult = recognition.onresult
+            recognitionRef.current = api
+            api.start()
+          } catch {
+            setIsListening(false)
+          }
+        }, 300)
       }
-      recognition.onerror = () => { manualStopRef.current = true; setIsListening(false) }
+      recognition.onerror = () => {
+        manualStopRef.current = true
+        setIsListening(false)
+      }
 
       let fullTranscript = ""
       recognition.onresult = (event: SpeechRecognitionEvent) => {
@@ -106,16 +127,14 @@ export function useSpeech() {
       recognition.start()
       recognitionRef.current = recognition
     },
-    []
+    [safeStop]
   )
 
   const stopListening = useCallback(() => {
     manualStopRef.current = true
-    if (recognitionRef.current) {
-      recognitionRef.current.stop()
-      setIsListening(false)
-    }
-  }, [])
+    safeStop()
+    setIsListening(false)
+  }, [safeStop])
 
   const speak = useCallback((text: string, lang: string = "ur-PK") => {
     if (!("speechSynthesis" in window)) return
