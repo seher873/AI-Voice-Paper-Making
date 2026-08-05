@@ -11,8 +11,8 @@ export interface SchoolBackup {
   exportedAt: string;
   schoolName: string;
   exams: Exam[];
-  students: StudentMark[];
-  results: StudentResult[];
+  students?: StudentMark[];
+  results?: StudentResult[];
   gradeScales: GradeScale[];
   papers: PaperState[];
 }
@@ -37,28 +37,16 @@ function writeJSON(key: string, value: unknown) {
   }
 }
 
-function resultStateToBackup(state: Partial<ResultState>): { exams: Exam[]; students: StudentMark[]; results: StudentResult[]; gradeScales: GradeScale[] } {
-  return {
-    exams: state.exams || [],
-    students: state.students || [],
-    results: state.results || [],
-    gradeScales: state.gradeScale || DEFAULT_GRADE_SCALE,
-  };
-}
-
 export async function exportSchoolData(): Promise<SchoolBackup> {
   const result = readJSON<Partial<ResultState>>(RESULT_KEY, {});
   const paper: PaperState = { ...initialPaperState, ...readJSON<Partial<PaperState>>(PAPER_KEY, {}) };
-  const { exams, students, results, gradeScales } = resultStateToBackup(result);
 
   return {
     version: 1,
     exportedAt: new Date().toISOString(),
     schoolName: paper.schoolName || result.schoolName || "My School",
-    exams,
-    students,
-    results,
-    gradeScales,
+    exams: result.exams || [],
+    gradeScales: result.gradeScale || DEFAULT_GRADE_SCALE,
     papers: [paper],
   };
 }
@@ -66,19 +54,22 @@ export async function exportSchoolData(): Promise<SchoolBackup> {
 export async function importSchoolData(backup: SchoolBackup): Promise<{ success: boolean; message: string }> {
   if (!backup || backup.version !== 1) throw new Error("Invalid backup file");
 
+  const exams: Exam[] = backup.exams || [];
+  const currentExam = exams.length > 0 ? exams[exams.length - 1] : null;
+
   const result: Partial<ResultState> = {
-    exams: backup.exams || [],
-    students: backup.students || [],
-    results: backup.results || [],
+    exams,
+    students: currentExam?.students || backup.students || [],
+    results: currentExam?.results || backup.results || [],
     gradeScale: backup.gradeScales && backup.gradeScales.length > 0 ? backup.gradeScales : DEFAULT_GRADE_SCALE,
     schoolName: backup.schoolName,
-    currentExam: backup.exams && backup.exams.length > 0 ? backup.exams[backup.exams.length - 1] : null,
+    currentExam,
   };
   writeJSON(RESULT_KEY, result);
 
   const paper: Partial<PaperState> = backup.papers && backup.papers.length > 0 ? backup.papers[0] : {};
   writeJSON(PAPER_KEY, paper);
 
-  const count = (backup.exams?.length || 0) + (backup.students?.length || 0) + (backup.results?.length || 0);
+  const count = exams.length + (result.students?.length || 0);
   return { success: true, message: `${count} records restored successfully!` };
 }

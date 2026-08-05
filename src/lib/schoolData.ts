@@ -7,29 +7,10 @@ interface SchoolStateRow {
   result_state: ResultState | null;
 }
 
-const LOCAL_PAPER_KEY = "school-state-paper";
-const LOCAL_RESULT_KEY = "school-state-result";
+const LOCAL_PAPER_KEY = "paper-maker-state";
+const LOCAL_RESULT_KEY = "paper-maker-results-state";
 
 export async function loadSchoolState(): Promise<{ paper: PaperState | null; result: ResultState | null } | null> {
-  try {
-    const schoolId = await getSchoolId();
-    if (schoolId) {
-      const { data, error } = await getSupabase()
-        .from("school_state")
-        .select("paper_state, result_state")
-        .eq("school_id", schoolId)
-        .maybeSingle();
-      if (!error && data) {
-        const row = data as SchoolStateRow;
-        return {
-          paper: row.paper_state || null,
-          result: row.result_state || null,
-        };
-      }
-    }
-  } catch {
-    // fall through to localStorage
-  }
   try {
     const paperRaw = localStorage.getItem(LOCAL_PAPER_KEY);
     const resultRaw = localStorage.getItem(LOCAL_RESULT_KEY);
