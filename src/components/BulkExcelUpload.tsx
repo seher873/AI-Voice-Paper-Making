@@ -78,6 +78,19 @@ export default function BulkExcelUpload() {
         >
           Download Template
         </button>
+        {state.students.length > 0 && (
+          <button
+            onClick={() => {
+              if (confirm("Delete all students from this exam?")) {
+                dispatch({ type: "CLEAR_STUDENTS" });
+                setErrors([]);
+              }
+            }}
+            className="px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 font-medium text-sm transition-all"
+          >
+            Delete Students
+          </button>
+        )}
       </div>
 
       {errors.length > 0 && (
