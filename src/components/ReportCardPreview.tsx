@@ -72,17 +72,6 @@ const ReportCardPreview = forwardRef<HTMLDivElement, Props>(
           </div>
         ) : (
           <div className="p-5 bg-white relative isolate">
-            {watermark && schoolLogo && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-[-1]">
-                <img
-                  src={schoolLogo}
-                  alt=""
-                  aria-hidden
-                  className="max-w-[90%] max-h-[85%] object-contain opacity-[0.06]"
-                  style={{ filter: watermarkColor ? "none" : "grayscale(1)" }}
-                />
-              </div>
-            )}
             {/* Info - name dotted lines */}
             <div className="mb-3 text-sm">
               <div className="flex items-center gap-2 mb-1.5">
@@ -134,8 +123,19 @@ const ReportCardPreview = forwardRef<HTMLDivElement, Props>(
             )}
 
             {/* Marks Table with border */}
-            <div className="rounded-lg overflow-hidden mb-4" style={{ border: `2px solid ${c.primary}30` }}>
-              <table className="w-full text-sm">
+            <div className="relative rounded-lg overflow-hidden mb-4" style={{ border: `2px solid ${c.primary}30` }}>
+              {watermark && schoolLogo && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-[1]">
+                  <img
+                    src={schoolLogo}
+                    alt=""
+                    aria-hidden
+                    className="max-w-[70%] max-h-[75%] object-contain opacity-[0.07]"
+                    style={{ filter: watermarkColor ? "none" : "grayscale(1)" }}
+                  />
+                </div>
+              )}
+              <table className="w-full text-sm relative z-[2]">
                 <thead>
                   <tr style={{ background: `linear-gradient(135deg, ${c.primary}, ${c.primary}dd)` }}>
                     <th className="text-left px-3 py-2.5 font-semibold text-white">Subject</th>
