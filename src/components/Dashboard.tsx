@@ -281,11 +281,11 @@ export default function Dashboard() {
                 {mode === "paper" ? "School Paper Builder" : "Results & Report Cards"}
               </p>
             </div>
-            <div className="ml-auto flex items-center gap-1.5">
+            <div className="ml-auto flex items-center gap-1.5 min-w-0">
               {isSuperAdmin && (
                 <button
                   onClick={() => setShowSchools(true)}
-                  className="px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 bg-white/10 text-white hover:bg-white/20"
+                  className="px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 bg-white/10 text-white hover:bg-white/20 flex-shrink-0"
                   title="School Overview"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -296,7 +296,7 @@ export default function Dashboard() {
               )}
               <button
                   onClick={() => setShowSchoolInfo(!showSchoolInfo)}
-                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 flex-shrink-0 ${
                     showSchoolInfo ? "bg-white/20 text-white" : "text-indigo-200 hover:bg-white/10 hover:text-white"
                   }`}
                   title="School Info"
@@ -308,12 +308,12 @@ export default function Dashboard() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
                   )}
-                  <span className="hidden sm:inline">{resultCtx.state.schoolName || "School"}</span>
+                  <span className="hidden sm:inline truncate max-w-[110px]">{resultCtx.state.schoolName || "School"}</span>
                 </button>
               {!planFromDb && availableModes.length > 1 && (
                 <button
                   onClick={() => setMode(mode === "paper" ? "results" : "paper")}
-                  className={`inline-flex px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  className={`inline-flex px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex-shrink-0 ${
                     mode === "results"
                       ? "bg-white/20 text-white"
                       : "bg-white/10 text-indigo-200 hover:bg-white/20 hover:text-white"
