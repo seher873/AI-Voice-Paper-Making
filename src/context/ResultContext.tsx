@@ -11,6 +11,7 @@ type ResultAction =
   | { type: "SET_CURRENT_EXAM"; payload: Exam | null }
   | { type: "SET_SUBJECTS"; payload: Subject[] }
   | { type: "SET_STUDENTS"; payload: StudentMark[] }
+  | { type: "ADD_STUDENTS"; payload: StudentMark[] }
   | { type: "UPDATE_STUDENT"; payload: StudentMark }
   | { type: "ADD_STUDENT"; payload: StudentMark }
   | { type: "REMOVE_STUDENT"; payload: string }
@@ -91,6 +92,18 @@ export function resultReducer(state: ResultState, action: ResultAction): ResultS
     }
     case "SET_STUDENTS":
       return snapshotExam(action.payload, state.results);
+    case "ADD_STUDENTS": {
+      const merged = [...state.students];
+      for (const student of action.payload) {
+        const idx = merged.findIndex((s) => s.rollNo === student.rollNo);
+        if (idx === -1) {
+          merged.push(student);
+        } else {
+          merged[idx] = student;
+        }
+      }
+      return snapshotExam(merged, state.results);
+    }
     case "UPDATE_STUDENT":
       return snapshotExam(
         state.students.map((s) => (s.rollNo === action.payload.rollNo ? { ...action.payload } : s)),

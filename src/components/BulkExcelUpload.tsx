@@ -24,7 +24,7 @@ export default function BulkExcelUpload() {
       const result = parseExcelFile(buffer, subjects);
 
       if (result.students.length > 0) {
-        dispatch({ type: "SET_STUDENTS", payload: result.students });
+        dispatch({ type: "ADD_STUDENTS", payload: result.students });
       }
 
       if (result.errors.length > 0) {
