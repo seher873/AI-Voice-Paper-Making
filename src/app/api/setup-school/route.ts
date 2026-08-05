@@ -33,13 +33,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "School name required" }, { status: 400 });
   }
 
-  const { data: school, error: schoolErr } = await supabase
-    .from("schools")
-    .insert({ name: schoolName.trim() })
-    .select("id")
-    .single();
+  const schoolId = crypto.randomUUID();
 
-  if (schoolErr || !school) {
+  const { error: schoolErr } = await supabase
+    .from("schools")
+    .insert({ id: schoolId, name: schoolName.trim() });
+
+  if (schoolErr) {
     return NextResponse.json({ error: "Failed to create school" }, { status: 500 });
   }
 
@@ -47,18 +47,18 @@ export async function POST(req: Request) {
     .from("profiles")
     .insert({
       id: user.id,
-      school_id: school.id,
+      school_id: schoolId,
       email: user.email,
       name: user.user_metadata?.name || "",
       role: "admin",
     });
 
   if (profileErr) {
-    await supabase.from("schools").delete().eq("id", school.id);
+    await supabase.from("schools").delete().eq("id", schoolId);
     return NextResponse.json({ error: "Failed to create profile" }, { status: 500 });
   }
 
-  return NextResponse.json({ schoolId: school.id });
+  return NextResponse.json({ schoolId });
 }
 
 export async function GET(req: Request) {

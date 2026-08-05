@@ -34,7 +34,7 @@ export function useSpeech() {
       }
 
       const recognition = new SpeechRecognitionAPI()
-      recognition.continuous = false
+      recognition.continuous = true
       recognition.interimResults = true
       recognition.maxAlternatives = 1
       const effectiveLang = lang === "sd-PK" ? "ur-PK" : lang
@@ -46,7 +46,9 @@ export function useSpeech() {
       recognition.onstart = () => setIsListening(true)
       recognition.onend = () => {
         if (!manualStopRef.current) {
-          try { recognition.start() } catch { setIsListening(false) }
+          setTimeout(() => {
+            try { recognition.start() } catch { setIsListening(false) }
+          }, 300)
         } else {
           setIsListening(false)
         }
@@ -54,10 +56,13 @@ export function useSpeech() {
       recognition.onerror = () => { manualStopRef.current = true; setIsListening(false) }
 
       let fullTranscript = ""
+      let lastFinalIndex = 0
       recognition.onresult = (event: SpeechRecognitionEvent) => {
+        let hasInterim = false
         for (let i = event.resultIndex; i < event.results.length; i++) {
           const result = event.results[i]
           if (result.isFinal) {
+            lastFinalIndex = i
             let newText = result[0].transcript.trim()
             if (fullTranscript && newText) {
               const lastWords = fullTranscript.split(/\s+/)
@@ -75,10 +80,12 @@ export function useSpeech() {
             if (newText) {
               fullTranscript += (fullTranscript ? " " : "") + newText
             }
+          } else {
+            hasInterim = true
           }
         }
         const last = event.results[event.results.length - 1]
-        if (last.isFinal && fullTranscript) {
+        if (last?.isFinal && fullTranscript && !hasInterim) {
           setTranscript(fullTranscript)
           setConfidence(last[0].confidence)
           onResult({ text: fullTranscript, confidence: last[0].confidence })

@@ -34,31 +34,42 @@ export default function SchoolSetup({ onComplete }: Props) {
       }
 
       const plan = localStorage.getItem("subscription_plan") || "full";
+      const schoolId = crypto.randomUUID();
 
-      const { data: school, error: schoolErr } = await sb
+      const { error: schoolErr } = await sb
         .from("schools")
-        .insert({ name: schoolName.trim(), plan })
-        .select("id")
-        .single();
+        .insert({ id: schoolId, name: schoolName.trim(), plan });
 
-      if (schoolErr || !school) throw new Error("Failed to create school");
+      if (schoolErr) throw new Error("Failed to create school: " + schoolErr.message);
 
       const { error: profileErr } = await sb
         .from("profiles")
         .insert({
           id: user.id,
-          school_id: school.id,
+          school_id: schoolId,
           email: user.email,
           name: user.user_metadata?.name || "",
           role: "admin",
         });
 
       if (profileErr) {
-        await sb.from("schools").delete().eq("id", school.id);
-        throw new Error("Failed to create profile");
+        if (profileErr.code === "23505") {
+          const { data: dup } = await sb
+            .from("profiles")
+            .select("school_id")
+            .eq("id", user.id)
+            .single();
+          if (dup?.school_id) {
+            addToast("School already set up", "success");
+            onComplete(dup.school_id);
+            return;
+          }
+        }
+        await sb.from("schools").delete().eq("id", schoolId);
+        throw new Error("Failed to create profile: " + profileErr.message);
       }
 
-      onComplete(school.id);
+      onComplete(schoolId);
       addToast("School created successfully!", "success");
     } catch (err) {
       addToast(err instanceof Error ? err.message : "Setup failed", "error");
