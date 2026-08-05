@@ -90,7 +90,7 @@ export default function PaperPreview() {
           <div
             ref={previewRef}
             id="paper-preview"
-            className="bg-white shadow-xl border border-slate-200 print-font"
+            className="bg-white shadow-xl border border-slate-200 print-font isolate"
             dir={isRTL ? "rtl" : "ltr"}
             style={{
               width: "min(210mm, 100%)",
@@ -99,6 +99,17 @@ export default function PaperPreview() {
               position: "relative",
             }}
           >
+            {state.showLogoWatermark && state.schoolLogo && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-[-1] overflow-hidden">
+                <img
+                  src={state.schoolLogo}
+                  alt=""
+                  aria-hidden
+                  className="w-[90%] h-[90%] object-contain opacity-[0.05]"
+                  style={{ filter: "grayscale(1)" }}
+                />
+              </div>
+            )}
             {/* Header */}
             <div className={`flex items-center gap-x-6 sm:gap-x-10 mb-3 sm:mb-4 relative ${isRTL ? "flex-row" : ""}`}>
               <div className={`w-[70px] sm:w-[90px] lg:w-[110px] h-[70px] sm:h-[90px] lg:h-[110px] flex-shrink-0`}>
@@ -207,17 +218,6 @@ export default function PaperPreview() {
 
             {/* Questions */}
             <div className="relative isolate mb-6 sm:mb-8 min-h-[120px] sm:min-h-[200px]">
-              {state.showLogoWatermark && state.schoolLogo && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-[-1]">
-                  <img
-                    src={state.schoolLogo}
-                    alt=""
-                    aria-hidden
-                    className="max-w-[65%] max-h-[80%] object-contain opacity-[0.07]"
-                    style={{ filter: "grayscale(1)" }}
-                  />
-                </div>
-              )}
               {questionCount === 0 ? (
                 <div className="flex items-center justify-center h-[120px] sm:h-[200px] border-2 border-dashed border-slate-200 rounded-xl">
                   <div className="text-center">

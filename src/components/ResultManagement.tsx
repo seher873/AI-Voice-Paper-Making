@@ -39,7 +39,7 @@ export default function ResultManagement() {
   const ActiveComponent = components[activeTab] || CreateExam;
 
   return (
-    <div className="flex flex-col h-full">
+    <div>
       <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 px-4 py-3">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center">
@@ -51,7 +51,7 @@ export default function ResultManagement() {
         </div>
       </div>
 
-      <div className="flex gap-0 border-b border-slate-200 bg-slate-50/50 overflow-x-auto">
+      <div className="sticky top-0 z-10 flex gap-0 border-b border-slate-200 bg-slate-50/95 overflow-x-auto">
         {menuItems.map((item) => (
           <button
             key={item.id}
@@ -70,7 +70,7 @@ export default function ResultManagement() {
         ))}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="p-4">
         <ActiveComponent />
       </div>
     </div>

@@ -595,14 +595,14 @@ export default function Dashboard() {
           {mode === "paper" && plan.features.paper && activeTab === "template" && <TemplateSection />}
           {mode === "results" && plan.features.results && <ResultManagement />}
         </div>
+        </div>
 
         {/* Export */}
         {mode === "paper" && plan.features.paper && (
-          <div className="bg-white border-t border-slate-200 px-3 sm:px-4 py-3">
+          <div className="flex-shrink-0 bg-white border-t border-slate-200 px-3 sm:px-4 py-3">
             <ExportBar />
           </div>
         )}
-        </div>
       </div>
 
       {/* Right Panel - Preview */}
