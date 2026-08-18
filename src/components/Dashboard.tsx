@@ -12,6 +12,7 @@ import UpgradeBanner from "./UpgradeBanner";
 import SchoolSetup from "./SchoolSetup";
 import BackupPanel from "./BackupPanel";
 import SchoolsOverview from "./SchoolsOverview";
+import VoiceAgent from "./VoiceAgent";
 import { useState, useEffect, useRef } from "react";
 import { getSupabase, getSchoolId } from "@/lib/supabase";
 import { loadSchoolState, saveSchoolState } from "@/lib/schoolData";
@@ -651,6 +652,7 @@ export default function Dashboard() {
         </div>
       )}
       {showSchools && isSuperAdmin && <SchoolsOverview onClose={() => setShowSchools(false)} />}
+      <VoiceAgent isSuperAdmin={isSuperAdmin} />
     </div>
   );
 }

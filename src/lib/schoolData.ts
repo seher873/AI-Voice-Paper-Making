@@ -12,6 +12,33 @@ const LOCAL_RESULT_KEY = "paper-maker-results-state";
 
 export async function loadSchoolState(): Promise<{ paper: PaperState | null; result: ResultState | null } | null> {
   try {
+    const schoolId = await getSchoolId();
+    if (schoolId) {
+      try {
+        const { data, error } = await getSupabase()
+          .from("school_state")
+          .select("paper_state, result_state")
+          .eq("school_id", schoolId)
+          .maybeSingle();
+
+        if (!error && data) {
+          const paper = data.paper_state as PaperState | null;
+          const result = data.result_state as ResultState | null;
+
+          if (paper) localStorage.setItem(LOCAL_PAPER_KEY, JSON.stringify(paper));
+          if (result) localStorage.setItem(LOCAL_RESULT_KEY, JSON.stringify(result));
+
+          if (paper || result) return { paper, result };
+        }
+      } catch {
+        // Supabase failed, fall through to localStorage
+      }
+    }
+  } catch {
+    // auth failed, fall through to localStorage
+  }
+
+  try {
     const paperRaw = localStorage.getItem(LOCAL_PAPER_KEY);
     const resultRaw = localStorage.getItem(LOCAL_RESULT_KEY);
     return {
