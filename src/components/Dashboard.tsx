@@ -12,7 +12,9 @@ import UpgradeBanner from "./UpgradeBanner";
 import SchoolSetup from "./SchoolSetup";
 import BackupPanel from "./BackupPanel";
 import SchoolsOverview from "./SchoolsOverview";
-import VoiceAgent from "./VoiceAgent";
+import dynamic from "next/dynamic";
+
+const VoiceAgent = dynamic(() => import("./VoiceAgent"), { ssr: false });
 import { useState, useEffect, useRef } from "react";
 import { getSupabase, getSchoolId } from "@/lib/supabase";
 import { loadSchoolState, saveSchoolState } from "@/lib/schoolData";
@@ -652,7 +654,20 @@ export default function Dashboard() {
         </div>
       )}
       {showSchools && isSuperAdmin && <SchoolsOverview onClose={() => setShowSchools(false)} />}
-      <VoiceAgent isSuperAdmin={isSuperAdmin} />
+      <ErrorBoundary fallback={null}>
+        <VoiceAgent isSuperAdmin={isSuperAdmin} />
+      </ErrorBoundary>
     </div>
   );
+}
+
+import { Component, type ReactNode } from "react";
+
+class ErrorBoundary extends Component<{ fallback: ReactNode; children: ReactNode }, { hasError: boolean }> {
+  constructor(props: { fallback: ReactNode; children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() { return { hasError: true }; }
+  render() { return this.state.hasError ? this.props.fallback : this.props.children; }
 }
