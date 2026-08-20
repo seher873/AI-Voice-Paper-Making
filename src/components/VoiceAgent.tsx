@@ -10,13 +10,6 @@ interface VoiceAgentProps {
 
 type Status = "idle" | "listening" | "processing" | "speaking";
 
-declare global {
-  interface Window {
-    SpeechRecognition: typeof SpeechRecognition;
-    webkitSpeechRecognition: typeof SpeechRecognition;
-  }
-}
-
 export default function VoiceAgent({ isSuperAdmin }: VoiceAgentProps) {
   const { state } = useResult();
   const [status, setStatus] = useState<Status>("idle");
@@ -24,11 +17,11 @@ export default function VoiceAgent({ isSuperAdmin }: VoiceAgentProps) {
   const [response, setResponse] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [isSupported, setIsSupported] = useState(true);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionRef = useRef<any>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
 
   useEffect(() => {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SR) {
       setIsSupported(false);
       return;
@@ -100,7 +93,7 @@ export default function VoiceAgent({ isSuperAdmin }: VoiceAgentProps) {
     setResponse("");
     setStatus("listening");
 
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
+    recognition.onresult = (event: any) => {
       let interim = "";
       let final = "";
       for (let i = event.resultIndex; i < event.results.length; i++) {
