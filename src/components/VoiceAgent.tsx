@@ -172,7 +172,7 @@ export default function VoiceAgent({ isSuperAdmin }: VoiceAgentProps) {
 
   return (
     <>
-      <div className="fixed bottom-20 right-4 sm:right-6 z-40">
+      <div className="fixed bottom-20 right-4 sm:right-6 z-40 group">
         <button
           onClick={() => {
             if (isOpen) { stopSpeaking(); setIsOpen(false); }
@@ -180,57 +180,155 @@ export default function VoiceAgent({ isSuperAdmin }: VoiceAgentProps) {
             else if (status === "speaking") stopSpeaking();
             else { setIsOpen(true); setTimeout(() => startListening(), 200); }
           }}
-          className={`w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 border-2 border-white/30 ${
-            status === "listening"
-              ? "bg-red-500 animate-pulse ring-4 ring-red-200 scale-110"
-              : status === "speaking"
-              ? "bg-emerald-500 ring-4 ring-emerald-200 animate-bounce"
-              : status === "processing"
-              ? "bg-amber-500 ring-4 ring-amber-200"
-              : "bg-gradient-to-br from-violet-600 to-indigo-700 hover:from-violet-700 hover:to-indigo-800 hover:scale-105"
-          }`}
+          className="relative w-[60px] h-[60px] cursor-pointer"
+          title="AI Assistant"
         >
-          <div className="relative">
-            {status === "idle" && (
-              <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2a3 3 0 00-3 3v6a3 3 0 006 0V5a3 3 0 00-3-3z" />
-                <path d="M19 11a7 7 0 01-14 0" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
-                <path d="M12 18v4m-3 0h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
+          {/* Glow ring */}
+          <div className={`absolute inset-[-4px] rounded-full transition-all duration-500 ${
+            status === "listening" ? "bg-red-400/30 animate-ping" :
+            status === "speaking" ? "bg-emerald-400/30 animate-pulse" :
+            status === "processing" ? "bg-amber-400/20 animate-spin" :
+            "bg-violet-400/20 group-hover:bg-violet-400/40"
+          }`} />
+
+          {/* Agent body */}
+          <svg viewBox="0 0 60 60" className="relative w-full h-full drop-shadow-xl">
+            <defs>
+              <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor={status === "listening" ? "#ef4444" : status === "speaking" ? "#10b981" : status === "processing" ? "#f59e0b" : "#7c3aed"} />
+                <stop offset="100%" stopColor={status === "listening" ? "#dc2626" : status === "speaking" ? "#059669" : status === "processing" ? "#d97706" : "#4f46e5"} />
+              </linearGradient>
+              <filter id="shadow2">
+                <feDropShadow dx="0" dy="2" stdDeviation="2" floodOpacity="0.15" />
+              </filter>
+            </defs>
+
+            {/* Antenna */}
+            <line x1="30" y1="8" x2="30" y2="16" stroke="white" strokeWidth="2.5" strokeLinecap="round" opacity="0.9" />
+            <circle cx="30" cy="6" r="3" fill="white" opacity="0.9">
+              {status === "listening" && <animate attributeName="r" values="3;4.5;3" dur="0.8s" repeatCount="indefinite" />}
+              {status === "processing" && <animate attributeName="opacity" values="0.9;0.3;0.9" dur="1s" repeatCount="indefinite" />}
+            </circle>
+
+            {/* Head / face */}
+            <circle cx="30" cy="33" r="18" fill="url(#bodyGrad)" filter="url(#shadow2)" />
+
+            {/* Face shine */}
+            <ellipse cx="24" cy="28" rx="7" ry="5" fill="white" opacity="0.15" />
+
+            {/* Left eye */}
+            <g>
+              {status === "speaking" ? (
+                <>
+                  <circle cx="23" cy="31" r="3.5" fill="white" />
+                  <circle cx="23" cy="31" r="2" fill="#1e1b4b">
+                    <animate attributeName="cy" values="31;30;31" dur="0.6s" repeatCount="indefinite" />
+                  </circle>
+                </>
+              ) : status === "listening" ? (
+                <>
+                  <circle cx="23" cy="31" r="4" fill="white" />
+                  <circle cx="23" cy="31" r="2.5" fill="#1e1b4b">
+                    <animate attributeName="cx" values="23;24.5;21.5;23" dur="1.5s" repeatCount="indefinite" />
+                  </circle>
+                </>
+              ) : status === "processing" ? (
+                <g>
+                  <line x1="19" y1="31" x2="27" y2="31" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+                    <animate attributeName="y1" values="31;30;31" dur="0.8s" repeatCount="indefinite" />
+                    <animate attributeName="y2" values="31;32;31" dur="0.8s" repeatCount="indefinite" />
+                  </line>
+                </g>
+              ) : (
+                <>
+                  <circle cx="23" cy="31" r="3.5" fill="white" />
+                  <circle cx="23" cy="32" r="2" fill="#1e1b4b" />
+                  <circle cx="22" cy="31" r="0.7" fill="white" />
+                </>
+              )}
+            </g>
+
+            {/* Right eye */}
+            <g>
+              {status === "speaking" ? (
+                <>
+                  <circle cx="37" cy="31" r="3.5" fill="white" />
+                  <circle cx="37" cy="31" r="2" fill="#1e1b4b">
+                    <animate attributeName="cy" values="31;30;31" dur="0.6s" repeatCount="indefinite" />
+                  </circle>
+                </>
+              ) : status === "listening" ? (
+                <>
+                  <circle cx="37" cy="31" r="4" fill="white" />
+                  <circle cx="37" cy="31" r="2.5" fill="#1e1b4b">
+                    <animate attributeName="cx" values="37;38.5;35.5;37" dur="1.5s" repeatCount="indefinite" />
+                  </circle>
+                </>
+              ) : status === "processing" ? (
+                <g>
+                  <line x1="33" y1="31" x2="41" y2="31" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+                    <animate attributeName="y1" values="31;32;31" dur="0.8s" repeatCount="indefinite" />
+                    <animate attributeName="y2" values="31;30;31" dur="0.8s" repeatCount="indefinite" />
+                  </line>
+                </g>
+              ) : (
+                <>
+                  <circle cx="37" cy="31" r="3.5" fill="white" />
+                  <circle cx="37" cy="32" r="2" fill="#1e1b4b" />
+                  <circle cx="36" cy="31" r="0.7" fill="white" />
+                </>
+              )}
+            </g>
+
+            {/* Mouth */}
+            {status === "speaking" ? (
+              <ellipse cx="30" cy="40" rx="3.5" ry="2.5" fill="white" opacity="0.9">
+                <animate attributeName="ry" values="2.5;1.5;2.5" dur="0.3s" repeatCount="indefinite" />
+              </ellipse>
+            ) : status === "listening" ? (
+              <circle cx="30" cy="40" r="2" fill="white" opacity="0.7" />
+            ) : status === "processing" ? (
+              <path d="M26 39 Q30 42 34 39" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.8">
+                <animate attributeName="d" values="M26 39 Q30 42 34 39;M26 40 Q30 38 34 40;M26 39 Q30 42 34 39" dur="1.2s" repeatCount="indefinite" />
+              </path>
+            ) : (
+              <path d="M26 38 Q30 42 34 38" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.8" />
             )}
-            {status === "listening" && (
-              <div className="flex items-center gap-[3px]">
-                {[1,2,3,4,5].map(i => (
-                  <div key={i} className="w-[3px] bg-white rounded-full animate-pulse" style={{ height: `${10 + Math.random()*10}px`, animationDelay: `${i*0.1}s` }} />
-                ))}
-              </div>
-            )}
-            {status === "processing" && (
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            )}
-            {status === "speaking" && (
-              <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
-              </svg>
-            )}
-          </div>
+
+            {/* Cheek blush */}
+            <circle cx="17" cy="37" r="2.5" fill="#f472b6" opacity="0.3" />
+            <circle cx="43" cy="37" r="2.5" fill="#f472b6" opacity="0.3" />
+          </svg>
+
+          {/* Status badge */}
+          {status === "listening" && (
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white">
+              <div className="absolute inset-0 bg-red-400 rounded-full animate-ping" />
+            </div>
+          )}
+          {status === "speaking" && (
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white" />
+          )}
         </button>
-        {status === "listening" && (
-          <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white animate-ping" />
-        )}
       </div>
 
       {isOpen && (
         <div className="fixed bottom-[88px] right-4 sm:right-6 z-40 w-[340px] sm:w-[380px] max-h-[480px] flex flex-col bg-white rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.18)] border border-slate-200/80 overflow-hidden animate-in slide-in-from-bottom-4 duration-200">
           <div className="bg-gradient-to-r from-violet-600 via-indigo-600 to-blue-600 px-4 py-3 flex items-center gap-3">
             <div className="relative">
-              <div className="w-9 h-9 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2a3 3 0 00-3 3v6a3 3 0 006 0V5a3 3 0 00-3-3z" />
-                  <path d="M19 11a7 7 0 01-14 0" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
-                  <path d="M12 18v4m-3 0h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-              </div>
+              <svg viewBox="0 0 36 36" className="w-9 h-9">
+                <circle cx="18" cy="18" r="16" fill="white" fillOpacity="0.2" />
+                <line x1="18" y1="3" x2="18" y2="8" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.8" />
+                <circle cx="18" cy="2" r="1.5" fill="white" opacity="0.8" />
+                <circle cx="18" cy="19" r="11" fill="white" fillOpacity="0.9" />
+                <circle cx="13" cy="17.5" r="2.2" fill="#1e1b4b" />
+                <circle cx="23" cy="17.5" r="2.2" fill="#1e1b4b" />
+                <circle cx="12.3" cy="16.8" r="0.6" fill="white" />
+                <circle cx="22.3" cy="16.8" r="0.6" fill="white" />
+                <path d="M14 22 Q18 25 22 22" stroke="#1e1b4b" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+                <circle cx="9" cy="20" r="1.8" fill="#f472b6" opacity="0.3" />
+                <circle cx="27" cy="20" r="1.8" fill="#f472b6" opacity="0.3" />
+              </svg>
               <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-violet-600" />
             </div>
             <div className="flex-1 min-w-0">
@@ -249,13 +347,20 @@ export default function VoiceAgent({ isSuperAdmin }: VoiceAgentProps) {
           <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 min-h-[200px] max-h-[320px] bg-slate-50/50">
             {messages.length === 0 && (
               <div className="flex flex-col items-center justify-center py-8 text-center">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-100 to-indigo-100 flex items-center justify-center mb-3">
-                  <svg className="w-8 h-8 text-indigo-400" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2a3 3 0 00-3 3v6a3 3 0 006 0V5a3 3 0 00-3-3z" />
-                    <path d="M19 11a7 7 0 01-14 0" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
-                    <path d="M12 18v4m-3 0h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  </svg>
-                </div>
+                <svg viewBox="0 0 64 64" className="w-16 h-16 mb-3 drop-shadow-md">
+                  <circle cx="32" cy="32" r="30" fill="url(#emptyGrad)" />
+                  <defs><linearGradient id="emptyGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#8b5cf6" /><stop offset="100%" stopColor="#6366f1" /></linearGradient></defs>
+                  <line x1="32" y1="4" x2="32" y2="12" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.8" />
+                  <circle cx="32" cy="3" r="2" fill="white" opacity="0.8" />
+                  <circle cx="32" cy="32" r="16" fill="white" fillOpacity="0.95" />
+                  <circle cx="25" cy="30" r="2.8" fill="#1e1b4b" />
+                  <circle cx="39" cy="30" r="2.8" fill="#1e1b4b" />
+                  <circle cx="24.1" cy="29.1" r="0.8" fill="white" />
+                  <circle cx="38.1" cy="29.1" r="0.8" fill="white" />
+                  <path d="M26 36 Q32 40 38 36" stroke="#1e1b4b" strokeWidth="2" fill="none" strokeLinecap="round" />
+                  <circle cx="19" cy="34" r="2.5" fill="#f472b6" opacity="0.25" />
+                  <circle cx="45" cy="34" r="2.5" fill="#f472b6" opacity="0.25" />
+                </svg>
                 <p className="text-sm font-semibold text-slate-700 mb-1">AI Voice Assistant</p>
                 <p className="text-xs text-slate-400 max-w-[240px]">Mic dabayein ya type karein — marks puchen, exams manage karein, data add karein</p>
                 <div className="mt-4 grid grid-cols-2 gap-1.5 w-full text-[10px]">
@@ -276,9 +381,12 @@ export default function VoiceAgent({ isSuperAdmin }: VoiceAgentProps) {
             {messages.map((msg) => (
               <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                 {msg.role === "agent" && (
-                  <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center mr-2 mt-1 flex-shrink-0">
-                    <svg className="w-3 h-3 text-white" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 2a3 3 0 00-3 3v6a3 3 0 006 0V5a3 3 0 00-3-3z" />
+                  <div className="w-6 h-6 rounded-lg flex items-center justify-center mr-2 mt-1 flex-shrink-0 bg-gradient-to-br from-violet-500 to-indigo-600">
+                    <svg viewBox="0 0 24 24" className="w-4 h-4">
+                      <circle cx="12" cy="13" r="7" fill="white" fillOpacity="0.95" />
+                      <circle cx="9.5" cy="12.5" r="1.2" fill="#1e1b4b" />
+                      <circle cx="14.5" cy="12.5" r="1.2" fill="#1e1b4b" />
+                      <path d="M10 15.5 Q12 17 14 15.5" stroke="#1e1b4b" strokeWidth="0.8" fill="none" strokeLinecap="round" />
                     </svg>
                   </div>
                 )}
@@ -322,8 +430,11 @@ export default function VoiceAgent({ isSuperAdmin }: VoiceAgentProps) {
             {status === "processing" && (
               <div className="flex justify-start">
                 <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center mr-2 flex-shrink-0">
-                  <svg className="w-3 h-3 text-white" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2a3 3 0 00-3 3v6a3 3 0 006 0V5a3 3 0 00-3-3z" />
+                  <svg viewBox="0 0 24 24" className="w-4 h-4">
+                    <circle cx="12" cy="13" r="7" fill="white" fillOpacity="0.95" />
+                    <circle cx="9.5" cy="12.5" r="1.2" fill="#1e1b4b" />
+                    <circle cx="14.5" cy="12.5" r="1.2" fill="#1e1b4b" />
+                    <path d="M10 15.5 Q12 17 14 15.5" stroke="#1e1b4b" strokeWidth="0.8" fill="none" strokeLinecap="round" />
                   </svg>
                 </div>
                 <div className="bg-white rounded-2xl rounded-tl-md px-4 py-3 shadow-sm border border-slate-100">
