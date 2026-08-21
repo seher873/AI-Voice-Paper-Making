@@ -9,7 +9,7 @@ export type MutationAction =
   | { type: "add_student"; studentName: string; rollNo: string }
   | { type: "create_exam"; examName: string; className: string; section: string };
 
-interface ParsedQuery {
+export interface ParsedQuery {
   studentName: string | null;
   subject: string | null;
   metric: string;
@@ -84,26 +84,58 @@ function detectSubject(text: string, subjects: string[]): string | null {
   return fuzzyMatch(lower, subjects);
 }
 
-function detectStudentName(text: string, studentNames: string[]): string | null {
+function findStudentInNames(text: string, studentNames: string[]): string | null {
   const lower = text.toLowerCase();
 
-  const stopwords = ["ki", "ke", "ka", "ko", "ne", "hai", "h", "hain", "kaun", "kya", "batao", "bata", "kitni", "kitne", "kitna", "mein", "se", "kiya", "wala", "vala", "ahai", "ka", "ki", "ke", "kauns", "kaunsa", "kaunsi", "marks", "grade", "position", "total", "percentage", "percent", "pass", "fail", "status", "result", "number", "roll", "average", "topper", "highest", "lowest", "students", "subject", "remark", "school", "database", "data", "activity", "active", "admin", "all", "kya", "bolo", "sunao", "jano"];
+  const stopwords = [
+    "ki", "ke", "ka", "ko", "ne", "hai", "hain", "kaun", "kya", "batao", "bata",
+    "kitni", "kitne", "kitna", "mein", "se", "kiya", "wala", "vala",
+    "kauns", "kaunsa", "kaunsi", "marks", "grade", "position", "total",
+    "percentage", "percent", "pass", "fail", "status", "result", "number",
+    "roll", "average", "topper", "highest", "lowest", "students", "student",
+    "subject", "remark", "school", "database", "data", "activity", "active",
+    "admin", "all", "bolo", "sunao", "jano", "do", "de", "dedo", "karo",
+    "add", "give", "set", "enter", "put", "delete", "remove", "create",
+    "make", "new", "update", "change", "exam", "test", "paper",
+    "math", "english", "urdu", "science", "islamiat", "drawing",
+    "detail", "details", "info", "kya", "haal", "chale", "chal",
+    "bol", "sun", "dekho", "bolo", "suno", "bata", "pata",
+  ];
 
   const words = lower.split(/\s+/).filter(Boolean);
-
   const potentialNames: string[] = [];
-  for (let i = 0; i < words.length; i++) {
-    if (words.length > 1 && i < words.length - 1) {
-      const bigram = words[i] + " " + words[i + 1];
-      if (!stopwords.includes(words[i]) && !stopwords.includes(words[i + 1])) {
-        potentialNames.push(bigram);
-      }
+
+  // Try bigrams
+  for (let i = 0; i < words.length - 1; i++) {
+    if (!stopwords.includes(words[i]) && !stopwords.includes(words[i + 1]) && words[i].length > 1 && words[i + 1].length > 1) {
+      potentialNames.push(words[i] + " " + words[i + 1]);
     }
-    if (!stopwords.includes(words[i]) && words[i].length > 1) {
-      potentialNames.push(words[i]);
+  }
+  // Try single words
+  for (const w of words) {
+    if (!stopwords.includes(w) && w.length > 2) {
+      potentialNames.push(w);
     }
   }
 
+  // Try every possible substring that could be a name
+  for (let len = Math.min(4, words.length); len >= 1; len--) {
+    for (let i = 0; i <= words.length - len; i++) {
+      const slice = words.slice(i, i + len).join(" ");
+      if (len <= 2 && words.slice(i, i + len).every(w => stopwords.includes(w))) continue;
+      if (words.slice(i, i + len).every(w => w.length <= 1)) continue;
+      potentialNames.push(slice);
+    }
+  }
+
+  // Direct exact match first
+  for (const pn of potentialNames) {
+    for (const name of studentNames) {
+      if (name.toLowerCase() === pn) return name;
+    }
+  }
+
+  // Then fuzzy
   for (const pn of potentialNames) {
     const match = fuzzyMatch(pn, studentNames);
     if (match) return match;
@@ -148,36 +180,6 @@ function isAdminQuery(text: string): boolean {
     if (lower.includes(kw)) return true;
   }
   return detectAdminMetric(text) !== null;
-}
-
-function detectMetric(text: string): string {
-  const lower = text.toLowerCase();
-  if (/kitn[ei]\s+student|total\s+student|student.*count|kitn[ei]\s+bacch[ei]/i.test(lower)) return "studentCount";
-  if (/pass\s+kitn[ei]|kitn[ei]\s+pass|pass.*count/i.test(lower)) return "passCount";
-  if (/fail\s+kitn[ei]|kitn[ei]\s+fail|fail.*count/i.test(lower)) return "failCount";
-  if (/topper|sab\s+se\s+(zyada|ziyada|acha|achi)|highest|sab\s+se\s+behtareen/i.test(lower)) return "topper";
-  if (/lowest|sab\s+se\s+(kam|kharab)|worst|sab\s+se\s+kamzor/i.test(lower)) return "lowest";
-  if (/average|ausat/i.test(lower)) return "average";
-  if (/position|rank|sthaan/i.test(lower)) return "position";
-  if (/grade/i.test(lower)) return "grade";
-  if (/pass\s+ya\s+fail|result|kya\s+hua|huiya|guzra/i.test(lower)) return "status";
-  if (/percentage|percent|fisad/i.test(lower)) return "percentage";
-  if (/total.*marks|marks.*total|total|kul/i.test(lower)) return "totalMarks";
-  if (/obtained|marks|number|aye|mile|kitn[ei]/i.test(lower)) return "marks";
-  if (/remark|note/i.test(lower)) return "remark";
-  if (/paper|sawal|question|questions|kitne\s+sawal|sawal.*kitn[ei]|paper.*detail|paper.*info|kya\s+kya\s+hai/i.test(lower)) return "paperDetails";
-  if (/subject|paper.*subject|subject.*kya|kons[ae]\s+subject/i.test(lower)) return "paperSubject";
-  if (/time|waqt|kitna\s+time|duration/i.test(lower)) return "paperTime";
-  if (/class|jamaat|konsi\s+class/i.test(lower)) return "paperClass";
-  if (/title|paper.*title|kya\s+naam/i.test(lower)) return "paperTitle";
-  return "marks";
-}
-
-function ordinal(n: number): string {
-  if (n === 0) return "";
-  const s = ["th", "st", "nd", "rd"];
-  const v = n % 100;
-  return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
 
 export function parseQuery(text: string): ParsedQuery {
@@ -290,163 +292,257 @@ export function answerQuery(query: ParsedQuery, ctx: VoiceContext): string {
   if (query.isAdminQuery) return "";
 
   const text = query.all.toLowerCase();
-  const metric = query.metric;
+  const metric = detectMetric(text);
 
   // Paper detail queries — work even without exam data
   if (metric === "paperDetails" || metric === "paperSubject" || metric === "paperTime" || metric === "paperClass" || metric === "paperTitle") {
-    const paper = ctx.paper;
-    if (!paper) return "Paper koi open nahi hai. Pehle Paper Builder mein paper banaein.";
-    const lines: string[] = [];
-    if (metric === "paperDetails" || metric === "paperTitle") {
-      if (paper.paperTitle) lines.push(`Title: ${paper.paperTitle}`);
-      if (paper.subject) lines.push(`Subject: ${paper.subject}`);
-      if (paper.className) lines.push(`Class: ${paper.className}`);
-      if (paper.time) lines.push(`Time: ${paper.time}`);
-      if (paper.totalMarks) lines.push(`Total Marks: ${paper.totalMarks}`);
-      if (paper.date) lines.push(`Date: ${paper.date}`);
-      if (paper.questions.length > 0) {
-        lines.push(`Total Questions: ${paper.questions.length}`);
-        const typeCounts: Record<string, number> = {};
-        paper.questions.forEach((q) => { typeCounts[q.type] = (typeCounts[q.type] || 0) + 1; });
-        lines.push(`Types: ${Object.entries(typeCounts).map(([t, c]) => `${c} ${t}`).join(", ")}`);
-      } else {
-        lines.push("Questions: Abhi koi question nahi hai.");
-      }
-      return lines.length > 0 ? `Paper Details:\n${lines.join("\n")}` : "Paper mein koi data nahi hai.";
-    }
-    if (metric === "paperSubject") return paper.subject ? `Paper ka subject: ${paper.subject}. Class: ${paper.className || "N/A"}.` : "Subject set nahi hai.";
-    if (metric === "paperTime") return paper.time ? `Paper ka time: ${paper.time}.` : "Time set nahi hai.";
-    if (metric === "paperClass") return paper.className ? `Paper ki class: ${paper.className}.` : "Class set nahi hai.";
-    return "Paper detail samajh nahi aayi.";
+    return answerPaperQuery(metric, text, ctx.paper);
   }
 
-  // Result/marks queries need exam data
   const exam = ctx.currentExam;
-  if (!exam || !exam.results || exam.results.length === 0) {
-    // Even without results, check if students exist
-    if (ctx.students && ctx.students.length > 0) {
-      if (metric === "studentCount") return `Current exam "${exam?.name || "?"}" mein ${ctx.students.length} students add ho chuke hain. Marks abhi calculate nahi hue.`;
-    }
-    return "Koi exam data nahi mila. Pehle exam create karein aur marks enter karein.";
-  }
+  const allStudents = ctx.students || [];
+  const results = exam?.results || ctx.results || [];
+  const subjects = exam?.subjects?.map((s) => s.name) || [];
 
-  const subjects = exam.subjects?.map((s) => s.name) || [];
-  const results = exam.results;
-  const studentNames = results.map((r) => r.studentName);
-
-  const detectedName = detectStudentName(text, studentNames);
+  // Detect student name from available data
+  const allNames = results.length > 0
+    ? results.map((r) => r.studentName)
+    : allStudents.map((s) => s.studentName);
+  const detectedName = findStudentInNames(text, allNames);
   const detectedSubject = detectSubject(text, subjects);
 
+  // No exam at all
+  if (!exam && allStudents.length === 0) {
+    return "Koi exam ya students nahi hain. Pehle exam create karein aur students add karein.";
+  }
+
+  // Has students but no results calculated yet
+  if (results.length === 0 && allStudents.length > 0) {
+    if (detectedName) {
+      const student = allStudents.find((s) => s.studentName.toLowerCase() === detectedName.toLowerCase())
+        || allStudents.find((s) => s.studentName.toLowerCase().includes(detectedName.toLowerCase()));
+      if (student) {
+        const marks = Object.entries(student.subjectMarks).map(([sub, m]) => `${sub}: ${m}`).join(", ");
+        return `${student.studentName} (roll ${student.rollNo}) ke marks: ${marks || "Abhi koi marks enter nahi hue"}. Results calculate hone ka intezar karein.`;
+      }
+    }
+    if (metric === "studentCount") {
+      return `${exam?.name || "Current exam"} mein ${allStudents.length} students add ho chuke hain.`;
+    }
+    const names = allStudents.slice(0, 10).map((s) => s.studentName).join(", ");
+    return `${allStudents.length} students hain (${names}${allStudents.length > 10 ? "..." : ""}). Marks enter karein aur results calculate karein.`;
+  }
+
+  // Student-specific queries
+  if (detectedName) {
+    const student = results.find((r) => r.studentName.toLowerCase() === detectedName.toLowerCase())
+      || results.find((r) => r.studentName.toLowerCase().includes(detectedName.toLowerCase()));
+    if (!student) return `${detectedName} ka record is exam mein nahi mila.`;
+    return answerStudentDetail(student, exam!, detectedSubject, metric, text);
+  }
+
+  // Subject-specific queries
+  if (detectedSubject) {
+    return answerSubjectDetail(detectedSubject, exam!, results);
+  }
+
+  // General metrics
+  return answerGeneralMetric(metric, exam!, results, text);
+}
+
+function answerPaperQuery(metric: string, text: string, paper: PaperState | null | undefined): string {
+  if (!paper) return "Paper koi open nahi hai. Pehle Paper Builder mein paper banaein.";
+
+  if (metric === "paperTitle" || metric === "paperDetails") {
+    const lines: string[] = [];
+    if (paper.paperTitle) lines.push(`Title: ${paper.paperTitle}`);
+    if (paper.subject) lines.push(`Subject: ${paper.subject}`);
+    if (paper.className) lines.push(`Class: ${paper.className}`);
+    if (paper.time) lines.push(`Time: ${paper.time}`);
+    if (paper.totalMarks) lines.push(`Total Marks: ${paper.totalMarks}`);
+    if (paper.date) lines.push(`Date: ${paper.date}`);
+    if (paper.questions.length > 0) {
+      lines.push(`Total Questions: ${paper.questions.length}`);
+      const typeCounts: Record<string, number> = {};
+      paper.questions.forEach((q) => { typeCounts[q.type] = (typeCounts[q.type] || 0) + 1; });
+      lines.push(`Types: ${Object.entries(typeCounts).map(([t, c]) => `${c} ${t}`).join(", ")}`);
+      lines.push("Questions:");
+      paper.questions.forEach((q, i) => {
+        lines.push(`  ${i + 1}. [${q.type}] ${q.text}`);
+      });
+    } else {
+      lines.push("Questions: Abhi koi question nahi hai.");
+    }
+    return lines.length > 0 ? `Paper Details:\n${lines.join("\n")}` : "Paper mein koi data nahi hai.";
+  }
+  if (metric === "paperSubject") return paper.subject ? `Paper ka subject: ${paper.subject}. Class: ${paper.className || "N/A"}.` : "Subject set nahi hai.";
+  if (metric === "paperTime") return paper.time ? `Paper ka time: ${paper.time}. Total Marks: ${paper.totalMarks || "N/A"}.` : "Time set nahi hai.";
+  if (metric === "paperClass") return paper.className ? `Paper ki class: ${paper.className}. Subject: ${paper.subject || "N/A"}.` : "Class set nahi hai.";
+  return "Paper detail samajh nahi aayi.";
+}
+
+function answerStudentDetail(student: StudentResult, exam: Exam, detectedSubject: string | null, metric: string, text: string): string {
+  if (detectedSubject) {
+    const obtained = student.subjectMarks[detectedSubject] ?? 0;
+    const subDef = exam.subjects?.find((s) => s.name === detectedSubject);
+    const total = subDef?.totalMarks ?? 0;
+    const passing = subDef?.passingMarks ?? 0;
+    const passed = obtained >= passing;
+    return `${student.studentName} ko ${detectedSubject} mein ${obtained} marks mile hain total ${total} mein se. ${passed ? "Pass" : "Fail"}. Position ${ordinal(student.position)}.`;
+  }
+
+  if (metric === "position") {
+    return `${student.studentName} ki position ${ordinal(student.position)} hai — ${student.percentage}% marks, ${student.grade} grade.`;
+  }
+  if (metric === "grade") {
+    return `${student.studentName} ka grade ${student.grade} hai — ${student.percentage}% marks, ${ordinal(student.position)} position.`;
+  }
+  if (metric === "percentage" || metric === "totalMarks") {
+    return `${student.studentName} ke ${student.totalObtained} marks hain total ${student.totalMarks} mein se — ${student.percentage}%. ${ordinal(student.position)} position.`;
+  }
+  if (metric === "status") {
+    if (student.passed) {
+      return `${student.studentName} pass ho gaya hai! ${student.grade} grade, ${student.percentage}% marks, ${ordinal(student.position)} position.`;
+    } else {
+      return `${student.studentName} fail ho gaya hai. ${student.grade} grade, ${student.percentage}% marks. Position ${ordinal(student.position)}.`;
+    }
+  }
+  if (metric === "remark") {
+    return `${student.studentName} ka remark hai: ${student.remark || "Koi remark nahi"}.`;
+  }
+
+  // Default: full subject-wise report
+  const subLines: string[] = [];
+  if (exam.subjects) {
+    for (const sub of exam.subjects) {
+      const obtained = student.subjectMarks[sub.name] ?? 0;
+      const passed = obtained >= sub.passingMarks;
+      subLines.push(`${sub.name}: ${obtained}/${sub.totalMarks} ${passed ? "Pass" : "Fail"}`);
+    }
+  }
+  const summary = `${student.studentName} ke total ${student.totalObtained} marks hain total ${student.totalMarks} mein se. Percentage ${student.percentage}%, Grade ${student.grade}, Position ${ordinal(student.position)}. ${student.passed ? "Pass" : "Fail"}.`;
+  if (subLines.length > 0) {
+    return summary + " Subject-wise: " + subLines.join("; ") + ".";
+  }
+  return summary;
+}
+
+function answerSubjectDetail(subjectName: string, exam: Exam, results: StudentResult[]): string {
+  const subDef = exam.subjects?.find((s) => s.name === subjectName);
+  if (!subDef) return `${subjectName} ka subject nahi mila.`;
+
+  const marksArr = results.map((r) => r.subjectMarks[subjectName] ?? 0);
+  const avg = marksArr.reduce((a, b) => a + b, 0) / marksArr.length;
+  const high = Math.max(...marksArr);
+  const low = Math.min(...marksArr);
+  const topStudent = results.find((r) => (r.subjectMarks[subjectName] ?? 0) === high);
+  const lowStudent = results.find((r) => (r.subjectMarks[subjectName] ?? 0) === low);
+  const passedCount = results.filter((r) => (r.subjectMarks[subjectName] ?? 0) >= subDef.passingMarks).length;
+
+  return `${subjectName} mein — total marks: ${subDef.totalMarks}, passing: ${subDef.passingMarks}. Highest: ${high} (${topStudent?.studentName || "?"}), Lowest: ${low} (${lowStudent?.studentName || "?"}). Average: ${avg.toFixed(1)}. ${passedCount} out of ${results.length} students pass.`;
+}
+
+function answerGeneralMetric(metric: string, exam: Exam, results: StudentResult[], text: string): string {
   if (metric === "studentCount") {
     return `Is exam "${exam.name}" mein total ${results.length} students hain.`;
   }
-
   if (metric === "passCount") {
     const passed = results.filter((r) => r.passed).length;
     return `Is exam mein ${passed} students pass hue hain ${results.length} mein se.`;
   }
-
   if (metric === "failCount") {
     const failed = results.filter((r) => !r.passed).length;
     return `Is exam mein ${failed} students fail hue hain ${results.length} mein se.`;
   }
-
   if (metric === "topper") {
     const sorted = [...results].sort((a, b) => b.percentage - a.percentage);
     const top = sorted[0];
     if (!top) return "Koi topper nahi mila.";
-    const subInfo = detectedSubject
-      ? ` ${detectedSubject} mein ${top.subjectMarks[detectedSubject] ?? 0} marks,`
+    const subInfo = exam.subjects?.length
+      ? ` Subject-wise: ${exam.subjects.map((s) => `${s.name}: ${top.subjectMarks[s.name] ?? 0}`).join(", ")}.`
       : "";
-    return `${top.studentName} sab se acha perform kar raha hai — ${top.percentage}% marks, ${top.grade} grade, ${ordinal(top.position)} position.${subInfo} Total ${top.totalObtained} out of ${top.totalMarks}.`;
+    return `${top.studentName} sab se acha perform kar raha hai — ${top.percentage}% marks, ${top.grade} grade, ${ordinal(top.position)} position. Total ${top.totalObtained} out of ${top.totalMarks}.${subInfo}`;
   }
-
   if (metric === "lowest") {
     const sorted = [...results].sort((a, b) => a.percentage - b.percentage);
     const low = sorted[0];
     if (!low) return "Koi student nahi mila.";
     return `${low.studentName} sab se kam marks laya hai — ${low.percentage}% marks, ${low.grade} grade, ${ordinal(low.position)} position. Total ${low.totalObtained} out of ${low.totalMarks}.`;
   }
-
   if (metric === "average") {
     const avg = results.reduce((sum, r) => sum + r.percentage, 0) / results.length;
     const passed = results.filter((r) => r.passed).length;
-    return `Class ka average ${avg.toFixed(1)}% hai. ${passed} out of ${results.length} students pass hue hain.`;
+    return `Class ka average ${avg.toFixed(1)}% hai. ${passed} out of ${results.length} students pass hue hain. ${results.length - passed} fail.`;
+  }
+  if (metric === "percentage") {
+    const avg = results.reduce((sum, r) => sum + r.percentage, 0) / results.length;
+    const sorted = [...results].sort((a, b) => b.percentage - a.percentage);
+    const top = sorted[0];
+    return `Average percentage: ${avg.toFixed(1)}%. Sab se zyada: ${top?.studentName} ${top?.percentage}%.`;
   }
 
-  if (detectedName) {
-    const student = results.find((r) => r.studentName === detectedName);
-    if (!student) return `${detectedName} ka record nahi mila.`;
-
-    if (detectedSubject) {
-      const obtained = student.subjectMarks[detectedSubject] ?? 0;
-      const subDef = exam.subjects?.find((s) => s.name === detectedSubject);
-      const total = subDef?.totalMarks ?? 0;
-      const passing = subDef?.passingMarks ?? 0;
-      const passed = obtained >= passing;
-      return `${student.studentName} ko ${detectedSubject} mein ${obtained} marks mile hain total ${total} mein se. ${passed ? "Pass" : "Fail"}. Position ${ordinal(student.position)}.`;
-    }
-
-    if (metric === "position") {
-      return `${student.studentName} ki position ${ordinal(student.position)} hai — ${student.percentage}% marks, ${student.grade} grade.`;
-    }
-
-    if (metric === "grade") {
-      return `${student.studentName} ka grade ${student.grade} hai — ${student.percentage}% marks.`;
-    }
-
-    if (metric === "percentage" || metric === "totalMarks") {
-      return `${student.studentName} ke ${student.totalObtained} marks hain total ${student.totalMarks} mein se — ${student.percentage}%.`;
-    }
-
-    if (metric === "status") {
-      if (student.passed) {
-        return `${student.studentName} pass ho gaya hai! ${student.grade} grade, ${student.percentage}% marks, ${ordinal(student.position)} position.`;
-      } else {
-        return `${student.studentName} fail ho gaya hai. ${student.grade} grade, ${student.percentage}% marks.`;
-      }
-    }
-
-    if (metric === "remark") {
-      return `${student.studentName} ka remark hai: ${student.remark || "Koi remark nahi"}.`;
-    }
-
-    const subLines: string[] = [];
-    if (exam.subjects) {
-      for (const sub of exam.subjects) {
-        const obtained = student.subjectMarks[sub.name] ?? 0;
-        const passed = obtained >= sub.passingMarks;
-        subLines.push(`${sub.name}: ${obtained}/${sub.totalMarks} ${passed ? "Pass" : "Fail"}`);
-      }
-    }
-    const summary = `${student.studentName} ke total ${student.totalObtained} marks hain total ${student.totalMarks} mein se. Percentage ${student.percentage}%, Grade ${student.grade}, Position ${ordinal(student.position)}. ${student.passed ? "Pass" : "Fail"}.`;
-    if (subLines.length > 0) {
-      return summary + " Subject-wise: " + subLines.join("; ") + ".";
-    }
-    return summary;
-  }
-
-  if (detectedSubject) {
-    const subDef = exam.subjects?.find((s) => s.name === detectedSubject);
-    if (!subDef) return `${detectedSubject} ka subject nahi mila.`;
-
-    const marksArr = results.map((r) => r.subjectMarks[detectedSubject] ?? 0);
-    const avg = marksArr.reduce((a, b) => a + b, 0) / marksArr.length;
-    const high = Math.max(...marksArr);
-    const low = Math.min(...marksArr);
-    const topStudent = results.find((r) => (r.subjectMarks[detectedSubject] ?? 0) === high);
-    const passedCount = results.filter((r) => (r.subjectMarks[detectedSubject] ?? 0) >= subDef.passingMarks).length;
-
-    return `${detectedSubject} mein: average ${avg.toFixed(1)}, highest ${high} (${topStudent?.studentName || "?"}), lowest ${low}. Total ${results.length} students, ${passedCount} pass, ${results.length - passedCount} fail. Total marks ${subDef.totalMarks}, passing ${subDef.passingMarks}.`;
-  }
-
+  // Default: exam summary
   const avg = results.reduce((sum, r) => sum + r.percentage, 0) / results.length;
   const passed = results.filter((r) => r.passed).length;
   const sorted = [...results].sort((a, b) => b.percentage - a.percentage);
   const top = sorted[0];
-
-  return `${exam.name} mein total ${results.length} students hain. ${passed} pass, ${results.length - passed} fail. Average ${avg.toFixed(1)}%. Topper: ${top?.studentName || "?"} ${top?.percentage || 0}%. Batayein kis student ya subject ka detail chahiye.`;
+  const subjects = exam.subjects?.map((s) => s.name).join(", ") || "N/A";
+  return `${exam.name} (Class: ${exam.className || "N/A"}) mein total ${results.length} students hain. ${passed} pass, ${results.length - passed} fail. Average ${avg.toFixed(1)}%. Topper: ${top?.studentName || "?"} (${top?.percentage || 0}%). Subjects: ${subjects}. Kis student ya subject ka detail chahiye?`;
 }
+
+// --- Metric Detection ---
+
+function detectMetric(text: string): string {
+  const lower = text.toLowerCase();
+
+  // Student count
+  if (/kitn[ei]\s+student|total\s+student|student.*count|kitn[ei]\s+bacch[ei]/i.test(lower)) return "studentCount";
+
+  // Pass/fail counts
+  if (/pass\s+kitn[ei]|kitn[ei]\s+pass|pass.*count|kitne\s+pass/i.test(lower)) return "passCount";
+  if (/fail\s+kitn[ei]|kitn[ei]\s+fail|fail.*count|kitne\s+fail/i.test(lower)) return "failCount";
+
+  // Topper / highest
+  if (/topper|sab\s+se\s+(zyada|ziyada|acha|achi)|highest|sab\s+se\s+behtareen|best/i.test(lower)) return "topper";
+
+  // Lowest / worst
+  if (/lowest|sab\s+se\s+(kam|kharab)|worst|sab\s+se\s+kamzor|weakest/i.test(lower)) return "lowest";
+
+  // Average
+  if (/average|ausat|average\s+marks/i.test(lower)) return "average";
+
+  // Position / rank
+  if (/position|rank|sthaan|kya\s+position|kitni\s+position/i.test(lower)) return "position";
+
+  // Grade
+  if (/grade|kya\s+grade|kitna\s+grade/i.test(lower)) return "grade";
+
+  // Status (pass/fail)
+  if (/pass\s+ya\s+fail|result|kya\s+hua|huiya|guzra|pass\s+hua|fail\s+hua/i.test(lower)) return "status";
+
+  // Percentage
+  if (/percentage|percent|fisad|kya\s+percentage/i.test(lower)) return "percentage";
+
+  // Total marks
+  if (/total.*marks|marks.*total|total|kul/i.test(lower)) return "totalMarks";
+
+  // Paper detail queries
+  if (/paper|sawal|question|questions|kitne\s+sawal|sawal.*kitn[ei]|paper.*detail|paper.*info|kya\s+kya\s+hai/i.test(lower)) return "paperDetails";
+  if (/subject|paper.*subject|subject.*kya|kons[ae]\s+subject/i.test(lower)) return "paperSubject";
+  if (/time|waqt|kitna\s+time|duration/i.test(lower)) return "paperTime";
+  if (/class|jamaat|konsi\s+class/i.test(lower)) return "paperClass";
+  if (/title|paper.*title|kya\s+naam/i.test(lower)) return "paperTitle";
+
+  // Remark
+  if (/remark|note/i.test(lower)) return "remark";
+
+  // Marks (generic — but combined with name detection it gives subject-wise marks)
+  if (/marks|number|aye|mile|kitn[ei]|scores?/i.test(lower)) return "marks";
+
+  return "overview";
+}
+
+// --- Mutation Parsing ---
 
 function extractNumber(text: string): number | null {
   const wordMap: Record<string, number> = {
@@ -481,7 +577,6 @@ export function parseMutation(text: string, subjects: string[]): MutationAction 
   const detectedSubject = detectSubject(text, subjects);
 
   let studentName: string | null = null;
-  // Try to extract name: "for Ahmed", "of Ali", "ka marks", etc.
   const namePatterns = [
     /(?:for|of|ka|ke|ki|ko|name|student)\s+([a-zA-Z\u0600-\u06FF]+(?:\s+[a-zA-Z\u0600-\u06FF]+)?)/i,
     /([a-zA-Z\u0600-\u06FF]+)\s+(?:ka|ke|ki|ko|marks|ki marks)/i,
@@ -498,7 +593,6 @@ export function parseMutation(text: string, subjects: string[]): MutationAction 
     }
   }
 
-  // Detect add/update marks — very flexible
   const isAdd = /(?:add|give|set|put|enter|daalo|dalo|jodo|plus|lagao|do|dedo|number|marks)/i.test(lower);
   const isUpdate = /(?:update|change|correct|fix|alter|badlo|modify|theek|sudharo|replace|edit)/i.test(lower);
   const isDelete = /(?:delete|remove|hatao|hatado|khatam|discard|drop)/i.test(lower);
@@ -537,15 +631,17 @@ export function parseMutation(text: string, subjects: string[]): MutationAction 
 
 export function describeMutation(action: MutationAction): string {
   switch (action.type) {
-    case "add_marks":
-      return `Add ${action.marks} marks in ${action.subject}${action.studentName ? ` for ${action.studentName}` : ""}${action.rollNo ? ` (roll ${action.rollNo})` : ""}?`;
-    case "update_marks":
-      return `Update ${action.subject} marks to ${action.marks}${action.studentName ? ` for ${action.studentName}` : ""}${action.rollNo ? ` (roll ${action.rollNo})` : ""}?`;
-    case "delete_student":
-      return `Delete ${action.studentName || `roll ${action.rollNo || "?"}`} from current exam?`;
-    case "add_student":
-      return `Add student "${action.studentName}" with roll number ${action.rollNo}?`;
-    case "create_exam":
-      return `Create exam "${action.examName}"${action.className ? ` class ${action.className}` : ""}${action.section ? ` section ${action.section}` : ""}?`;
+    case "add_marks": return `${action.studentName || "Student"} ko ${action.subject} mein ${action.marks} marks dena.`;
+    case "update_marks": return `${action.studentName || "Student"} ke ${action.subject} marks ${action.marks} karna.`;
+    case "delete_student": return `${action.studentName || "Student"} ko exam se hatana.`;
+    case "add_student": return `${action.studentName} (roll ${action.rollNo}) ko exam mein add karna.`;
+    case "create_exam": return `Naya exam "${action.examName}" create karna.`;
   }
+}
+
+function ordinal(n: number): string {
+  if (n === 0) return "";
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
