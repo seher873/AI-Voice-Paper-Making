@@ -100,9 +100,17 @@ export default function Dashboard() {
     return () => clearTimeout(timer);
   }, [state, resultCtx.state]);
 
+  const [authError, setAuthError] = useState<string | null>(null);
+
   useEffect(() => {
     let mounted = true;
     const sb = getSupabase();
+    const timeout = setTimeout(() => {
+      if (mounted && !schoolReady) {
+        console.error("[Auth] Timeout: auth check took too long");
+        setAuthError("Connection timeout — check your internet");
+      }
+    }, 10000);
     const { data: { subscription } } = sb.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
       if (event === "SIGNED_OUT" || (!session && event !== "INITIAL_SESSION")) {
@@ -112,30 +120,37 @@ export default function Dashboard() {
       if (session && mounted) checkAuth(sb);
     });
     checkAuth(sb);
-    return () => { mounted = false; subscription.unsubscribe(); };
+    return () => { mounted = false; clearTimeout(timeout); subscription.unsubscribe(); };
 
     async function checkAuth(sb: ReturnType<typeof getSupabase>) {
       try {
-        const { data: { session } } = await sb.auth.getSession();
+        const { data: { session }, error: sessErr } = await sb.auth.getSession();
+        console.log("[Auth] getSession:", session ? "ok" : "no session", sessErr?.message || "");
         if (!mounted) return;
         if (!session) { window.location.href = "/login"; return; }
-        const { data: { user } } = await sb.auth.getUser();
+        const { data: { user }, error: userErr } = await sb.auth.getUser();
+        console.log("[Auth] getUser:", user?.id || "no user", userErr?.message || "");
         if (!user || !mounted) { window.location.href = "/login"; return; }
-        const { data } = await sb.from("profiles").select("school_id").eq("id", user.id);
+        const { data, error: profErr } = await sb.from("profiles").select("school_id").eq("id", user.id);
+        console.log("[Auth] profiles:", data?.length ?? "null", profErr?.message || "");
         if (mounted) setSchoolReady(!!data && data.length > 0);
         try {
-          const { data: adminRow } = await sb
+          const { data: adminRow, error: adminErr } = await sb
             .from("profiles")
             .select("super_admin")
             .eq("id", user.id)
             .maybeSingle();
+          console.log("[Auth] super_admin:", adminRow?.super_admin, adminErr?.message || "");
           if (mounted) setIsSuperAdmin(!!adminRow?.super_admin);
-        } catch {
-          // super_admin column may not exist yet
+        } catch (e) {
+          console.log("[Auth] super_admin query failed:", e);
         }
       } catch (err) {
-        console.error("Auth check error:", err);
-        if (mounted) window.location.href = "/login";
+        console.error("[Auth] checkAuth error:", err);
+        if (mounted) {
+          setAuthError(err instanceof Error ? err.message : "Auth failed");
+          setTimeout(() => { if (mounted) window.location.href = "/login"; }, 3000);
+        }
       }
     }
   }, []);
@@ -204,13 +219,14 @@ export default function Dashboard() {
 
   if (schoolReady === null) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-slate-100">
-        <div className="flex items-center gap-3 text-slate-500">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-slate-100 p-4">
+        <div className="flex flex-col items-center gap-3 text-slate-500 max-w-sm text-center">
           <svg className="w-6 h-6 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="10" strokeWidth={3} className="opacity-25" />
             <path d="M4 12a8 8 0 018-8" strokeWidth={3} className="opacity-75" />
           </svg>
-          <span className="font-medium">Loading...</span>
+          <span className="font-medium">{authError ? `Error: ${authError}` : "Loading..."}</span>
+          {authError && <span className="text-xs text-red-400">Redirecting to login in 3 seconds...</span>}
         </div>
       </div>
     );
