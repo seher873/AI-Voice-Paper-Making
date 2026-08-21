@@ -258,13 +258,11 @@ export default function VoiceAgent({ isSuperAdmin }: VoiceAgentProps) {
       <div
         className="fixed z-50 group select-none"
         style={{ left: pos.x, top: pos.y, width: 60, height: 60, cursor: isDragging ? "grabbing" : "grab", touchAction: "none" }}
-        onMouseDown={onDragStart}
-        onTouchStart={onDragStart}
       >
         <button
           onClick={handleButtonClick}
-          onMouseDown={(e) => e.stopPropagation()}
-          onTouchStart={(e) => e.stopPropagation()}
+          onMouseDown={onDragStart}
+          onTouchStart={onDragStart}
           className="relative w-[60px] h-[60px] cursor-pointer"
           title="AI Assistant — Drag to move"
         >
