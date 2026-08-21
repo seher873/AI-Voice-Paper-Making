@@ -1,6 +1,13 @@
 import type { Exam, StudentResult, StudentMark } from "@/types/result";
 import { getSupabase } from "./supabase";
 
+export type MutationAction =
+  | { type: "add_marks"; studentName: string | null; rollNo: string | null; subject: string; marks: number }
+  | { type: "update_marks"; studentName: string | null; rollNo: string | null; subject: string; marks: number }
+  | { type: "delete_student"; studentName: string | null; rollNo: string | null }
+  | { type: "add_student"; studentName: string; rollNo: string }
+  | { type: "create_exam"; examName: string; className: string; section: string };
+
 interface ParsedQuery {
   studentName: string | null;
   subject: string | null;
@@ -399,4 +406,96 @@ export function answerQuery(query: ParsedQuery, ctx: VoiceContext): string {
   const top = sorted[0];
 
   return `${exam.name} mein total ${results.length} students hain. ${passed} pass, ${results.length - passed} fail. Average ${avg.toFixed(1)}%. Topper: ${top?.studentName || "?"} ${top?.percentage || 0}%. Batayein kis student ya subject ka detail chahiye.`;
+}
+
+function extractNumber(text: string): number | null {
+  const wordMap: Record<string, number> = {
+    zero: 0, ek: 1, do: 2, teen: 3, char: 4, chaar: 4, paanch: 5, panch: 5,
+    chhe: 6, saat: 7, aath: 8, nau: 9, das: 10, gyarah: 11, barah: 12,
+    tera: 13, chaudah: 15, pandrah: 15, solah: 16, satrah: 17, atharah: 18,
+    unnis: 19, bees: 20, pachees: 25, tees: 30, paitalis: 40, pachas: 50,
+    saath: 60, sattar: 70, assi: 80, nabbe: 90, sau: 100,
+  };
+  const lower = text.toLowerCase();
+  for (const [word, num] of Object.entries(wordMap)) {
+    if (lower.includes(word)) return num;
+  }
+  const match = lower.match(/(\d+)/);
+  if (match) return parseInt(match[1], 10);
+  return null;
+}
+
+function extractRollNo(text: string): string | null {
+  const m = text.match(/roll\s*(?:number|no|#|num)?\s*(\d+)/i);
+  if (m) return m[1];
+  const m2 = text.match(/(\d+)\s*(?:number|roll|sila)/i);
+  if (m2) return m2[1];
+  return null;
+}
+
+const MUTATION_ADD_MARKS = /(?:add|give|set|put|enter|daalo|dalo|jodo|plus|bayeen|lagao)\s+(?:.*?\s+)?(\d+)\s*(?:marks|number|numbers)?/i;
+const MUTATION_UPDATE_MARKS = /(?:update|change|correct|fix|alter|badlo|set|dusra|modify|theek|sudharo)\s+(?:.*?\s+)?(?:marks?\s*(?:to|se|=|ko)\s*)?(\d+)/i;
+const MUTATION_DELETE = /(?:delete|remove|hatao|hatado|khatam|remove karo|discard|drop)\s+(?:.*?\s+)?(?:student|roll|banda|bacha|pupil)?/i;
+const MUTATION_ADD_STUDENT = /(?:add|insert|naya|naye|new)\s+(?:student|roll|banda|bacha|pupil)/i;
+const MUTATION_CREATE_EXAM = /(?:create|make|new|naya|banayein|banao|start|shuru|setup)\s+(?:.*?\s+)?(?:exam|test|paper|imtihan|pariksha)/i;
+
+export function parseMutation(text: string, subjects: string[]): MutationAction | null {
+  const lower = text.toLowerCase();
+  const marks = extractNumber(text);
+  const rollNo = extractRollNo(text);
+
+  const detectedSubject = detectSubject(text, subjects);
+  let studentName: string | null = null;
+  const nameMatch = text.match(/(?:for|of|ka|ke|ki|ko|name)\s+(.+?)(?:\s+(?:in|mein|subject|ka|ke|ki|marks|roll|number|\d+))/i);
+  if (nameMatch) {
+    studentName = nameMatch[1].trim();
+  }
+
+  if (MUTATION_ADD_MARKS.test(lower) && marks !== null) {
+    const subject = detectedSubject || subjects[0] || "Unknown";
+    return { type: "add_marks", studentName, rollNo, subject, marks };
+  }
+
+  if (MUTATION_UPDATE_MARKS.test(lower) && marks !== null) {
+    const subject = detectedSubject || subjects[0] || "Unknown";
+    return { type: "update_marks", studentName, rollNo, subject, marks };
+  }
+
+  if (MUTATION_DELETE.test(lower)) {
+    const nameOnly = text.replace(/(?:delete|remove|hatao|hatado|khatam|remove karo|discard|drop)\s*/i, "").trim();
+    const nameWords = nameOnly.split(/\s+/).filter(w => !["student", "roll", "number", "banda", "bacha", "pupil"].includes(w.toLowerCase()));
+    return { type: "delete_student", studentName: nameWords.join(" ") || null, rollNo };
+  }
+
+  if (MUTATION_ADD_STUDENT.test(lower)) {
+    const nameMatch2 = text.match(/(?:add|insert|naya|naye|new)\s+(?:student|roll|banda|bacha|pupil)\s+(.+?)(?:\s+roll|\s+number|\s+as|\s+called|\s+naam|$)/i);
+    const name = nameMatch2?.[1]?.trim() || "Student";
+    return { type: "add_student", studentName: name, rollNo: rollNo || String(Math.floor(Math.random() * 1000) + 1) };
+  }
+
+  if (MUTATION_CREATE_EXAM.test(lower)) {
+    const examName = text.match(/(?:exam|test|paper|imtihan)\s+(?:called|named|ka naam|naam)?\s*(.+?)(?:\s+class|\s+section|\s+for|\s+ka|\s+ki|$)/i)?.[1]?.trim()
+      || text.match(/(?:create|make|new|naya|banayein|banao|start|shuru|setup)\s+(.+?)(?:\s+exam|\s+test|\s+paper)/i)?.[1]?.trim()
+      || "New Exam";
+    const className = text.match(/class\s+(\w+)/i)?.[1] || "";
+    const section = text.match(/section\s+(\w+)/i)?.[1] || "";
+    return { type: "create_exam", examName, className, section };
+  }
+
+  return null;
+}
+
+export function describeMutation(action: MutationAction): string {
+  switch (action.type) {
+    case "add_marks":
+      return `Add ${action.marks} marks in ${action.subject}${action.studentName ? ` for ${action.studentName}` : ""}${action.rollNo ? ` (roll ${action.rollNo})` : ""}?`;
+    case "update_marks":
+      return `Update ${action.subject} marks to ${action.marks}${action.studentName ? ` for ${action.studentName}` : ""}${action.rollNo ? ` (roll ${action.rollNo})` : ""}?`;
+    case "delete_student":
+      return `Delete ${action.studentName || `roll ${action.rollNo || "?"}`} from current exam?`;
+    case "add_student":
+      return `Add student "${action.studentName}" with roll number ${action.rollNo}?`;
+    case "create_exam":
+      return `Create exam "${action.examName}"${action.className ? ` class ${action.className}` : ""}${action.section ? ` section ${action.section}` : ""}?`;
+  }
 }
