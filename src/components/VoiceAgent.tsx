@@ -35,7 +35,7 @@ function loadPos(): { x: number; y: number } {
 
 export default function VoiceAgent({ isSuperAdmin }: VoiceAgentProps) {
   const { state, dispatch } = useResult();
-  const { state: paperState } = usePaper();
+  const { state: paperState, papers } = usePaper();
   const [status, setStatus] = useState<Status>("idle");
   const [isOpen, setIsOpen] = useState(false);
   const [isSupported, setIsSupported] = useState(true);
@@ -122,11 +122,11 @@ export default function VoiceAgent({ isSuperAdmin }: VoiceAgentProps) {
       });
       return;
     }
-    const ctx: VoiceContext = { exams: state.exams, currentExam: state.currentExam, students: state.students, results: state.results, paper: paperState };
+    const ctx: VoiceContext = { exams: state.exams, currentExam: state.currentExam, students: state.students, results: state.results, paper: paperState, savedPapers: papers };
     const answer = answerQuery(parsed, ctx);
     addMsg("agent", answer);
     speak(answer);
-  }, [isSuperAdmin, state, paperState, speak, addMsg]);
+  }, [isSuperAdmin, state, paperState, papers, speak, addMsg]);
 
   const processQuery = useCallback((text: string) => {
     const lower = text.toLowerCase().trim();

@@ -1,5 +1,5 @@
 import type { Exam, StudentResult, StudentMark } from "@/types/result";
-import type { PaperState } from "@/types/paper";
+import type { PaperState, PaperProject } from "@/types/paper";
 import { getSupabase } from "./supabase";
 
 export type MutationAction =
@@ -100,6 +100,8 @@ function findStudentInNames(text: string, studentNames: string[]): string | null
     "math", "english", "urdu", "science", "islamiat", "drawing",
     "detail", "details", "info", "kya", "haal", "chale", "chal",
     "bol", "sun", "dekho", "bolo", "suno", "bata", "pata",
+    "passing", "passmarks", "passingmarks", "minimum", "threshold",
+    "btao", "bataye", "sirf", "konsa", "konsi", "konsae",
   ];
 
   const words = lower.split(/\s+/).filter(Boolean);
@@ -200,6 +202,7 @@ export interface VoiceContext {
   students: StudentMark[];
   results: StudentResult[];
   paper?: PaperState | null;
+  savedPapers?: PaperProject[];
 }
 
 export async function answerAdminQuery(adminMetric: string | null, text: string): Promise<string> {
@@ -294,6 +297,14 @@ export function answerQuery(query: ParsedQuery, ctx: VoiceContext): string {
   const text = query.all.toLowerCase();
   const metric = detectMetric(text);
 
+  // Saved papers list
+  if (metric === "savedPapers") {
+    const papers = ctx.savedPapers || [];
+    if (papers.length === 0) return "Abhi koi saved paper nahi hai. Paper Builder mein paper bana kar Save karein.";
+    const list = papers.map((p, i) => `${i + 1}. ${p.name} — ${p.state.questions.length} questions, ${p.state.className || "No class"}, ${p.state.subject || "No subject"}`).join("\n");
+    return `${papers.length} saved papers hain:\n${list}\n\nKisi paper ko load karne ka bolo.`;
+  }
+
   // Paper detail queries — work even without exam data
   if (metric === "paperDetails" || metric === "paperSubject" || metric === "paperTime" || metric === "paperClass" || metric === "paperTitle") {
     return answerPaperQuery(metric, text, ctx.paper);
@@ -310,6 +321,21 @@ export function answerQuery(query: ParsedQuery, ctx: VoiceContext): string {
     : allStudents.map((s) => s.studentName);
   const detectedName = findStudentInNames(text, allNames);
   const detectedSubject = detectSubject(text, subjects);
+
+  // Passing marks query
+  if (metric === "passingMarks") {
+    if (!exam) return "Koi exam nahi hai. Pehle exam create karein.";
+    if (detectedSubject) {
+      const sub = exam.subjects?.find((s) => s.name === detectedSubject);
+      if (sub) return `${detectedSubject} mein passing marks ${sub.passingMarks} hain total ${sub.totalMarks} mein se.`;
+      return `${detectedSubject} ka subject nahi mila.`;
+    }
+    if (exam.subjects && exam.subjects.length > 0) {
+      const list = exam.subjects.map((s) => `${s.name}: ${s.passingMarks}/${s.totalMarks}`).join(", ");
+      return `Har subject ke passing marks:\n${list}`;
+    }
+    return "Subjects mein passing marks define nahi hue.";
+  }
 
   // No exam at all
   if (!exam && allStudents.length === 0) {
@@ -526,8 +552,16 @@ function detectMetric(text: string): string {
   // Total marks
   if (/total.*marks|marks.*total|total|kul/i.test(lower)) return "totalMarks";
 
+  // Passing marks query
+  if (/passing\s*marks|pass\s*marks|kitn[ei]?\s*pass|minimum\s*marks|pass\s*kitn[ei]/i.test(lower)) return "passingMarks";
+
+  // Saved papers list
+  if (/kitn[ei]?\s*papers?|papers?\s*kitn[ei]|papers?\s*list|sari?\s*papers?|sab\s*papers?|saved\s*papers?|paper\s*list|papers?\s*batao|papers?\s*kitn[ei]|papers?\s*ho/i.test(lower)) return "savedPapers";
+
   // Paper detail queries
-  if (/paper|sawal|question|questions|kitne\s+sawal|sawal.*kitn[ei]|paper.*detail|paper.*info|kya\s+kya\s+hai/i.test(lower)) return "paperDetails";
+  if (/paper|sawal|question|questions|kitne\s+sawal|sawal.*kitn[ei]|paper.*detail|paper.*info|kya\s+kya\s+hai/i.test(lower)) {
+    return "paperDetails";
+  }
   if (/subject|paper.*subject|subject.*kya|kons[ae]\s+subject/i.test(lower)) return "paperSubject";
   if (/time|waqt|kitna\s+time|duration/i.test(lower)) return "paperTime";
   if (/class|jamaat|konsi\s+class/i.test(lower)) return "paperClass";
@@ -576,6 +610,9 @@ export function parseMutation(text: string, subjects: string[]): MutationAction 
 
   const detectedSubject = detectSubject(text, subjects);
 
+  // "passing marks" is a query, not a mutation — detect before anything else
+  if (/passing\s*marks|pass\s*marks|minimum\s*marks|pass\s*kitn[ei]/i.test(lower)) return null;
+
   let studentName: string | null = null;
   const namePatterns = [
     /(?:for|of|ka|ke|ki|ko|name|student)\s+([a-zA-Z\u0600-\u06FF]+(?:\s+[a-zA-Z\u0600-\u06FF]+)?)/i,
@@ -585,7 +622,7 @@ export function parseMutation(text: string, subjects: string[]): MutationAction 
     const m = text.match(pat);
     if (m) {
       const name = m[1].trim();
-      const skip = ["add", "give", "set", "put", "enter", "marks", "in", "mein", "for", "of", "roll", "number", "math", "english", "urdu", "science", "total", "ka", "ki", "ko"];
+      const skip = ["add", "give", "set", "put", "enter", "marks", "in", "mein", "for", "of", "roll", "number", "math", "english", "urdu", "science", "total", "ka", "ki", "ko", "passing", "pass", "btao", "bataye", "sirf"];
       if (!skip.includes(name.toLowerCase())) {
         studentName = name;
         break;
@@ -593,9 +630,10 @@ export function parseMutation(text: string, subjects: string[]): MutationAction 
     }
   }
 
-  const isAdd = /(?:add|give|set|put|enter|daalo|dalo|jodo|plus|lagao|do|dedo|number|marks)/i.test(lower);
-  const isUpdate = /(?:update|change|correct|fix|alter|badlo|modify|theek|sudharo|replace|edit)/i.test(lower);
-  const isDelete = /(?:delete|remove|hatao|hatado|khatam|discard|drop)/i.test(lower);
+  // Mutation verbs only — NOT just "marks" alone
+  const isAdd = /(?:add|give|set|put|enter|daalo|dalo|jodo|plus|lagao|dedo)\s+/i.test(lower);
+  const isUpdate = /(?:update|change|correct|fix|alter|badlo|modify|theek|sudharo|replace|edit)\s+/i.test(lower);
+  const isDelete = /(?:delete|remove|hatao|hatado|khatam|discard|drop)\s+/i.test(lower);
   const isAddStudent = /(?:add|insert|naya|naye|new)\s+(?:student|banda|bacha|pupil)/i.test(lower);
   const isCreateExam = /(?:create|make|new|naya|banayein|banao|start|shuru|setup)\s*(?:.*?\s*)?(?:exam|test|paper|imtihan|pariksha)/i.test(lower);
 
