@@ -30,6 +30,14 @@ export interface PaperState {
   questions: Question[];
 }
 
+export interface PaperProject {
+  id: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+  state: PaperState;
+}
+
 export type PaperAction =
   | { type: "SET_SCHOOL_NAME"; payload: string }
   | { type: "SET_SCHOOL_ADDRESS"; payload: string }
@@ -55,7 +63,14 @@ export type PaperAction =
   | { type: "DELETE_QUESTION"; payload: string }
   | { type: "REORDER_QUESTIONS"; payload: Question[] }
   | { type: "HYDRATE"; payload: PaperState }
-  | { type: "RESET" };
+  | { type: "RESET" }
+  | { type: "SAVE_PAPER"; payload: { id: string; name: string } }
+  | { type: "UPDATE_SAVED_PAPER"; payload: { id: string } }
+  | { type: "LOAD_PAPER"; payload: string }
+  | { type: "DELETE_PAPER"; payload: string }
+  | { type: "RENAME_PAPER"; payload: { id: string; name: string } }
+  | { type: "HYDRATE_PAPERS"; payload: PaperProject[] }
+  | { type: "SET_ACTIVE_PAPER_ID"; payload: string | null };
 
 export const initialState: PaperState = {
   schoolName: "",

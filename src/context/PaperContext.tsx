@@ -6,12 +6,14 @@ import {
   useReducer,
   useEffect,
   useRef,
+  useState,
   type ReactNode,
 } from "react";
-import { initialState, type PaperState, type PaperAction } from "@/types/paper";
+import { initialState, type PaperState, type PaperProject, type PaperAction } from "@/types/paper";
 import { getTemplate } from "@/lib/paperFormat";
 
 const STORAGE_KEY = "paper-maker-state";
+const PAPERS_KEY = "paper-maker-projects";
 
 function loadState(): PaperState {
   if (typeof window === "undefined") return initialState;
@@ -21,10 +23,17 @@ function loadState(): PaperState {
       const parsed = JSON.parse(saved);
       return { ...initialState, ...parsed };
     }
-  } catch {
-    // ignore
-  }
+  } catch { /* ignore */ }
   return initialState;
+}
+
+function loadPapers(): PaperProject[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const saved = localStorage.getItem(PAPERS_KEY);
+    if (saved) return JSON.parse(saved);
+  } catch { /* ignore */ }
+  return [];
 }
 
 function paperReducer(state: PaperState, action: PaperAction): PaperState {
@@ -111,6 +120,11 @@ function paperReducer(state: PaperState, action: PaperAction): PaperState {
       return { ...state, questions: action.payload };
     case "HYDRATE":
       return { ...action.payload, questions: action.payload.questions || [] };
+    case "LOAD_PAPER": {
+      const papers = loadPapers();
+      const found = papers.find((p) => p.id === action.payload);
+      return found ? { ...found.state } : state;
+    }
     case "RESET":
       try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
       return initialState;
@@ -122,13 +136,24 @@ function paperReducer(state: PaperState, action: PaperAction): PaperState {
 interface PaperContextType {
   state: PaperState;
   dispatch: React.Dispatch<PaperAction>;
+  papers: PaperProject[];
+  activePaperId: string | null;
+  savePaper: (name: string) => void;
+  updateSavedPaper: () => void;
+  deletePaper: (id: string) => void;
+  renamePaper: (id: string, name: string) => void;
+  loadPaperById: (id: string) => void;
+  newPaper: () => void;
 }
 
 const PaperContext = createContext<PaperContextType | undefined>(undefined);
 
 export function PaperProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(paperReducer, initialState);
+  const [papers, setPapers] = useState<PaperProject[]>([]);
+  const [activePaperId, setActivePaperId] = useState<string | null>(null);
   const isFirstRender = useRef(true);
+  const prevState = useRef(state);
 
   useEffect(() => {
     if (isFirstRender.current) {
@@ -137,22 +162,84 @@ export function PaperProvider({ children }: { children: ReactNode }) {
       if (saved !== initialState) {
         dispatch({ type: "HYDRATE", payload: saved });
       }
+      setPapers(loadPapers());
     }
   }, []);
 
-  const prevState = useRef(state);
   useEffect(() => {
     if (prevState.current === state) return;
     prevState.current = state;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch {
-      // ignore
-    }
+    } catch { /* ignore */ }
   }, [state]);
 
+  const savePapers = (updated: PaperProject[]) => {
+    setPapers(updated);
+    try { localStorage.setItem(PAPERS_KEY, JSON.stringify(updated)); } catch { /* ignore */ }
+  };
+
+  const savePaper = (name: string) => {
+    const id = activePaperId || crypto.randomUUID();
+    const now = new Date().toISOString();
+    const project: PaperProject = {
+      id,
+      name: name || state.paperTitle || state.subject || "Untitled Paper",
+      createdAt: papers.find((p) => p.id === id)?.createdAt || now,
+      updatedAt: now,
+      state: { ...state },
+    };
+    const exists = papers.findIndex((p) => p.id === id);
+    const updated = exists >= 0 ? papers.map((p) => (p.id === id ? project : p)) : [...papers, project];
+    savePapers(updated);
+    setActivePaperId(id);
+    try { localStorage.setItem("paper-maker-active-id", id); } catch { /* ignore */ }
+  };
+
+  const updateSavedPaper = () => {
+    if (!activePaperId) return;
+    const now = new Date().toISOString();
+    const updated = papers.map((p) =>
+      p.id === activePaperId ? { ...p, state: { ...state }, updatedAt: now, name: p.name || state.paperTitle || state.subject || "Untitled" } : p
+    );
+    savePapers(updated);
+  };
+
+  const deletePaper = (id: string) => {
+    const updated = papers.filter((p) => p.id !== id);
+    savePapers(updated);
+    if (activePaperId === id) {
+      setActivePaperId(null);
+      dispatch({ type: "RESET" });
+      try { localStorage.removeItem("paper-maker-active-id"); } catch { /* ignore */ }
+    }
+  };
+
+  const renamePaper = (id: string, name: string) => {
+    const updated = papers.map((p) => (p.id === id ? { ...p, name, updatedAt: new Date().toISOString() } : p));
+    savePapers(updated);
+  };
+
+  const loadPaperById = (id: string) => {
+    const found = papers.find((p) => p.id === id);
+    if (found) {
+      dispatch({ type: "HYDRATE", payload: found.state });
+      setActivePaperId(id);
+      try { localStorage.setItem("paper-maker-active-id", id); } catch { /* ignore */ }
+    }
+  };
+
+  const newPaper = () => {
+    setActivePaperId(null);
+    dispatch({ type: "RESET" });
+    try { localStorage.removeItem("paper-maker-active-id"); } catch { /* ignore */ }
+  };
+
   return (
-    <PaperContext.Provider value={{ state, dispatch }}>
+    <PaperContext.Provider value={{
+      state, dispatch, papers, activePaperId,
+      savePaper, updateSavedPaper, deletePaper, renamePaper, loadPaperById, newPaper,
+    }}>
       {children}
     </PaperContext.Provider>
   );

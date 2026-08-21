@@ -62,7 +62,7 @@ function initialPlanState(): {
 }
 
 export default function Dashboard() {
-  const { state, dispatch } = usePaper();
+  const { state, dispatch, papers, activePaperId, savePaper, updateSavedPaper, deletePaper, renamePaper, loadPaperById, newPaper } = usePaper();
   const resultCtx = useResult();
   const [plan, setPlanState] = useState(() => initialPlanState().plan);
   const [mode, setMode] = useState<"paper" | "results">(() => initialPlanState().mode);
@@ -70,6 +70,10 @@ export default function Dashboard() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showSchoolInfo, setShowSchoolInfo] = useState(false);
   const [schoolInfoCollapsed, setSchoolInfoCollapsed] = useState(false);
+  const [showPapersList, setShowPapersList] = useState(false);
+  const [papersListCollapsed, setPapersListCollapsed] = useState(false);
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameVal, setRenameVal] = useState("");
   const [, setLockedPlan] = useState<"paper" | "results" | "full" | null>(() => initialPlanState().lockedPlan);
   const [planFromDb, setPlanFromDb] = useState(() => initialPlanState().planFromDb);
   const [schoolReady, setSchoolReady] = useState<boolean | null>(null);
@@ -562,8 +566,104 @@ export default function Dashboard() {
 
         {/* Template Selector */}
         {mode === "paper" && plan.features.paper && (
-          <div className="px-3 sm:px-4 pt-4 pb-3 bg-slate-50/80 border-b border-slate-200">
-            <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase">Paper Template</label>
+          <div className="px-3 sm:px-4 pt-4 pb-3 bg-slate-50/80 border-b border-slate-200 space-y-3">
+            {/* Save / New buttons */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  const name = state.paperTitle || state.subject || `Paper ${papers.length + 1}`;
+                  savePaper(name);
+                }}
+                className="flex items-center gap-1.5 px-3 py-2 bg-indigo-600 text-white text-xs font-bold rounded-xl hover:bg-indigo-700 transition-all active:scale-95"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                </svg>
+                {activePaperId ? "Save" : "Save Paper"}
+              </button>
+              <button
+                onClick={() => newPaper()}
+                className="flex items-center gap-1.5 px-3 py-2 bg-white text-slate-600 text-xs font-bold rounded-xl border border-slate-200 hover:bg-slate-50 transition-all active:scale-95"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                New
+              </button>
+              {papers.length > 0 && (
+                <button
+                  onClick={() => setShowPapersList(!showPapersList)}
+                  className={`flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl border transition-all ${
+                    showPapersList ? "bg-indigo-50 text-indigo-600 border-indigo-200" : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50"
+                  }`}
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                  Papers ({papers.length})
+                </button>
+              )}
+            </div>
+
+            {/* Papers List */}
+            {showPapersList && papers.length > 0 && (
+              <div className="space-y-1.5 max-h-[200px] overflow-y-auto">
+                {papers.map((p) => (
+                  <div
+                    key={p.id}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs transition-all cursor-pointer ${
+                      activePaperId === p.id
+                        ? "bg-indigo-50 border border-indigo-200 ring-1 ring-indigo-300"
+                        : "bg-white border border-slate-200 hover:bg-slate-50"
+                    }`}
+                    onClick={() => { if (renamingId !== p.id) loadPaperById(p.id); }}
+                  >
+                    <div className="flex-1 min-w-0">
+                      {renamingId === p.id ? (
+                        <input
+                          autoFocus
+                          value={renameVal}
+                          onChange={(e) => setRenameVal(e.target.value)}
+                          onBlur={() => { renamePaper(p.id, renameVal.trim() || p.name); setRenamingId(null); }}
+                          onKeyDown={(e) => { if (e.key === "Enter") { renamePaper(p.id, renameVal.trim() || p.name); setRenamingId(null); } if (e.key === "Escape") setRenamingId(null); }}
+                          onClick={(e) => e.stopPropagation()}
+                          className="w-full px-2 py-0.5 text-xs border border-indigo-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                        />
+                      ) : (
+                        <>
+                          <p className="font-semibold text-slate-700 truncate">{p.name}</p>
+                          <p className="text-[10px] text-slate-400">
+                            {p.state.questions.length}Q &middot; {p.state.className || "No class"} &middot; {new Date(p.updatedAt).toLocaleDateString("en-PK")}
+                          </p>
+                        </>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setRenamingId(p.id); setRenameVal(p.name); }}
+                        className="w-6 h-6 flex items-center justify-center rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all"
+                        title="Rename"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); if (confirm(`Delete "${p.name}"?`)) deletePaper(p.id); }}
+                        className="w-6 h-6 flex items-center justify-center rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                        title="Delete"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <label className="block text-xs font-semibold text-slate-500 uppercase">Paper Template</label>
             <div className="relative">
               <select
                 value={state.paperTemplate}

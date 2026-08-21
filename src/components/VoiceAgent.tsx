@@ -22,6 +22,17 @@ interface ChatMsg {
 let msgId = 0;
 function nextId() { return `m${++msgId}`; }
 
+const POS_KEY = "paper-maker-agent-pos";
+
+function loadPos(): { x: number; y: number } {
+  if (typeof window === "undefined") return { x: -1, y: -1 };
+  try {
+    const saved = localStorage.getItem(POS_KEY);
+    if (saved) return JSON.parse(saved);
+  } catch { /* ignore */ }
+  return { x: -1, y: -1 };
+}
+
 export default function VoiceAgent({ isSuperAdmin }: VoiceAgentProps) {
   const { state, dispatch } = useResult();
   const { state: paperState } = usePaper();
@@ -33,6 +44,16 @@ export default function VoiceAgent({ isSuperAdmin }: VoiceAgentProps) {
   const recognitionRef = useRef<any>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Drag state
+  const savedPos = useRef(loadPos());
+  const [pos, setPos] = useState<{ x: number; y: number }>(() => {
+    const p = savedPos.current;
+    if (p.x >= 0 && p.y >= 0) return p;
+    return { x: typeof window !== "undefined" ? window.innerWidth - 80 : 300, y: typeof window !== "undefined" ? window.innerHeight - 140 : 500 };
+  });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragRef = useRef({ startX: 0, startY: 0, origX: 0, origY: 0, moved: false });
 
   useEffect(() => {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -49,6 +70,13 @@ export default function VoiceAgent({ isSuperAdmin }: VoiceAgentProps) {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, status]);
+
+  // Save position to localStorage
+  useEffect(() => {
+    if (pos.x >= 0 && pos.y >= 0) {
+      try { localStorage.setItem(POS_KEY, JSON.stringify(pos)); } catch { /* ignore */ }
+    }
+  }, [pos]);
 
   const addMsg = useCallback((role: "user" | "agent", text: string, pendingAction?: MutationAction) => {
     setMessages((prev) => [...prev, { id: nextId(), role, text, pendingAction }]);
@@ -168,22 +196,77 @@ export default function VoiceAgent({ isSuperAdmin }: VoiceAgentProps) {
     setStatus("idle");
   }, []);
 
+  // Drag handlers
+  const onDragStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+    dragRef.current = { startX: clientX, startY: clientY, origX: pos.x, origY: pos.y, moved: false };
+    setIsDragging(true);
+  }, [pos]);
+
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const onMove = (e: MouseEvent | TouchEvent) => {
+      const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+      const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+      const dx = clientX - dragRef.current.startX;
+      const dy = clientY - dragRef.current.startY;
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) dragRef.current.moved = true;
+      const newX = Math.max(8, Math.min(window.innerWidth - 68, dragRef.current.origX + dx));
+      const newY = Math.max(8, Math.min(window.innerHeight - 68, dragRef.current.origY + dy));
+      setPos({ x: newX, y: newY });
+    };
+
+    const onUp = () => {
+      setIsDragging(false);
+    };
+
+    window.addEventListener("mousemove", onMove, { passive: false });
+    window.addEventListener("mouseup", onUp);
+    window.addEventListener("touchmove", onMove, { passive: false });
+    window.addEventListener("touchend", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("touchmove", onMove);
+      window.removeEventListener("touchend", onUp);
+    };
+  }, [isDragging]);
+
+  const handleButtonClick = useCallback(() => {
+    if (dragRef.current.moved) return;
+    if (isOpen) { stopSpeaking(); setIsOpen(false); }
+    else if (status === "listening") stopListening();
+    else if (status === "speaking") stopSpeaking();
+    else { setIsOpen(true); setTimeout(() => startListening(), 200); }
+  }, [isOpen, status, stopSpeaking, stopListening, startListening]);
+
   if (!isSupported) return null;
 
   const lastAgentMsg = [...messages].reverse().find((m) => m.role === "agent" && m.pendingAction);
 
+  // Position chat panel relative to button
+  const panelWidth = typeof window !== "undefined" && window.innerWidth < 640 ? 340 : 380;
+  const panelX = pos.x + 68 > panelWidth ? pos.x - panelWidth - 12 : pos.x + 68;
+  const panelY = Math.max(8, Math.min(pos.y - 400, window.innerHeight - 500));
+
   return (
     <>
-      <div className="fixed bottom-20 right-4 sm:right-6 z-40 group">
+      {/* Draggable Agent Button */}
+      <div
+        className="fixed z-50 group select-none"
+        style={{ left: pos.x, top: pos.y, width: 60, height: 60, cursor: isDragging ? "grabbing" : "grab", touchAction: "none" }}
+        onMouseDown={onDragStart}
+        onTouchStart={onDragStart}
+      >
         <button
-          onClick={() => {
-            if (isOpen) { stopSpeaking(); setIsOpen(false); }
-            else if (status === "listening") stopListening();
-            else if (status === "speaking") stopSpeaking();
-            else { setIsOpen(true); setTimeout(() => startListening(), 200); }
-          }}
+          onClick={handleButtonClick}
+          onMouseDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
           className="relative w-[60px] h-[60px] cursor-pointer"
-          title="AI Assistant"
+          title="AI Assistant — Drag to move"
         >
           {/* Glow ring */}
           <div className={`absolute inset-[-4px] rounded-full transition-all duration-500 ${
@@ -204,100 +287,47 @@ export default function VoiceAgent({ isSuperAdmin }: VoiceAgentProps) {
                 <feDropShadow dx="0" dy="2" stdDeviation="2" floodOpacity="0.15" />
               </filter>
             </defs>
-
-            {/* Antenna */}
             <line x1="30" y1="8" x2="30" y2="16" stroke="white" strokeWidth="2.5" strokeLinecap="round" opacity="0.9" />
             <circle cx="30" cy="6" r="3" fill="white" opacity="0.9">
               {status === "listening" && <animate attributeName="r" values="3;4.5;3" dur="0.8s" repeatCount="indefinite" />}
               {status === "processing" && <animate attributeName="opacity" values="0.9;0.3;0.9" dur="1s" repeatCount="indefinite" />}
             </circle>
-
-            {/* Head / face */}
             <circle cx="30" cy="33" r="18" fill="url(#bodyGrad)" filter="url(#shadow2)" />
-
-            {/* Face shine */}
             <ellipse cx="24" cy="28" rx="7" ry="5" fill="white" opacity="0.15" />
-
             {/* Left eye */}
             <g>
               {status === "speaking" ? (
-                <>
-                  <circle cx="23" cy="31" r="3.5" fill="white" />
-                  <circle cx="23" cy="31" r="2" fill="#1e1b4b">
-                    <animate attributeName="cy" values="31;30;31" dur="0.6s" repeatCount="indefinite" />
-                  </circle>
-                </>
+                <><circle cx="23" cy="31" r="3.5" fill="white" /><circle cx="23" cy="31" r="2" fill="#1e1b4b"><animate attributeName="cy" values="31;30;31" dur="0.6s" repeatCount="indefinite" /></circle></>
               ) : status === "listening" ? (
-                <>
-                  <circle cx="23" cy="31" r="4" fill="white" />
-                  <circle cx="23" cy="31" r="2.5" fill="#1e1b4b">
-                    <animate attributeName="cx" values="23;24.5;21.5;23" dur="1.5s" repeatCount="indefinite" />
-                  </circle>
-                </>
+                <><circle cx="23" cy="31" r="4" fill="white" /><circle cx="23" cy="31" r="2.5" fill="#1e1b4b"><animate attributeName="cx" values="23;24.5;21.5;23" dur="1.5s" repeatCount="indefinite" /></circle></>
               ) : status === "processing" ? (
-                <g>
-                  <line x1="19" y1="31" x2="27" y2="31" stroke="white" strokeWidth="2.5" strokeLinecap="round">
-                    <animate attributeName="y1" values="31;30;31" dur="0.8s" repeatCount="indefinite" />
-                    <animate attributeName="y2" values="31;32;31" dur="0.8s" repeatCount="indefinite" />
-                  </line>
-                </g>
+                <g><line x1="19" y1="31" x2="27" y2="31" stroke="white" strokeWidth="2.5" strokeLinecap="round"><animate attributeName="y1" values="31;30;31" dur="0.8s" repeatCount="indefinite" /><animate attributeName="y2" values="31;32;31" dur="0.8s" repeatCount="indefinite" /></line></g>
               ) : (
-                <>
-                  <circle cx="23" cy="31" r="3.5" fill="white" />
-                  <circle cx="23" cy="32" r="2" fill="#1e1b4b" />
-                  <circle cx="22" cy="31" r="0.7" fill="white" />
-                </>
+                <><circle cx="23" cy="31" r="3.5" fill="white" /><circle cx="23" cy="32" r="2" fill="#1e1b4b" /><circle cx="22" cy="31" r="0.7" fill="white" /></>
               )}
             </g>
-
             {/* Right eye */}
             <g>
               {status === "speaking" ? (
-                <>
-                  <circle cx="37" cy="31" r="3.5" fill="white" />
-                  <circle cx="37" cy="31" r="2" fill="#1e1b4b">
-                    <animate attributeName="cy" values="31;30;31" dur="0.6s" repeatCount="indefinite" />
-                  </circle>
-                </>
+                <><circle cx="37" cy="31" r="3.5" fill="white" /><circle cx="37" cy="31" r="2" fill="#1e1b4b"><animate attributeName="cy" values="31;30;31" dur="0.6s" repeatCount="indefinite" /></circle></>
               ) : status === "listening" ? (
-                <>
-                  <circle cx="37" cy="31" r="4" fill="white" />
-                  <circle cx="37" cy="31" r="2.5" fill="#1e1b4b">
-                    <animate attributeName="cx" values="37;38.5;35.5;37" dur="1.5s" repeatCount="indefinite" />
-                  </circle>
-                </>
+                <><circle cx="37" cy="31" r="4" fill="white" /><circle cx="37" cy="31" r="2.5" fill="#1e1b4b"><animate attributeName="cx" values="37;38.5;35.5;37" dur="1.5s" repeatCount="indefinite" /></circle></>
               ) : status === "processing" ? (
-                <g>
-                  <line x1="33" y1="31" x2="41" y2="31" stroke="white" strokeWidth="2.5" strokeLinecap="round">
-                    <animate attributeName="y1" values="31;32;31" dur="0.8s" repeatCount="indefinite" />
-                    <animate attributeName="y2" values="31;30;31" dur="0.8s" repeatCount="indefinite" />
-                  </line>
-                </g>
+                <g><line x1="33" y1="31" x2="41" y2="31" stroke="white" strokeWidth="2.5" strokeLinecap="round"><animate attributeName="y1" values="31;32;31" dur="0.8s" repeatCount="indefinite" /><animate attributeName="y2" values="31;30;31" dur="0.8s" repeatCount="indefinite" /></line></g>
               ) : (
-                <>
-                  <circle cx="37" cy="31" r="3.5" fill="white" />
-                  <circle cx="37" cy="32" r="2" fill="#1e1b4b" />
-                  <circle cx="36" cy="31" r="0.7" fill="white" />
-                </>
+                <><circle cx="37" cy="31" r="3.5" fill="white" /><circle cx="37" cy="32" r="2" fill="#1e1b4b" /><circle cx="36" cy="31" r="0.7" fill="white" /></>
               )}
             </g>
-
             {/* Mouth */}
             {status === "speaking" ? (
-              <ellipse cx="30" cy="40" rx="3.5" ry="2.5" fill="white" opacity="0.9">
-                <animate attributeName="ry" values="2.5;1.5;2.5" dur="0.3s" repeatCount="indefinite" />
-              </ellipse>
+              <ellipse cx="30" cy="40" rx="3.5" ry="2.5" fill="white" opacity="0.9"><animate attributeName="ry" values="2.5;1.5;2.5" dur="0.3s" repeatCount="indefinite" /></ellipse>
             ) : status === "listening" ? (
               <circle cx="30" cy="40" r="2" fill="white" opacity="0.7" />
             ) : status === "processing" ? (
-              <path d="M26 39 Q30 42 34 39" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.8">
-                <animate attributeName="d" values="M26 39 Q30 42 34 39;M26 40 Q30 38 34 40;M26 39 Q30 42 34 39" dur="1.2s" repeatCount="indefinite" />
-              </path>
+              <path d="M26 39 Q30 42 34 39" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.8"><animate attributeName="d" values="M26 39 Q30 42 34 39;M26 40 Q30 38 34 40;M26 39 Q30 42 34 39" dur="1.2s" repeatCount="indefinite" /></path>
             ) : (
               <path d="M26 38 Q30 42 34 38" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.8" />
             )}
-
-            {/* Cheek blush */}
             <circle cx="17" cy="37" r="2.5" fill="#f472b6" opacity="0.3" />
             <circle cx="43" cy="37" r="2.5" fill="#f472b6" opacity="0.3" />
           </svg>
@@ -314,8 +344,12 @@ export default function VoiceAgent({ isSuperAdmin }: VoiceAgentProps) {
         </button>
       </div>
 
+      {/* Chat Panel */}
       {isOpen && (
-        <div className="fixed bottom-[88px] right-4 sm:right-6 z-40 w-[340px] sm:w-[380px] max-h-[480px] flex flex-col bg-white rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.18)] border border-slate-200/80 overflow-hidden animate-in slide-in-from-bottom-4 duration-200">
+        <div
+          className="fixed z-50 w-[340px] sm:w-[380px] max-h-[480px] flex flex-col bg-white rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.18)] border border-slate-200/80 overflow-hidden animate-in slide-in-from-bottom-4 duration-200"
+          style={{ left: Math.max(8, Math.min(panelX, window.innerWidth - panelWidth - 8)), top: Math.max(8, panelY) }}
+        >
           <div className="bg-gradient-to-r from-violet-600 via-indigo-600 to-blue-600 px-4 py-3 flex items-center gap-3">
             <div className="relative">
               <svg viewBox="0 0 36 36" className="w-9 h-9">
