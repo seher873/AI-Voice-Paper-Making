@@ -9,11 +9,21 @@ interface MutationContext {
 function findStudent(ctx: MutationContext, action: { studentName: string | null; rollNo: string | null }): StudentMark | undefined {
   const students = ctx.resultState.students;
   if (action.rollNo) {
-    return students.find((s) => s.rollNo === action.rollNo);
+    const byRoll = students.find((s) => s.rollNo === action.rollNo);
+    if (byRoll) return byRoll;
   }
   if (action.studentName) {
     const lower = action.studentName.toLowerCase();
-    return students.find((s) => s.studentName.toLowerCase().includes(lower));
+    const exact = students.find((s) => s.studentName.toLowerCase() === lower);
+    if (exact) return exact;
+    const partial = students.find((s) => s.studentName.toLowerCase().includes(lower) || lower.includes(s.studentName.toLowerCase()));
+    if (partial) return partial;
+    // fuzzy: check if any student name starts with same letters
+    const first = lower.split(/\s+/)[0];
+    if (first && first.length > 2) {
+      const fuzzy = students.find((s) => s.studentName.toLowerCase().startsWith(first));
+      if (fuzzy) return fuzzy;
+    }
   }
   return undefined;
 }
@@ -25,10 +35,26 @@ export function executeMutation(action: MutationAction, ctx: MutationContext): s
   switch (action.type) {
     case "add_marks":
     case "update_marks": {
-      const student = findStudent(ctx, action);
+      let student = findStudent(ctx, action);
+      // Auto-create student if roll number provided but not found
+      if (!student && action.rollNo) {
+        const newStudent: StudentMark = {
+          rollNo: action.rollNo,
+          studentName: action.studentName || `Student ${action.rollNo}`,
+          fatherName: "",
+          subjectMarks: { [action.subject]: action.marks },
+        };
+        ctx.resultDispatch({ type: "ADD_STUDENT", payload: newStudent });
+        ctx.resultDispatch({ type: "CALCULATE_RESULTS" });
+        return `Naya student (roll ${action.rollNo}) add kar diya aur ${action.subject} mein ${action.marks} marks set kiye.`;
+      }
       if (!student) {
-        const who = action.studentName || `roll ${action.rollNo}`;
-        return `${who} ka record current exam mein nahi mila. Pehle student add karein.`;
+        const students = ctx.resultState.students;
+        if (students.length === 0) {
+          return "Current exam mein koi student nahi hai. Pehle student add karein.";
+        }
+        const list = students.slice(0, 8).map((s) => `${s.studentName} (roll ${s.rollNo})`).join(", ");
+        return `${action.studentName || "Student"} nahi mila. Available students: ${list}${students.length > 8 ? ` aur ${students.length - 8} aur...` : ""}. Roll number ya sahi naam bolein.`;
       }
       const updated = { ...student, subjectMarks: { ...student.subjectMarks, [action.subject]: action.marks } };
       ctx.resultDispatch({ type: "UPDATE_STUDENT", payload: updated });
@@ -39,7 +65,7 @@ export function executeMutation(action: MutationAction, ctx: MutationContext): s
     case "delete_student": {
       const student = findStudent(ctx, action);
       if (!student) {
-        const who = action.studentName || `roll ${action.rollNo}`;
+        const who = action.studentName || `roll ${action.rollNo || "?"}`;
         return `${who} current exam mein nahi mila.`;
       }
       ctx.resultDispatch({ type: "REMOVE_STUDENT", payload: student.rollNo });
@@ -49,7 +75,7 @@ export function executeMutation(action: MutationAction, ctx: MutationContext): s
 
     case "add_student": {
       const exists = ctx.resultState.students.find((s) => s.rollNo === action.rollNo);
-      if (exists) return `Roll number ${action.rollNo} pehle se maujood hai.`;
+      if (exists) return `Roll number ${action.rollNo} pehle se maujood hai (${exists.studentName}).`;
       const newStudent: StudentMark = {
         rollNo: action.rollNo,
         studentName: action.studentName,

@@ -1,4 +1,5 @@
 import type { Exam, StudentResult, StudentMark } from "@/types/result";
+import type { PaperState } from "@/types/paper";
 import { getSupabase } from "./supabase";
 
 export type MutationAction =
@@ -164,6 +165,11 @@ function detectMetric(text: string): string {
   if (/total.*marks|marks.*total|total|kul/i.test(lower)) return "totalMarks";
   if (/obtained|marks|number|aye|mile|kitn[ei]/i.test(lower)) return "marks";
   if (/remark|note/i.test(lower)) return "remark";
+  if (/paper|sawal|question|questions|kitne\s+sawal|sawal.*kitn[ei]|paper.*detail|paper.*info|kya\s+kya\s+hai/i.test(lower)) return "paperDetails";
+  if (/subject|paper.*subject|subject.*kya|kons[ae]\s+subject/i.test(lower)) return "paperSubject";
+  if (/time|waqt|kitna\s+time|duration/i.test(lower)) return "paperTime";
+  if (/class|jamaat|konsi\s+class/i.test(lower)) return "paperClass";
+  if (/title|paper.*title|kya\s+naam/i.test(lower)) return "paperTitle";
   return "marks";
 }
 
@@ -191,6 +197,7 @@ export interface VoiceContext {
   currentExam: Exam | null;
   students: StudentMark[];
   results: StudentResult[];
+  paper?: PaperState | null;
 }
 
 export async function answerAdminQuery(adminMetric: string | null, text: string): Promise<string> {
@@ -282,20 +289,53 @@ export async function answerAdminQuery(adminMetric: string | null, text: string)
 export function answerQuery(query: ParsedQuery, ctx: VoiceContext): string {
   if (query.isAdminQuery) return "";
 
+  const text = query.all.toLowerCase();
+  const metric = query.metric;
+
+  // Paper detail queries — work even without exam data
+  if (metric === "paperDetails" || metric === "paperSubject" || metric === "paperTime" || metric === "paperClass" || metric === "paperTitle") {
+    const paper = ctx.paper;
+    if (!paper) return "Paper koi open nahi hai. Pehle Paper Builder mein paper banaein.";
+    const lines: string[] = [];
+    if (metric === "paperDetails" || metric === "paperTitle") {
+      if (paper.paperTitle) lines.push(`Title: ${paper.paperTitle}`);
+      if (paper.subject) lines.push(`Subject: ${paper.subject}`);
+      if (paper.className) lines.push(`Class: ${paper.className}`);
+      if (paper.time) lines.push(`Time: ${paper.time}`);
+      if (paper.totalMarks) lines.push(`Total Marks: ${paper.totalMarks}`);
+      if (paper.date) lines.push(`Date: ${paper.date}`);
+      if (paper.questions.length > 0) {
+        lines.push(`Total Questions: ${paper.questions.length}`);
+        const typeCounts: Record<string, number> = {};
+        paper.questions.forEach((q) => { typeCounts[q.type] = (typeCounts[q.type] || 0) + 1; });
+        lines.push(`Types: ${Object.entries(typeCounts).map(([t, c]) => `${c} ${t}`).join(", ")}`);
+      } else {
+        lines.push("Questions: Abhi koi question nahi hai.");
+      }
+      return lines.length > 0 ? `Paper Details:\n${lines.join("\n")}` : "Paper mein koi data nahi hai.";
+    }
+    if (metric === "paperSubject") return paper.subject ? `Paper ka subject: ${paper.subject}. Class: ${paper.className || "N/A"}.` : "Subject set nahi hai.";
+    if (metric === "paperTime") return paper.time ? `Paper ka time: ${paper.time}.` : "Time set nahi hai.";
+    if (metric === "paperClass") return paper.className ? `Paper ki class: ${paper.className}.` : "Class set nahi hai.";
+    return "Paper detail samajh nahi aayi.";
+  }
+
+  // Result/marks queries need exam data
   const exam = ctx.currentExam;
   if (!exam || !exam.results || exam.results.length === 0) {
+    // Even without results, check if students exist
+    if (ctx.students && ctx.students.length > 0) {
+      if (metric === "studentCount") return `Current exam "${exam?.name || "?"}" mein ${ctx.students.length} students add ho chuke hain. Marks abhi calculate nahi hue.`;
+    }
     return "Koi exam data nahi mila. Pehle exam create karein aur marks enter karein.";
   }
 
   const subjects = exam.subjects?.map((s) => s.name) || [];
   const results = exam.results;
   const studentNames = results.map((r) => r.studentName);
-  const text = query.all.toLowerCase();
 
   const detectedName = detectStudentName(text, studentNames);
   const detectedSubject = detectSubject(text, subjects);
-
-  const metric = query.metric;
 
   if (metric === "studentCount") {
     return `Is exam "${exam.name}" mein total ${results.length} students hain.`;
@@ -433,47 +473,57 @@ function extractRollNo(text: string): string | null {
   return null;
 }
 
-const MUTATION_ADD_MARKS = /(?:add|give|set|put|enter|daalo|dalo|jodo|plus|bayeen|lagao)\s+(?:.*?\s+)?(\d+)\s*(?:marks|number|numbers)?/i;
-const MUTATION_UPDATE_MARKS = /(?:update|change|correct|fix|alter|badlo|set|dusra|modify|theek|sudharo)\s+(?:.*?\s+)?(?:marks?\s*(?:to|se|=|ko)\s*)?(\d+)/i;
-const MUTATION_DELETE = /(?:delete|remove|hatao|hatado|khatam|remove karo|discard|drop)\s+(?:.*?\s+)?(?:student|roll|banda|bacha|pupil)?/i;
-const MUTATION_ADD_STUDENT = /(?:add|insert|naya|naye|new)\s+(?:student|roll|banda|bacha|pupil)/i;
-const MUTATION_CREATE_EXAM = /(?:create|make|new|naya|banayein|banao|start|shuru|setup)\s+(?:.*?\s+)?(?:exam|test|paper|imtihan|pariksha)/i;
-
 export function parseMutation(text: string, subjects: string[]): MutationAction | null {
   const lower = text.toLowerCase();
   const marks = extractNumber(text);
-  const rollNo = extractRollNo(text);
+  const rollNo = extractRollNo(lower);
 
   const detectedSubject = detectSubject(text, subjects);
+
   let studentName: string | null = null;
-  const nameMatch = text.match(/(?:for|of|ka|ke|ki|ko|name)\s+(.+?)(?:\s+(?:in|mein|subject|ka|ke|ki|marks|roll|number|\d+))/i);
-  if (nameMatch) {
-    studentName = nameMatch[1].trim();
+  // Try to extract name: "for Ahmed", "of Ali", "ka marks", etc.
+  const namePatterns = [
+    /(?:for|of|ka|ke|ki|ko|name|student)\s+([a-zA-Z\u0600-\u06FF]+(?:\s+[a-zA-Z\u0600-\u06FF]+)?)/i,
+    /([a-zA-Z\u0600-\u06FF]+)\s+(?:ka|ke|ki|ko|marks|ki marks)/i,
+  ];
+  for (const pat of namePatterns) {
+    const m = text.match(pat);
+    if (m) {
+      const name = m[1].trim();
+      const skip = ["add", "give", "set", "put", "enter", "marks", "in", "mein", "for", "of", "roll", "number", "math", "english", "urdu", "science", "total", "ka", "ki", "ko"];
+      if (!skip.includes(name.toLowerCase())) {
+        studentName = name;
+        break;
+      }
+    }
   }
 
-  if (MUTATION_ADD_MARKS.test(lower) && marks !== null) {
+  // Detect add/update marks — very flexible
+  const isAdd = /(?:add|give|set|put|enter|daalo|dalo|jodo|plus|lagao|do|dedo|number|marks)/i.test(lower);
+  const isUpdate = /(?:update|change|correct|fix|alter|badlo|modify|theek|sudharo|replace|edit)/i.test(lower);
+  const isDelete = /(?:delete|remove|hatao|hatado|khatam|discard|drop)/i.test(lower);
+  const isAddStudent = /(?:add|insert|naya|naye|new)\s+(?:student|banda|bacha|pupil)/i.test(lower);
+  const isCreateExam = /(?:create|make|new|naya|banayein|banao|start|shuru|setup)\s*(?:.*?\s*)?(?:exam|test|paper|imtihan|pariksha)/i.test(lower);
+
+  if ((isAdd || isUpdate) && marks !== null) {
     const subject = detectedSubject || subjects[0] || "Unknown";
-    return { type: "add_marks", studentName, rollNo, subject, marks };
+    const type = isUpdate ? "update_marks" : "add_marks";
+    return { type, studentName, rollNo, subject, marks };
   }
 
-  if (MUTATION_UPDATE_MARKS.test(lower) && marks !== null) {
-    const subject = detectedSubject || subjects[0] || "Unknown";
-    return { type: "update_marks", studentName, rollNo, subject, marks };
-  }
-
-  if (MUTATION_DELETE.test(lower)) {
-    const nameOnly = text.replace(/(?:delete|remove|hatao|hatado|khatam|remove karo|discard|drop)\s*/i, "").trim();
-    const nameWords = nameOnly.split(/\s+/).filter(w => !["student", "roll", "number", "banda", "bacha", "pupil"].includes(w.toLowerCase()));
+  if (isDelete) {
+    const nameOnly = lower.replace(/(?:delete|remove|hatao|hatado|khatam|remove karo|discard|drop)\s*/i, "").trim();
+    const nameWords = nameOnly.split(/\s+/).filter(w => !["student", "roll", "number", "banda", "bacha", "pupil", "from", "se", "exam"].includes(w));
     return { type: "delete_student", studentName: nameWords.join(" ") || null, rollNo };
   }
 
-  if (MUTATION_ADD_STUDENT.test(lower)) {
+  if (isAddStudent) {
     const nameMatch2 = text.match(/(?:add|insert|naya|naye|new)\s+(?:student|roll|banda|bacha|pupil)\s+(.+?)(?:\s+roll|\s+number|\s+as|\s+called|\s+naam|$)/i);
     const name = nameMatch2?.[1]?.trim() || "Student";
     return { type: "add_student", studentName: name, rollNo: rollNo || String(Math.floor(Math.random() * 1000) + 1) };
   }
 
-  if (MUTATION_CREATE_EXAM.test(lower)) {
+  if (isCreateExam) {
     const examName = text.match(/(?:exam|test|paper|imtihan)\s+(?:called|named|ka naam|naam)?\s*(.+?)(?:\s+class|\s+section|\s+for|\s+ka|\s+ki|$)/i)?.[1]?.trim()
       || text.match(/(?:create|make|new|naya|banayein|banao|start|shuru|setup)\s+(.+?)(?:\s+exam|\s+test|\s+paper)/i)?.[1]?.trim()
       || "New Exam";

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useResult } from "@/context/ResultContext";
+import { usePaper } from "@/context/PaperContext";
 import { parseQuery, answerQuery, answerAdminQuery, parseMutation, describeMutation, type MutationAction, type VoiceContext } from "@/lib/voiceQuery";
 import { executeMutation } from "@/lib/voiceMutations";
 
@@ -23,6 +24,7 @@ function nextId() { return `m${++msgId}`; }
 
 export default function VoiceAgent({ isSuperAdmin }: VoiceAgentProps) {
   const { state, dispatch } = useResult();
+  const { state: paperState } = usePaper();
   const [status, setStatus] = useState<Status>("idle");
   const [isOpen, setIsOpen] = useState(false);
   const [isSupported, setIsSupported] = useState(true);
@@ -92,11 +94,11 @@ export default function VoiceAgent({ isSuperAdmin }: VoiceAgentProps) {
       });
       return;
     }
-    const ctx: VoiceContext = { exams: state.exams, currentExam: state.currentExam, students: state.students, results: state.results };
+    const ctx: VoiceContext = { exams: state.exams, currentExam: state.currentExam, students: state.students, results: state.results, paper: paperState };
     const answer = answerQuery(parsed, ctx);
     addMsg("agent", answer);
     speak(answer);
-  }, [isSuperAdmin, state, speak, addMsg]);
+  }, [isSuperAdmin, state, paperState, speak, addMsg]);
 
   const processQuery = useCallback((text: string) => {
     const lower = text.toLowerCase().trim();
