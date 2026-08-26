@@ -1,5 +1,7 @@
 "use client";
 
+import React from "react";
+
 import { useResult } from "@/context/ResultContext";
 import CreateExam from "./CreateExam";
 import ManageSubjects from "./ManageSubjects";

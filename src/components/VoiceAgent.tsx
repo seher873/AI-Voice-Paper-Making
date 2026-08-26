@@ -44,6 +44,8 @@ export default function VoiceAgent({ isSuperAdmin }: VoiceAgentProps) {
   const recognitionRef = useRef<any>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const [feeStudents, setFeeStudents] = useState<import("@/types/fee").StudentFee[]>([]);
+  const [feePayments, setFeePayments] = useState<import("@/types/fee").FeePayment[]>([]);
 
   // Drag state
   const savedPos = useRef(loadPos());
@@ -77,6 +79,31 @@ export default function VoiceAgent({ isSuperAdmin }: VoiceAgentProps) {
       try { localStorage.setItem(POS_KEY, JSON.stringify(pos)); } catch { /* ignore */ }
     }
   }, [pos]);
+
+  // Load fee data when agent opens
+  useEffect(() => {
+    if (!isOpen) return;
+    let mounted = true;
+    (async () => {
+      try {
+        const { getSupabase, getSchoolId } = await import("@/lib/supabase");
+        const sb = getSupabase();
+        const schoolId = await getSchoolId();
+        if (!schoolId || !mounted) return;
+        const [studRes, payRes] = await Promise.all([
+          sb.from("student_fees").select("*").eq("school_id", schoolId).eq("is_active", true),
+          sb.from("fee_payments").select("*").eq("school_id", schoolId).order("month_year", { ascending: false }),
+        ]);
+        if (mounted) {
+          if (studRes.data) setFeeStudents(studRes.data as import("@/types/fee").StudentFee[]);
+          if (payRes.data) setFeePayments(payRes.data as import("@/types/fee").FeePayment[]);
+        }
+      } catch (e) {
+        console.error("[VoiceAgent] Fee data load failed:", e);
+      }
+    })();
+    return () => { mounted = false; };
+  }, [isOpen]);
 
   const addMsg = useCallback((role: "user" | "agent", text: string, pendingAction?: MutationAction) => {
     setMessages((prev) => [...prev, { id: nextId(), role, text, pendingAction }]);
@@ -122,7 +149,17 @@ export default function VoiceAgent({ isSuperAdmin }: VoiceAgentProps) {
       });
       return;
     }
-    const ctx: VoiceContext = { exams: state.exams, currentExam: state.currentExam, students: state.students, results: state.results, paper: paperState, savedPapers: papers };
+    const ctx: VoiceContext = {
+      exams: state.exams,
+      currentExam: state.currentExam,
+      students: state.students,
+      results: state.results,
+      paper: paperState,
+      savedPapers: papers,
+      feeStudents,
+      feePayments,
+      schoolName: state.schoolName,
+    };
     const answer = answerQuery(parsed, ctx);
     addMsg("agent", answer);
     speak(answer);

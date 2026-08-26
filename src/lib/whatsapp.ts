@@ -1,4 +1,6 @@
 import type { StudentResult, Exam } from "@/types/result";
+import type { StudentFee, FeePayment } from "@/types/fee";
+import { formatPKR } from "@/types/fee";
 import type { PaperState } from "@/types/paper";
 
 const WHATSAPP_BASE = "https://wa.me";
@@ -214,7 +216,47 @@ export function sharePaperWhatsApp(paper: PaperState, phone?: string) {
   openWhatsApp(phone || "", msg);
 }
 
+// ─── Fee Slip WhatsApp share ─────────────────────────────────────────────────
+
+export function shareFeeSlipWhatsApp(
+  student: StudentFee,
+  payment: FeePayment,
+  schoolName: string
+) {
+  const balance = payment.amount_due - payment.amount_paid;
+  const statusEmoji =
+    payment.status === "paid" ? "✅ PAID" :
+    payment.status === "partial" ? "⚠️ PARTIAL" : "❌ DUE";
+
+  let msg = `🏫 *${schoolName}*\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━━\n`;
+  msg += `📋 *Fee Notification Slip*\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
+  msg += `👤 *Student:* ${student.student_name}\n`;
+  if (student.father_name) msg += `👨 *Father:* ${student.father_name}\n`;
+  msg += `🏛️ *Class:* ${student.class_name}${student.section ? `-${student.section}` : ""}`;
+  if (student.roll_no) msg += ` | Roll No: ${student.roll_no}`;
+  msg += `\n📅 *Month:* ${payment.month_label}\n\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━━\n`;
+  msg += `💰 *Fee Due:*   ${formatPKR(payment.amount_due)}\n`;
+  msg += `✅ *Paid:*      ${formatPKR(payment.amount_paid)}\n`;
+  msg += `📊 *Balance:*   ${formatPKR(balance)}\n`;
+  msg += `🔖 *Status:*    ${statusEmoji}\n`;
+  if (payment.payment_date) msg += `📆 *Date:*      ${payment.payment_date}\n`;
+  if (payment.remarks) msg += `📝 *Note:*      ${payment.remarks}\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
+  if (payment.status !== "paid") {
+    msg += `⏰ Meherbani farma ke jald az jald fee ada karein.\n\n`;
+  } else {
+    msg += `Shukriya! Fee ada karne ka shukriya. 🙏\n\n`;
+  }
+  msg += `_${schoolName}_`;
+
+  openWhatsApp(student.parent_phone || "", msg);
+}
+
 function ordinal(n: number): string {
+
   if (n === 0) return "";
   const s = ["th", "st", "nd", "rd"];
   const v = n % 100;

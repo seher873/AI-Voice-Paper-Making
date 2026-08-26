@@ -7,6 +7,7 @@ export interface Plan {
   features: {
     paper: boolean;
     results: boolean;
+    fees: boolean;
   };
 }
 
@@ -15,19 +16,19 @@ export const PLANS: Plan[] = [
     id: "paper",
     label: "Paper Generator",
     description: "Paper Generator Only",
-    features: { paper: true, results: false },
+    features: { paper: true, results: false, fees: false },
   },
   {
     id: "results",
     label: "Result Management",
     description: "Result Management Only",
-    features: { paper: false, results: true },
+    features: { paper: false, results: true, fees: true },
   },
   {
     id: "full",
     label: "Full Access",
     description: "Paper Generator + Result Management",
-    features: { paper: true, results: true },
+    features: { paper: true, results: true, fees: true },
   },
 ];
 
@@ -43,6 +44,7 @@ export function setPlan(id: PlanId): void {
   localStorage.setItem(STORAGE_KEY, id);
 }
 
-export function hasFeature(feature: "paper" | "results"): boolean {
+export function hasFeature(feature: "paper" | "results" | "fees"): boolean {
   return getPlan().features[feature];
 }
+

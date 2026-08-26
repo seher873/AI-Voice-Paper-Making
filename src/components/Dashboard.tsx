@@ -12,6 +12,7 @@ import UpgradeBanner from "./UpgradeBanner";
 import SchoolSetup from "./SchoolSetup";
 import BackupPanel from "./BackupPanel";
 import SchoolsOverview from "./SchoolsOverview";
+import FeeManagement from "./FeeManagement";
 import dynamic from "next/dynamic";
 
 const VoiceAgent = dynamic(() => import("./VoiceAgent"), { ssr: false });
@@ -65,7 +66,7 @@ export default function Dashboard() {
   const { state, dispatch, papers, activePaperId, savePaper, updateSavedPaper, deletePaper, renamePaper, loadPaperById, newPaper } = usePaper();
   const resultCtx = useResult();
   const [plan, setPlanState] = useState(() => initialPlanState().plan);
-  const [mode, setMode] = useState<"paper" | "results">(() => initialPlanState().mode);
+  const [mode, setMode] = useState<"paper" | "results" | "fees">(() => initialPlanState().mode);
   const [activeTab, setActiveTab] = useState<"header" | "questions" | "template">("header");
   const [menuOpen, setMenuOpen] = useState(false);
   const [showSchoolInfo, setShowSchoolInfo] = useState(false);
@@ -294,14 +295,14 @@ export default function Dashboard() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 min-w-0">
                 <h1 className="flex-1 min-w-0 text-base font-bold text-white tracking-tight truncate">
-                  {mode === "paper" ? "AI Voice Paper" : "Result Management"}
+                  {mode === "paper" ? "AI Voice Paper" : mode === "fees" ? "Fee Management" : "Result Management"}
                 </h1>
                 <span className="flex-shrink-0 inline-flex px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-white/15 text-indigo-200 leading-none whitespace-nowrap">
                   {plan.label}
                 </span>
               </div>
               <p className="text-[10px] text-indigo-200 font-medium">
-                {mode === "paper" ? "School Paper Builder" : "Results & Report Cards"}
+                {mode === "paper" ? "School Paper Builder" : mode === "fees" ? "Students · Fees · WhatsApp Slips" : "Results & Report Cards"}
               </p>
             </div>
             <div className="ml-auto flex items-center gap-1.5 min-w-0">
@@ -333,6 +334,20 @@ export default function Dashboard() {
                   )}
                   <span className="hidden sm:inline">Info</span>
                 </button>
+                {plan.features.fees && (
+                  <button
+                    onClick={() => setMode(mode === "fees" ? "paper" : "fees")}
+                    className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 flex-shrink-0 ${
+                      mode === "fees" ? "bg-white/20 text-white" : "text-indigo-200 hover:bg-white/10 hover:text-white"
+                    }`}
+                    title="Fee Management"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="hidden sm:inline">Fees</span>
+                  </button>
+                )}
               {!planFromDb && availableModes.length > 1 && (
                 <button
                   onClick={() => setMode(mode === "paper" ? "results" : "paper")}
@@ -713,6 +728,7 @@ export default function Dashboard() {
           {mode === "paper" && plan.features.paper && activeTab === "questions" && <QuestionEditor />}
           {mode === "paper" && plan.features.paper && activeTab === "template" && <TemplateSection />}
           {mode === "results" && plan.features.results && <ResultManagement />}
+          {mode === "fees" && plan.features.fees && <FeeManagement />}
         </div>
         </div>
 
@@ -766,6 +782,22 @@ export default function Dashboard() {
             </svg>
             <p className="text-sm font-medium">Result Management</p>
             <p className="text-xs mt-1">Manage exams, marks, and report cards</p>
+          </div>
+        </div>
+      )}
+      {mode === "fees" && plan.features.fees && (
+        <div className="flex-1 overflow-y-auto overflow-x-auto bg-gradient-to-b from-emerald-50 to-slate-50 p-3 sm:p-4 lg:p-6 flex items-center justify-center">
+          <div className="text-center text-slate-400 max-w-xs">
+            <svg className="w-14 h-14 mx-auto mb-3 text-green-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-sm font-semibold text-slate-500">Fee Management System</p>
+            <p className="text-xs mt-1 text-slate-400">Students add karein → Fee collect karein → WhatsApp pe slip bhejein</p>
+            <div className="mt-4 space-y-1.5 text-left">
+              {["👤 Students & fee records", "💰 Monthly collection", "📊 Paid / Partial / Due report", "📱 WhatsApp notification slips"].map((f) => (
+                <p key={f} className="text-xs text-green-600 font-medium">{f}</p>
+              ))}
+            </div>
           </div>
         </div>
       )}

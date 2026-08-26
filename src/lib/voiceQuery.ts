@@ -1,5 +1,7 @@
 import type { Exam, StudentResult, StudentMark } from "@/types/result";
 import type { PaperState, PaperProject } from "@/types/paper";
+import type { StudentFee, FeePayment } from "@/types/fee";
+import { formatPKR } from "@/types/fee";
 import { getSupabase } from "./supabase";
 
 export type MutationAction =
@@ -203,6 +205,9 @@ export interface VoiceContext {
   results: StudentResult[];
   paper?: PaperState | null;
   savedPapers?: PaperProject[];
+  feeStudents?: StudentFee[];
+  feePayments?: FeePayment[];
+  schoolName?: string;
 }
 
 export async function answerAdminQuery(adminMetric: string | null, text: string): Promise<string> {
@@ -310,6 +315,28 @@ export function answerQuery(query: ParsedQuery, ctx: VoiceContext): string {
     return answerPaperQuery(metric, text, ctx.paper);
   }
 
+  // ─── FEE QUERIES ───────────────────────────────────────────────────────────
+  const feeStudents = ctx.feeStudents || [];
+  const feePayments = ctx.feePayments || [];
+
+  if (metric === "feeDetail" || metric === "feeDue" || metric === "feePaid" || metric === "feeList" || metric === "feeReport") {
+    return answerFeeQuery(metric, text, feeStudents, feePayments);
+  }
+
+  // Also handle fee queries when student name is mentioned alongside fee keywords
+  if (feeStudents.length > 0) {
+    const feeNames = feeStudents.map((s) => s.student_name);
+    const rollMatch = text.match(/roll\s*(?:no|number|#)?\s*(\d+)/i);
+    const detectedFeeStudent =
+      findStudentInNames(text, feeNames) ||
+      (rollMatch ? feeStudents.find((s) => s.roll_no === rollMatch[1])?.student_name || null : null);
+
+    if (detectedFeeStudent && /fee|dues?|baki|baqi|paid|ada|jama|outstanding/i.test(text)) {
+      return answerFeeQuery("feeDetail", text, feeStudents, feePayments, detectedFeeStudent);
+    }
+  }
+  // ───────────────────────────────────────────────────────────────────────────
+
   const exam = ctx.currentExam;
   const allStudents = ctx.students || [];
   const results = exam?.results || ctx.results || [];
@@ -405,6 +432,149 @@ function answerPaperQuery(metric: string, text: string, paper: PaperState | null
   if (metric === "paperTime") return paper.time ? `Paper ka time: ${paper.time}. Total Marks: ${paper.totalMarks || "N/A"}.` : "Time set nahi hai.";
   if (metric === "paperClass") return paper.className ? `Paper ki class: ${paper.className}. Subject: ${paper.subject || "N/A"}.` : "Class set nahi hai.";
   return "Paper detail samajh nahi aayi.";
+}
+
+function answerFeeQuery(
+  metric: string,
+  text: string,
+  students: StudentFee[],
+  payments: FeePayment[],
+  preDetectedName?: string | null
+): string {
+  if (students.length === 0) {
+    return "Fee system mein abhi koi student nahi hai. Fee Management mein pehle students add karein.";
+  }
+
+  // Helper: get latest payment for a student
+  function getLatestPayment(studentId: string): FeePayment | null {
+    const sp = payments
+      .filter((p) => p.student_fee_id === studentId)
+      .sort((a, b) => b.month_year.localeCompare(a.month_year));
+    return sp[0] || null;
+  }
+
+  // Helper: get all payments for a student
+  function getAllPayments(studentId: string): FeePayment[] {
+    return payments
+      .filter((p) => p.student_fee_id === studentId)
+      .sort((a, b) => b.month_year.localeCompare(a.month_year));
+  }
+
+  // Detect student by name or roll no from voice text
+  const rollMatch = text.match(/roll\s*(?:no|number|#)?\s*(\d+)/i);
+  const allNames = students.map((s) => s.student_name);
+
+  let targetStudent: StudentFee | null = null;
+  if (preDetectedName) {
+    targetStudent = students.find((s) => s.student_name.toLowerCase() === preDetectedName.toLowerCase())
+      || students.find((s) => s.student_name.toLowerCase().includes(preDetectedName.toLowerCase())) || null;
+  } else if (rollMatch) {
+    targetStudent = students.find((s) => s.roll_no === rollMatch[1]) || null;
+  } else {
+    const detectedName = findStudentInNames(text, allNames);
+    if (detectedName) {
+      targetStudent = students.find((s) => s.student_name.toLowerCase() === detectedName.toLowerCase())
+        || students.find((s) => s.student_name.toLowerCase().includes(detectedName.toLowerCase())) || null;
+    }
+  }
+
+  // ── Single student detail ──────────────────────────────────────────────────
+  if (targetStudent) {
+    const s = targetStudent;
+    const latestPay = getLatestPayment(s.id);
+    const allPay = getAllPayments(s.id);
+    const paidMonths = allPay.filter((p) => p.status === "paid").length;
+    const dueMonths = allPay.filter((p) => p.status === "due" || p.status === "partial").length;
+    const totalPaid = allPay.reduce((acc, p) => acc + p.amount_paid, 0);
+    const totalDue = allPay.reduce((acc, p) => acc + (p.amount_due - p.amount_paid), 0);
+
+    let resp = `${s.student_name} (Roll: ${s.roll_no || "N/A"}) — Class ${s.class_name}${s.section ? "-" + s.section : ""}. `;
+    if (s.father_name) resp += `Father: ${s.father_name}. `;
+    resp += `Monthly Fee: ${formatPKR(s.monthly_fee)}. `;
+
+    if (latestPay) {
+      const statusWord = latestPay.status === "paid" ? "PAID ✅" : latestPay.status === "partial" ? "PARTIAL ⚠️" : "DUE ❌";
+      const balance = latestPay.amount_due - latestPay.amount_paid;
+      resp += `Latest (${latestPay.month_label}): ${statusWord} — Paid: ${formatPKR(latestPay.amount_paid)}, Due: ${formatPKR(latestPay.amount_due)}`;
+      if (balance > 0) resp += `, Balance: ${formatPKR(balance)}`;
+      resp += ". ";
+    } else {
+      resp += "Abhi tak koi payment record nahi hai. ";
+    }
+
+    if (allPay.length > 0) {
+      resp += `Total: ${paidMonths} month paid, ${dueMonths} month pending. `;
+      resp += `Kul jama: ${formatPKR(totalPaid)}, Kul baqi: ${formatPKR(totalDue)}.`;
+    }
+    return resp;
+  }
+
+  // ── Fee Report / Summary ───────────────────────────────────────────────────
+  if (metric === "feeReport") {
+    const totalStudents = students.length;
+    const totalMonthlyBill = students.reduce((a, s) => a + s.monthly_fee, 0);
+    const totalCollected = payments.reduce((a, p) => a + p.amount_paid, 0);
+    const totalOutstanding = payments.reduce((a, p) => a + (p.amount_due - p.amount_paid), 0);
+    const paidStudents = new Set(payments.filter((p) => p.status === "paid").map((p) => p.student_fee_id)).size;
+    const dueStudents = students.filter((s) => {
+      const lp = getLatestPayment(s.id);
+      return !lp || lp.status !== "paid";
+    }).length;
+    return `Fee Report — Total students: ${totalStudents}. Monthly bill: ${formatPKR(totalMonthlyBill)}. Total collected: ${formatPKR(totalCollected)}. Outstanding: ${formatPKR(totalOutstanding)}. ${paidStudents} students paid, ${dueStudents} students ke dues baki hain.`;
+  }
+
+  // ── Due list ───────────────────────────────────────────────────────────────
+  if (metric === "feeDue") {
+    const dueList = students.filter((s) => {
+      const lp = getLatestPayment(s.id);
+      return !lp || lp.status === "due" || lp.status === "partial";
+    });
+    if (dueList.length === 0) return "Mashallah! Sab students ki fee paid hai. Koi dues nahi.";
+    const lines = dueList.slice(0, 10).map((s) => {
+      const lp = getLatestPayment(s.id);
+      const bal = lp ? formatPKR(lp.amount_due - lp.amount_paid) : formatPKR(s.monthly_fee);
+      const month = lp ? lp.month_label : "No record";
+      return `${s.student_name} (Roll: ${s.roll_no || "N/A"}, Class: ${s.class_name}) — ${month} — Baqi: ${bal}`;
+    });
+    const more = dueList.length > 10 ? ` ...aur ${dueList.length - 10} aur students.` : "";
+    return `${dueList.length} students ki fee pending hai:\n${lines.join("\n")}${more}`;
+  }
+
+  // ── Paid list ──────────────────────────────────────────────────────────────
+  if (metric === "feePaid") {
+    const paidList = students.filter((s) => {
+      const lp = getLatestPayment(s.id);
+      return lp && lp.status === "paid";
+    });
+    if (paidList.length === 0) return "Abhi kisi student ki fee paid nahi hai is mahine.";
+    const lines = paidList.slice(0, 10).map((s) => {
+      const lp = getLatestPayment(s.id);
+      return `${s.student_name} (Roll: ${s.roll_no || "N/A"}, Class: ${s.class_name}) — ${lp?.month_label} — ${formatPKR(lp?.amount_paid || 0)} ✅`;
+    });
+    const more = paidList.length > 10 ? ` ...aur ${paidList.length - 10} aur.` : "";
+    return `${paidList.length} students paid hain:\n${lines.join("\n")}${more}`;
+  }
+
+  // ── Full list ──────────────────────────────────────────────────────────────
+  if (metric === "feeList") {
+    const lines = students.slice(0, 15).map((s) => {
+      const lp = getLatestPayment(s.id);
+      const statusIcon = !lp ? "⬜ No record" : lp.status === "paid" ? "✅ Paid" : lp.status === "partial" ? "⚠️ Partial" : "❌ Due";
+      return `${s.student_name} (Roll: ${s.roll_no || "N/A"}) — Class ${s.class_name} — ${formatPKR(s.monthly_fee)} — ${statusIcon}`;
+    });
+    const more = students.length > 15 ? `\n...aur ${students.length - 15} aur students.` : "";
+    return `Fee list (${students.length} total):\n${lines.join("\n")}${more}`;
+  }
+
+  // ── Default: quick overview ────────────────────────────────────────────────
+  const dueCount = students.filter((s) => {
+    const lp = getLatestPayment(s.id);
+    return !lp || lp.status !== "paid";
+  }).length;
+  const paidCount = students.length - dueCount;
+  const totalCollected = payments.reduce((a, p) => a + p.amount_paid, 0);
+
+  return `Fee overview — ${students.length} students. ${paidCount} paid ✅, ${dueCount} due/pending ❌. Total collected: ${formatPKR(totalCollected)}. Kisi student ka naam ya roll no bolo fee detail ke liye.`;
 }
 
 function answerStudentDetail(student: StudentResult, exam: Exam, detectedSubject: string | null, metric: string, text: string): string {
@@ -569,6 +739,13 @@ function detectMetric(text: string): string {
 
   // Remark
   if (/remark|note/i.test(lower)) return "remark";
+
+  // Fee / dues queries
+  if (/fee.*detail|fee.*status|fee.*paid|fee.*due|fee.*baki|fee.*baqi|fee.*record|fee.*info|fee.*check|fee.*dekho|fee.*batao|fee.*kya|fees?/i.test(lower)) return "feeDetail";
+  if (/due.*fee|baki.*fee|baqi.*fee|kitni.*fee|unpaid|outstanding|fee.*nahi.*di|fee.*nahi.*adi/i.test(lower)) return "feeDue";
+  if (/paid.*fee|fee.*paid|fee.*ada|fee.*jama|fee.*dedi|fee.*de.*di|fee.*dey.*di/i.test(lower)) return "feePaid";
+  if (/fee.*list|sari.*fee|tamam.*fee|all.*fee|fee.*sab|sabki.*fee|poori.*fee/i.test(lower)) return "feeList";
+  if (/fee.*report|fee.*summary|total.*fee|fee.*total|kitna.*collect|collect.*fee/i.test(lower)) return "feeReport";
 
   // Marks (generic — but combined with name detection it gives subject-wise marks)
   if (/marks|number|aye|mile|kitn[ei]|scores?/i.test(lower)) return "marks";
