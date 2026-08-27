@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "tsx tests/resultEngine.test.ts && tsx tests/reducer.test.ts && tsx tests/excelPaper.test.ts",
+    "test": "tsx tests/resultEngine.test.ts && tsx tests/reducer.test.ts && tsx tests/excelPaper.test.ts && tsx tests/feeEngine.test.ts",
     "check": "npm run lint && npm run test && npm run build"
   },
   "dependencies": {
