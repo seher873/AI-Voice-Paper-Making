@@ -41,12 +41,13 @@ export default function BackupPanel() {
         if (backup.version !== 1) throw new Error("Invalid backup file");
         const examCount = backup.exams?.length || 0;
         const studentCount = examCount > 0 ? backup.exams[examCount - 1].students?.length || 0 : backup.students?.length || 0;
-        if (examCount === 0 && studentCount === 0 && (backup.papers?.length || 0) === 0) {
+        const feeCount = (backup.feeStudents?.length || 0) + (backup.feePayments?.length || 0);
+        if (examCount === 0 && studentCount === 0 && (backup.papers?.length || 0) === 0 && feeCount === 0) {
           addToast("This backup file is empty — no data to restore. Try a different file.", "error");
           setLoading(null);
           return;
         }
-        if (!confirm(`Restore ${examCount} exam(s), ${studentCount} student(s) from "${backup.schoolName}"? This will replace current data.`)) {
+        if (!confirm(`Restore ${examCount} exam(s), ${studentCount} student(s), ${feeCount} fee record(s) from "${backup.schoolName}"? This will replace current data.`)) {
           setLoading(null);
           return;
         }

@@ -92,16 +92,18 @@ export default function FeeStudentList({ onStudentSelect }: Props) {
       const payload = { ...form, monthly_fee: monthlyFee, school_id: schoolId };
 
       if (editId) {
-        await sb.from("student_fees").update(payload).eq("id", editId);
+        const { error } = await sb.from("student_fees").update(payload).eq("id", editId);
+        if (error) throw new Error(error.message);
       } else {
-        await sb.from("student_fees").insert(payload);
+        const { error } = await sb.from("student_fees").insert(payload);
+        if (error) throw new Error(error.message);
       }
       setShowForm(false);
       setEditId(null);
       setForm(EMPTY_FORM);
       await load();
     } catch (e) {
-      setError("Save karne mein masla hua");
+      setError(`Save error: ${e instanceof Error ? e.message : "Unknown"}`);
       console.error(e);
     } finally {
       setSaving(false);
@@ -112,10 +114,12 @@ export default function FeeStudentList({ onStudentSelect }: Props) {
     if (!confirm("Kya aap is student ko delete karna chahte hain?")) return;
     try {
       const sb = getSupabase();
-      await sb.from("student_fees").delete().eq("id", id);
+      const { error } = await sb.from("student_fees").delete().eq("id", id);
+      if (error) throw new Error(error.message);
       await load();
     } catch (e) {
       console.error(e);
+      setError(`Delete error: ${e instanceof Error ? e.message : "Unknown"}`);
     }
   }
 
