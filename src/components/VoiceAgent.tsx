@@ -43,6 +43,7 @@ export default function VoiceAgent({ isSuperAdmin }: VoiceAgentProps) {
   const [interimText, setInterimText] = useState("");
   const recognitionRef = useRef<any>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
+  const speakTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const [feeStudents, setFeeStudents] = useState<import("@/types/fee").StudentFee[]>([]);
   const [feePayments, setFeePayments] = useState<import("@/types/fee").FeePayment[]>([]);
@@ -66,6 +67,12 @@ export default function VoiceAgent({ isSuperAdmin }: VoiceAgentProps) {
     recognition.lang = "en-US";
     recognitionRef.current = recognition;
     synthRef.current = window.speechSynthesis || null;
+    // Force voices to load (Chrome quirk: returns [] until "voiceschanged")
+    if (synthRef.current) {
+      synthRef.current.getVoices();
+      const onVoices = () => synthRef.current?.getVoices();
+      synthRef.current.addEventListener?.("voiceschanged", onVoices);
+    }
     return () => { recognition.abort(); synthRef.current?.cancel(); };
   }, []);
 
@@ -110,16 +117,24 @@ export default function VoiceAgent({ isSuperAdmin }: VoiceAgentProps) {
   }, []);
 
   const speak = useCallback((text: string) => {
+    if (speakTimerRef.current) { clearTimeout(speakTimerRef.current); speakTimerRef.current = null; }
     const synth = synthRef.current;
     if (!synth) { setStatus("idle"); return; }
     synth.cancel();
     const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = "en-US";
+    const voice = synth.getVoices().find((v) => v.lang?.toLowerCase().startsWith("en")) || null;
+    if (voice) { utter.voice = voice; utter.lang = voice.lang; }
+    else utter.lang = "en-US";
     utter.rate = 0.95;
     utter.onend = () => setStatus("idle");
     utter.onerror = () => setStatus("idle");
     setStatus("speaking");
-    synth.speak(utter);
+    // Chrome bug: speak() right after cancel() is often swallowed. Defer slightly.
+    speakTimerRef.current = setTimeout(() => {
+      speakTimerRef.current = null;
+      if (synth.paused) synth.resume();
+      synth.speak(utter);
+    }, 60);
   }, []);
 
   const processInput = useCallback((text: string) => {
