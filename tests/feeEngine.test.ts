@@ -7,6 +7,7 @@ import {
   allMonthsForSession,
   calcStatus,
 } from "../src/types/fee";
+import { normalizePhone } from "../src/lib/whatsapp";
 
 let pass = 0, fail = 0;
 function check(name: string, cond: boolean, detail = "") {
@@ -86,6 +87,16 @@ const studentRule = (f: { student_name: string; class_name: string }) => !!f.stu
 check("name only -> blocked", studentRule({ student_name: "Ahmed", class_name: "" }) === false);
 check("class only -> blocked", studentRule({ student_name: "", class_name: "Class 5" }) === false);
 check("both -> ok", studentRule({ student_name: "Ahmed", class_name: "Class 5" }) === true);
+
+console.log("== WhatsApp phone normalization (valid PK numbers for wa.me) ==");
+check("0300-1234567 -> 923001234567", normalizePhone("0300-1234567") === "923001234567", normalizePhone("0300-1234567"));
+check("03001234567 -> 923001234567", normalizePhone("03001234567") === "923001234567", normalizePhone("03001234567"));
+check("+92 300 1234567 -> 923001234567", normalizePhone("+92 300 1234567") === "923001234567", normalizePhone("+92 300 1234567"));
+check("923001234567 unchanged", normalizePhone("923001234567") === "923001234567", normalizePhone("923001234567"));
+check("0092 300 1234567 -> 923001234567", normalizePhone("0092 300 1234567") === "923001234567", normalizePhone("0092 300 1234567"));
+check("3001234567 -> 923001234567", normalizePhone("3001234567") === "923001234567", normalizePhone("3001234567"));
+check("300-1234567 -> 923001234567", normalizePhone("300-1234567") === "923001234567", normalizePhone("300-1234567"));
+check("empty -> ''", normalizePhone("") === "", normalizePhone(""));
 
 console.log("\n==== FEE ENGINE RESULT: " + pass + " passed, " + fail + " failed ====");
 process.exit(fail > 0 ? 1 : 0);

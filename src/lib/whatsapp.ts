@@ -5,10 +5,20 @@ import type { PaperState } from "@/types/paper";
 
 const WHATSAPP_BASE = "https://wa.me";
 
+export function normalizePhone(phone: string): string {
+  let digits = phone.replace(/[^0-9]/g, "");
+  if (!digits) return "";
+  if (digits.startsWith("00")) digits = digits.slice(2);      // 00 92 ...
+  if (digits.startsWith("0")) digits = "92" + digits.slice(1); // 0300-1234567 → 923001234567
+  if (!digits.startsWith("92") && digits.length === 10) digits = "92" + digits; // 3001234567 → 923001234567
+  return digits;
+}
+
 function openWhatsApp(phone: string, text: string) {
   const encoded = encodeURIComponent(text);
-  const url = phone ? `${WHATSAPP_BASE}/${phone.replace(/[^0-9]/g, "")}?text=${encoded}` : `${WHATSAPP_BASE}?text=${encoded}`;
-  window.open(url, "_blank");
+  const num = normalizePhone(phone);
+  const url = num ? `${WHATSAPP_BASE}/${num}?text=${encoded}` : `${WHATSAPP_BASE}?text=${encoded}`;
+  window.open(url, "_blank", "noopener");
 }
 
 async function generatePdfBlob(element: HTMLElement): Promise<Blob | null> {
