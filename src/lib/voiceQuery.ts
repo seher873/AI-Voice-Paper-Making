@@ -566,7 +566,7 @@ function answerFeeQuery(
     return `Fee list (${students.length} total):\n${lines.join("\n")}${more}`;
   }
 
-  // ── Default: quick overview ────────────────────────────────────────────────
+  // ── Default: full detail with names (paid/due) ─────────────────────────────
   const dueCount = students.filter((s) => {
     const lp = getLatestPayment(s.id);
     return !lp || lp.status !== "paid";
@@ -574,7 +574,16 @@ function answerFeeQuery(
   const paidCount = students.length - dueCount;
   const totalCollected = payments.reduce((a, p) => a + p.amount_paid, 0);
 
-  return `Fee overview — ${students.length} students. ${paidCount} paid ✅, ${dueCount} due/pending ❌. Total collected: ${formatPKR(totalCollected)}. Kisi student ka naam ya roll no bolo fee detail ke liye.`;
+  const lines = students.slice(0, 20).map((s) => {
+    const lp = getLatestPayment(s.id);
+    const statusWord = !lp ? "NO RECORD" : lp.status === "paid" ? "PAID" : lp.status === "partial" ? "PARTIAL" : "DUE";
+    const paidAmt = lp ? lp.amount_paid : 0;
+    const dueAmt = lp ? lp.amount_due - lp.amount_paid : s.monthly_fee;
+    return `${s.student_name} (Roll: ${s.roll_no || "N/A"}, Class: ${s.class_name}) — ${statusWord} — Paid: ${formatPKR(paidAmt)}, Baaki: ${formatPKR(dueAmt)}`;
+  });
+  const more = students.length > 20 ? ` ...aur ${students.length - 20} aur.` : "";
+
+  return `Fee detail — Total students: ${students.length}. ${paidCount} PAID ✅, ${dueCount} DUE/PENDING ❌. Total collected: ${formatPKR(totalCollected)}.\n${lines.join("\n")}${more}`;
 }
 
 function answerStudentDetail(student: StudentResult, exam: Exam, detectedSubject: string | null, metric: string, text: string): string {
@@ -741,7 +750,7 @@ function detectMetric(text: string): string {
   if (/remark|note/i.test(lower)) return "remark";
 
   // Fee / dues queries
-  if (/fee.*detail|fee.*status|fee.*paid|fee.*due|fee.*baki|fee.*baqi|fee.*record|fee.*info|fee.*check|fee.*dekho|fee.*batao|fee.*kya|fees?/i.test(lower)) return "feeDetail";
+  if (/fee.*detail|fee.*status|fee.*paid|fee.*due|fee.*baki|fee.*baqi|fee.*record|fee.*info|fee.*check|fee.*dekho|fee.*batao|fee.*kya|fees?|fee\s+detals|fee.*details|detail.*fee/i.test(lower)) return "feeDetail";
   if (/due.*fee|baki.*fee|baqi.*fee|kitni.*fee|unpaid|outstanding|fee.*nahi.*di|fee.*nahi.*adi/i.test(lower)) return "feeDue";
   if (/paid.*fee|fee.*paid|fee.*ada|fee.*jama|fee.*dedi|fee.*de.*di|fee.*dey.*di/i.test(lower)) return "feePaid";
   if (/fee.*list|sari.*fee|tamam.*fee|all.*fee|fee.*sab|sabki.*fee|poori.*fee/i.test(lower)) return "feeList";

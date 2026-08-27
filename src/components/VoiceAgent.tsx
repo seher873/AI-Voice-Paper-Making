@@ -164,6 +164,65 @@ export default function VoiceAgent({ isSuperAdmin }: VoiceAgentProps) {
       });
       return;
     }
+
+    const FEE_METRICS: Record<string, boolean> = {
+      feeDetail: true, feeDue: true, feePaid: true, feeList: true, feeReport: true, fee: true, overview: true,
+    };
+
+    // Fee queries → fetch FRESH data so newly added students are always included
+    if (FEE_METRICS[parsed.metric] || /fee|fee.*detail|dues?|baki|baqi|paid.*fee|fee.*due|fee.*collect/i.test(text)) {
+      (async () => {
+        try {
+          const { getSupabase, getSchoolId } = await import("@/lib/supabase");
+          const sb = getSupabase();
+          const schoolId = await getSchoolId();
+          const freshStudents: import("@/types/fee").StudentFee[] = [];
+          const freshPayments: import("@/types/fee").FeePayment[] = [];
+          if (schoolId) {
+            const [studRes, payRes] = await Promise.all([
+              sb.from("student_fees").select("*").eq("school_id", schoolId).eq("is_active", true),
+              sb.from("fee_payments").select("*").eq("school_id", schoolId).order("month_year", { ascending: false }),
+            ]);
+            if (studRes.data) freshStudents.push(...(studRes.data as import("@/types/fee").StudentFee[]));
+            if (payRes.data) freshPayments.push(...(payRes.data as import("@/types/fee").FeePayment[]));
+          }
+          setFeeStudents(freshStudents);
+          setFeePayments(freshPayments);
+          const ctx: VoiceContext = {
+            exams: state.exams,
+            currentExam: state.currentExam,
+            students: state.students,
+            results: state.results,
+            paper: paperState,
+            savedPapers: papers,
+            feeStudents: freshStudents,
+            feePayments: freshPayments,
+            schoolName: state.schoolName,
+          };
+          const answer = answerQuery(parsed, ctx);
+          addMsg("agent", answer);
+          speak(answer);
+        } catch (e) {
+          console.error("[VoiceAgent] Fresh fee fetch failed:", e);
+          const ctx: VoiceContext = {
+            exams: state.exams,
+            currentExam: state.currentExam,
+            students: state.students,
+            results: state.results,
+            paper: paperState,
+            savedPapers: papers,
+            feeStudents,
+            feePayments,
+            schoolName: state.schoolName,
+          };
+          const answer = answerQuery(parsed, ctx);
+          addMsg("agent", answer);
+          speak(answer);
+        }
+      })();
+      return;
+    }
+
     const ctx: VoiceContext = {
       exams: state.exams,
       currentExam: state.currentExam,
@@ -178,7 +237,7 @@ export default function VoiceAgent({ isSuperAdmin }: VoiceAgentProps) {
     const answer = answerQuery(parsed, ctx);
     addMsg("agent", answer);
     speak(answer);
-  }, [isSuperAdmin, state, paperState, papers, speak, addMsg]);
+  }, [isSuperAdmin, state, paperState, papers, speak, addMsg, feeStudents, feePayments]);
 
   const processQuery = useCallback((text: string) => {
     const lower = text.toLowerCase().trim();

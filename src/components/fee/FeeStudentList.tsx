@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { getSupabase, getSchoolId } from "@/lib/supabase";
 import type { StudentFee, FeeStructure } from "@/types/fee";
-import { formatPKR } from "@/types/fee";
+import { formatPKR, STANDARD_CLASSES, sessionOptions } from "@/types/fee";
 
 interface Props {
   onStudentSelect?: (student: StudentFee) => void;
@@ -288,8 +288,11 @@ export default function FeeStudentList({ onStudentSelect }: Props) {
             </div>
             <div>
               <label className="block text-[10px] font-semibold text-slate-500 mb-0.5">Class *</label>
-              <input type="text" value={form.class_name} onChange={(e) => setForm({ ...form, class_name: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400" placeholder="Class 5" />
+              <select value={form.class_name} onChange={(e) => setForm({ ...form, class_name: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                <option value="">-- Select Class --</option>
+                {STANDARD_CLASSES.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
             </div>
             <div>
               <label className="block text-[10px] font-semibold text-slate-500 mb-0.5">Section</label>
@@ -305,6 +308,14 @@ export default function FeeStudentList({ onStudentSelect }: Props) {
               <label className="block text-[10px] font-semibold text-slate-500 mb-0.5">Parent Phone (WhatsApp) 📱</label>
               <input type="tel" value={form.parent_phone} onChange={(e) => setForm({ ...form, parent_phone: e.target.value })}
                 className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400" placeholder="923001234567" />
+            </div>
+            <div>
+              <label className="block text-[10px] font-semibold text-slate-500 mb-0.5">Academic Year / Session</label>
+              <select value={form.session} onChange={(e) => setForm({ ...form, session: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                <option value="">-- Select Session --</option>
+                {sessionOptions().map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
             </div>
             <div>
               <label className="block text-[10px] font-semibold text-slate-500 mb-0.5">Fee Structure</label>
@@ -324,11 +335,6 @@ export default function FeeStudentList({ onStudentSelect }: Props) {
               <label className="block text-[10px] font-semibold text-slate-500 mb-0.5">Monthly Fee (PKR) — Override</label>
               <input type="number" value={form.monthly_fee || ""} onChange={(e) => setForm({ ...form, monthly_fee: Number(e.target.value) })}
                 className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400" placeholder="2500" />
-            </div>
-            <div>
-              <label className="block text-[10px] font-semibold text-slate-500 mb-0.5">Session</label>
-              <input type="text" value={form.session} onChange={(e) => setForm({ ...form, session: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400" placeholder="2025-2026" />
             </div>
           </div>
           <div className="flex gap-2 mt-4">

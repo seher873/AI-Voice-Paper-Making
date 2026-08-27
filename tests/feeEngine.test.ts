@@ -6,6 +6,8 @@ import {
   monthYearFromLabel,
   allMonthsForSession,
   calcStatus,
+  STANDARD_CLASSES,
+  sessionOptions,
 } from "../src/types/fee";
 import { normalizePhone } from "../src/lib/whatsapp";
 
@@ -97,6 +99,19 @@ check("0092 300 1234567 -> 923001234567", normalizePhone("0092 300 1234567") ===
 check("3001234567 -> 923001234567", normalizePhone("3001234567") === "923001234567", normalizePhone("3001234567"));
 check("300-1234567 -> 923001234567", normalizePhone("300-1234567") === "923001234567", normalizePhone("300-1234567"));
 check("empty -> ''", normalizePhone("") === "", normalizePhone(""));
+
+console.log("== standard classes dropdown ==");
+check("Playgroup first", STANDARD_CLASSES[0] === "Playgroup");
+check("Class 10 last", STANDARD_CLASSES[STANDARD_CLASSES.length - 1] === "Class 10");
+check("14 classes", STANDARD_CLASSES.length === 14);
+check("Class 5 present", STANDARD_CLASSES.includes("Class 5"));
+check("no duplicates", new Set(STANDARD_CLASSES).size === STANDARD_CLASSES.length);
+
+console.log("== session options ==");
+const sessions = sessionOptions();
+check("4 options", sessions.length === 4);
+check("format YYYY-YYYY", sessions.every((s) => /^\d{4}-\d{4}$/.test(s)), sessions.join(","));
+check("linear years", sessions.every((s, i) => i === 0 || parseInt(s.split("-")[0]) === parseInt(sessions[i - 1].split("-")[0]) + 1));
 
 console.log("\n==== FEE ENGINE RESULT: " + pass + " passed, " + fail + " failed ====");
 process.exit(fail > 0 ? 1 : 0);

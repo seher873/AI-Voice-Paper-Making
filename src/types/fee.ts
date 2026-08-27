@@ -52,6 +52,26 @@ export function formatPKR(amount: number): string {
   return `PKR ${amount.toLocaleString("en-PK")}`;
 }
 
+// ─── Standard Classes (PK schools) ───────────────────────────────────────────
+
+export const STANDARD_CLASSES = [
+  "Playgroup", "Nursery", "Prep", "KG",
+  "Class 1", "Class 2", "Class 3", "Class 4", "Class 5",
+  "Class 6", "Class 7", "Class 8", "Class 9", "Class 10",
+];
+
+// ─── Academic Sessions ────────────────────────────────────────────────────────
+
+export function sessionOptions(): string[] {
+  const start = new Date().getFullYear() - 1;
+  const out: string[] = [];
+  for (let i = 0; i < 4; i++) {
+    const y = start + i;
+    out.push(`${y}-${y + 1}`);
+  }
+  return out;
+}
+
 // ─── Month Helpers ────────────────────────────────────────────────────────────
 
 export const MONTHS = [
