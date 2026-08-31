@@ -80,6 +80,10 @@ export default function Dashboard() {
   const [schoolReady, setSchoolReady] = useState<boolean | null>(null);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [showSchools, setShowSchools] = useState(false);
+  const [showDataTip, setShowDataTip] = useState(() => {
+    if (typeof window === "undefined") return true;
+    try { return localStorage.getItem("pm-data-tip-dismissed") !== "1"; } catch { return true; }
+  });
   const dbLoaded = useRef(false);
 
   useEffect(() => {
@@ -243,6 +247,24 @@ export default function Dashboard() {
 
   return (
     <div className="relative flex flex-col lg:flex-row app-h bg-gradient-to-br from-slate-50 to-indigo-50/50">
+      {/* Data-saving tip banner */}
+      {showDataTip && (
+        <div className="lg:absolute lg:top-2 lg:right-2 z-40 max-w-[260px] bg-amber-50 border border-amber-200 rounded-2xl shadow-lg p-3 text-[11px] text-amber-800 flex gap-2 items-start">
+          <span className="text-base leading-none">💡</span>
+          <div className="flex-1 min-w-0">
+            <p className="font-bold mb-0.5">Data Bachayein!</p>
+            <p>App ko sara din khula rakhein (school time 8–12). Baar baar kholne se internet data waste hota hai.</p>
+          </div>
+          <button
+            onClick={() => { setShowDataTip(false); try { localStorage.setItem("pm-data-tip-dismissed", "1"); } catch {} }}
+            className="text-amber-500 hover:text-amber-700 flex-shrink-0"
+            title="Dismiss"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Mobile top bar */}
       <div className="lg:hidden flex items-center justify-between bg-white border-b border-slate-200 px-4 py-2 z-30 shadow-sm">
         <button
@@ -454,7 +476,12 @@ export default function Dashboard() {
                       <span className="text-[9px] text-slate-400 font-medium mt-0.5">Upload</span>
                       <input type="file" accept="image/*" onChange={(e) => {
                         const file = e.target.files?.[0];
-                        if (file) { const r = new FileReader(); r.onload = (ev) => { const logo = ev.target?.result as string; resultCtx.dispatch({ type: "SET_SCHOOL_INFO", payload: { name: resultCtx.state.schoolName, logo, address: resultCtx.state.schoolAddress } }); dispatch({ type: "SET_SCHOOL_LOGO", payload: logo }); }; r.readAsDataURL(file); }
+                        if (file) {
+                          if (file.size > 500 * 1024) {
+                            alert(`Logo ${(file.size / 1024).toFixed(0)}KB ka hai — 500KB se bada hai. Data bachane ke liye chhota logo (50-200KB) lagayein.`);
+                          }
+                          const r = new FileReader(); r.onload = (ev) => { const logo = ev.target?.result as string; resultCtx.dispatch({ type: "SET_SCHOOL_INFO", payload: { name: resultCtx.state.schoolName, logo, address: resultCtx.state.schoolAddress } }); dispatch({ type: "SET_SCHOOL_LOGO", payload: logo }); }; r.readAsDataURL(file);
+                        }
                       }} className="hidden" />
                     </label>
                   )}
