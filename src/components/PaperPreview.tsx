@@ -263,6 +263,16 @@ export default function PaperPreview() {
                           ))}
                         </div>
                       )}
+                      {question.type === "descriptive" && (question.options?.filter((o) => o.trim()).length || 0) > 0 && (
+                        <div className={`mt-1 text-slate-700 text-[11px] flex flex-wrap gap-x-6 gap-y-1 ${isRTL ? "text-right" : ""}`}>
+                          {question.options!.filter((o) => o.trim()).map((part, i) => (
+                            <span key={i} className="inline-flex items-baseline gap-1.5">
+                              <span className="font-semibold text-slate-900">({["i", "ii", "iii", "iv", "v", "vi"][i] || i + 1})</span>
+                              <span>{part}</span>
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

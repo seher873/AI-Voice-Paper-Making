@@ -268,7 +268,7 @@ export default function QuestionEditor() {
                   </div>
                 )}
 
-                {question.type === "maths" && (
+                {(question.type === "maths" || (question.type === "descriptive" && (question.options?.filter((o) => o.trim()).length ?? 0) > 0)) && (
                   <div className="mt-2 space-y-1.5">
                     {(question.options && question.options.length > 0 ? question.options : ["", "", ""]).map((part, i) => (
                       <div key={i} className="flex items-center gap-2">
@@ -296,6 +296,22 @@ export default function QuestionEditor() {
                       </svg>
                       Add Part
                     </button>
+                    {question.type === "descriptive" && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const opts = [...(question.options || []), ""];
+                          dispatch({ type: "UPDATE_QUESTION_OPTIONS", payload: { id: question.id, options: opts } });
+                          addToast("Maths pattern parts active", "info");
+                        }}
+                        className="ml-1 inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 text-xs font-bold rounded-lg hover:bg-blue-100 transition-all"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        Start Maths Pattern
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
