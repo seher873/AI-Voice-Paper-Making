@@ -99,9 +99,20 @@ export default function QuestionEditor() {
 
   const handleTypeChange = useCallback(
     (id: string, type: QuestionType) => {
+      const q = state.questions.find((q) => q.id === id);
+      if (type === "maths" && q && !(q.options && q.options.length > 0)) {
+        dispatch({
+          type: "UPDATE_QUESTION",
+          payload: { id, text: q.text || "Solve the following:" },
+        });
+        dispatch({
+          type: "UPDATE_QUESTION_OPTIONS",
+          payload: { id, options: ["2 + 2 = ?", "5 + 8 = ?", "8 + 9 = ?"] },
+        });
+      }
       dispatch({ type: "UPDATE_QUESTION_TYPE", payload: { id, type } });
     },
-    [dispatch]
+    [dispatch, state.questions]
   );
 
   const handleDeleteQuestion = useCallback(
@@ -254,6 +265,37 @@ export default function QuestionEditor() {
                         </button>
                       </div>
                     ))}
+                  </div>
+                )}
+
+                {question.type === "maths" && (
+                  <div className="mt-2 space-y-1.5">
+                    {(question.options && question.options.length > 0 ? question.options : ["", "", ""]).map((part, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <span className="inline-flex items-center justify-center w-8 h-8 bg-orange-100 text-orange-700 text-[11px] font-bold rounded-lg flex-shrink-0">
+                          ({["i", "ii", "iii", "iv", "v", "vi"][i] || i + 1})
+                        </span>
+                        <input
+                          value={part}
+                          onChange={(e) => handleOptionChange(question.id, i, e.target.value)}
+                          placeholder={`e.g. ${i === 0 ? "2 + 2 = ?" : i === 1 ? "5 + 8 = ?" : "8 + 9 = ?"}`}
+                          className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition-all"
+                        />
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const opts = [...(question.options || []), ""];
+                        dispatch({ type: "UPDATE_QUESTION_OPTIONS", payload: { id: question.id, options: opts } });
+                      }}
+                      className="mt-1 inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 text-xs font-bold rounded-lg hover:bg-orange-100 transition-all"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                      </svg>
+                      Add Part
+                    </button>
                   </div>
                 )}
               </div>
