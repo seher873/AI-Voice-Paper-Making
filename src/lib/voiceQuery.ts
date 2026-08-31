@@ -367,9 +367,7 @@ export function answerQuery(query: ParsedQuery, ctx: VoiceContext): string {
   // No exam at all
   if (!exam && allStudents.length === 0) {
     return "Koi exam ya students nahi hain. Pehle exam create karein aur students add karein.";
-  }
-
-  // Has students but no results calculated yet
+  }  // Has students but no results calculated yet
   if (results.length === 0 && allStudents.length > 0) {
     if (detectedName) {
       const student = allStudents.find((s) => s.studentName.toLowerCase() === detectedName.toLowerCase())
@@ -400,6 +398,9 @@ export function answerQuery(query: ParsedQuery, ctx: VoiceContext): string {
   }
 
   // General metrics
+  if (metric === "unrecognized") {
+    return "Mujhe aapka sawal samajh nahi aaya. Correct your question please — sirf apne paper, exam, results, fees ya students ke baare mein puchiye, phir aapko sahi jawab milega. Misal: \"Kitne students?\", \"English topper?\", \"fee detail do?\", \"paper title kya hai?\".";
+  }
   return answerGeneralMetric(metric, exam!, results, text);
 }
 
@@ -759,7 +760,11 @@ function detectMetric(text: string): string {
   // Marks (generic — but combined with name detection it gives subject-wise marks)
   if (/marks|number|aye|mile|kitn[ei]|scores?/i.test(lower)) return "marks";
 
-  return "overview";
+  // Explicit overview / summary request
+  if (/overview|summary|batao|batayein|detail|details|poori|sab\s+kuch|kya\s+scene|kya\s+haal|kya\s+hoga|sab\s+batao/i.test(lower)) return "overview";
+
+  // Nothing matched — flag as unrecognized so agent can ask for correction
+  return "unrecognized";
 }
 
 // --- Mutation Parsing ---
