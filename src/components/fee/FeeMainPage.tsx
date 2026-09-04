@@ -105,15 +105,17 @@ export default function FeeMainPage({ onHome }: Props) {
         </div>
       )}
 
-      <HeaderSection
-        search={search} setSearch={setSearch}
-        filterClass={filterClass} setFilterClass={setFilterClass}
-        filterSession={filterSession} setFilterSession={setFilterSession}
-        uniqueClasses={uniqueClasses} sessions={sessions}
-        onCollect={() => setShowCollect(true)}
-        onSendSlips={() => setShowSlips(true)}
-        onHome={onHome}
-      />
+      <div className="sticky top-0 z-20">
+        <HeaderSection
+          search={search} setSearch={setSearch}
+          filterClass={filterClass} setFilterClass={setFilterClass}
+          filterSession={filterSession} setFilterSession={setFilterSession}
+          uniqueClasses={uniqueClasses} sessions={sessions}
+          onCollect={() => setShowCollect(true)}
+          onSendSlips={() => setShowSlips(true)}
+          onHome={onHome}
+        />
+      </div>
 
       <SummaryCards
         totalStudents={filteredStudents.length}
