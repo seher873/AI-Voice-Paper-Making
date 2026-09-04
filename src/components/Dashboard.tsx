@@ -968,7 +968,7 @@ export default function Dashboard() {
       )}
       {mode === "fees" && plan.features.fees && (
         <div className="flex-1 overflow-y-auto overflow-x-auto bg-gradient-to-b from-emerald-50 to-slate-50 p-3 sm:p-4 lg:p-6">
-          <FeeManagement />
+          <FeeManagement onHome={() => setShowHome(true)} />
         </div>
       )}
       {showSchools && isSuperAdmin && <SchoolsOverview onClose={() => setShowSchools(false)} />}

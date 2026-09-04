@@ -15,7 +15,11 @@ interface PaymentRow extends FeePayment {
   student: StudentFee;
 }
 
-export default function FeeMainPage() {
+interface Props {
+  onHome: () => void;
+}
+
+export default function FeeMainPage({ onHome }: Props) {
   const [students, setStudents] = useState<StudentFee[]>([]);
   const [allPayments, setAllPayments] = useState<PaymentRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -108,6 +112,7 @@ export default function FeeMainPage() {
         uniqueClasses={uniqueClasses} sessions={sessions}
         onCollect={() => setShowCollect(true)}
         onSendSlips={() => setShowSlips(true)}
+        onHome={onHome}
       />
 
       <SummaryCards

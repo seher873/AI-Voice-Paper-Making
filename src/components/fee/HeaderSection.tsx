@@ -11,14 +11,18 @@ interface Props {
   sessions: string[];
   onCollect: () => void;
   onSendSlips: () => void;
+  onHome: () => void;
 }
 
-export default function HeaderSection({ search, setSearch, filterClass, setFilterClass, filterSession, setFilterSession, uniqueClasses, sessions, onCollect, onSendSlips }: Props) {
+export default function HeaderSection({ search, setSearch, filterClass, setFilterClass, filterSession, setFilterSession, uniqueClasses, sessions, onCollect, onSendSlips, onHome }: Props) {
   return (
     <div className="space-y-3">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-xs text-slate-400">
-        <span className="hover:text-indigo-600 cursor-pointer transition-colors">Dashboard</span>
+        <button onClick={onHome} className="hover:text-indigo-600 cursor-pointer transition-colors font-semibold flex items-center gap-1">
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10" /></svg>
+          Home
+        </button>
         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
         <span className="text-slate-700 font-semibold">Fees</span>
       </div>

@@ -2,10 +2,14 @@
 
 import FeeMainPage from "./fee/FeeMainPage";
 
-export default function FeeManagement() {
+interface Props {
+  onHome: () => void;
+}
+
+export default function FeeManagement({ onHome }: Props) {
   return (
     <div className="space-y-1">
-      <FeeMainPage />
+      <FeeMainPage onHome={onHome} />
     </div>
   );
 }
