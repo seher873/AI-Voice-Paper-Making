@@ -280,7 +280,7 @@ export default function Dashboard() {
       )}
 
       {/* Mobile top bar */}
-      <div className="lg:hidden flex items-center justify-between bg-white border-b border-slate-200 px-4 py-2 z-30 shadow-sm">
+      <div className="lg:hidden flex items-center justify-between bg-white border-b border-slate-200 px-3 py-2 z-30 shadow-sm">
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className="flex items-center gap-2 min-h-[48px] px-2 text-slate-700 hover:text-indigo-600 active:scale-[0.96] transition-all rounded-xl"
@@ -290,28 +290,61 @@ export default function Dashboard() {
             <rect x="2" y="3" width="20" height="18" rx="3" stroke="currentColor" fill="none" />
             <path strokeLinecap="round" d="M7 8h10M7 12h10M7 16h10" />
           </svg>
-          <span className="font-bold text-sm tracking-tight truncate max-w-[160px]">
+          <span className="font-bold text-sm tracking-tight truncate max-w-[120px]">
             {mode === "paper" ? "AI Voice Paper" : mode === "fees" ? "Fee Management" : "Result Management"}
           </span>
         </button>
         <div className="flex items-center gap-1.5">
-          <button
-            onClick={() => setShowHome(true)}
-            className="px-2.5 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-bold transition-all active:scale-[0.97]"
-            title="Home / Dashboard"
-          >
-            Home
-          </button>
           {availableModes.length > 1 && (
             <button
-              onClick={() => setMode(mode === "paper" ? "results" : "paper")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              onClick={() => setMode(mode === "fees" || mode === "paper" ? "results" : "paper")}
+              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-[0.94] ${
                 mode === "results" ? "bg-indigo-600 text-white" : "bg-indigo-50 text-indigo-600"
               }`}
+              title={mode === "results" ? "Open Papers" : "Open Results"}
             >
-              {mode === "paper" ? "Results" : "Papers"}
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
             </button>
           )}
+          {plan.features.fees && (
+            <button
+              onClick={() => setMode(mode === "fees" ? "paper" : "fees")}
+              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-[0.94] ${
+                mode === "fees" ? "bg-amber-500 text-white" : "bg-amber-50 text-amber-600"
+              }`}
+              title="Fees"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </button>
+          )}
+          <button
+            onClick={() => setShowSchoolInfo(!showSchoolInfo)}
+            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-[0.94] ${
+              showSchoolInfo ? "bg-indigo-600 text-white" : "bg-indigo-50 text-indigo-600"
+            }`}
+            title="School Info"
+          >
+            {resultCtx.state.schoolLogo ? (
+              <img src={resultCtx.state.schoolLogo} alt="Logo" className="w-6 h-6 rounded-full object-contain bg-white" />
+            ) : (
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+            )}
+          </button>
+          <button
+            onClick={() => setShowHome(true)}
+            className="w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center transition-all active:scale-[0.94]"
+            title="Home / Dashboard"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10" />
+            </svg>
+          </button>
         </div>
       </div>
 
