@@ -281,6 +281,7 @@ export default function Dashboard() {
 
       {/* Mobile top bar */}
       <div className="lg:hidden flex items-center justify-between bg-white border-b border-slate-200 px-3 py-2 z-30 shadow-sm">
+        {mode !== "fees" && (
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className="flex items-center gap-2 min-h-[48px] px-2 text-slate-700 hover:text-indigo-600 active:scale-[0.96] transition-all rounded-xl"
@@ -291,9 +292,10 @@ export default function Dashboard() {
             <path strokeLinecap="round" d="M7 8h10M7 12h10M7 16h10" />
           </svg>
           <span className="font-bold text-sm tracking-tight truncate max-w-[120px]">
-            {mode === "paper" ? "AI Voice Paper" : mode === "fees" ? "Fee Management" : "Result Management"}
+            {mode === "paper" ? "AI Voice Paper" : "Result Management"}
           </span>
         </button>
+        )}
         <div className="flex items-center gap-1.5">
           {availableModes.length > 1 && (
             <button
@@ -439,7 +441,7 @@ export default function Dashboard() {
       {/* Left Panel - Controls */}
       <div
         className={`${
-          mode === "fees" ? "lg:hidden" : ""
+          mode === "fees" ? "hidden lg:hidden" : ""
         } ${
           menuOpen ? "translate-x-0" : "-translate-x-full"
         } lg:translate-x-0 absolute lg:relative top-0 left-0 bottom-0 lg:bottom-auto z-30           w-[92vw] max-w-[480px] lg:h-auto lg:w-[520px] lg:min-w-[520px] xl:w-[560px] xl:min-w-[560px] bg-white/95 backdrop-blur-sm border-r border-slate-200 flex flex-col shadow-2xl lg:shadow-lg transition-transform duration-300 ease-in-out`}
@@ -455,7 +457,7 @@ export default function Dashboard() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 min-w-0">
                 <h1 className="flex-1 min-w-0 text-base font-bold text-white tracking-tight truncate">
-                  {mode === "paper" ? "AI Voice Paper" : mode === "fees" ? "Fee Management" : "Result Management"}
+            {mode === "paper" ? "AI Voice Paper" : "Result Management"}
                 </h1>
                 <span className="flex-shrink-0 inline-flex px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-white/15 text-indigo-200 leading-none whitespace-nowrap">
                   {plan.label}
