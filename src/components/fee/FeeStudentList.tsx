@@ -19,6 +19,7 @@ const EMPTY_FORM: Omit<StudentFee, "id" | "school_id" | "created_at"> = {
   fee_structure_id: null,
   monthly_fee: 0,
   session: "",
+  admission_date: "",
   is_active: true,
 };
 
@@ -156,6 +157,7 @@ export default function FeeStudentList({ onStudentSelect }: Props) {
       fee_structure_id: s.fee_structure_id,
       monthly_fee: s.monthly_fee,
       session: s.session,
+      admission_date: s.admission_date,
       is_active: s.is_active,
     });
     setEditId(s.id);
@@ -212,7 +214,8 @@ export default function FeeStudentList({ onStudentSelect }: Props) {
                 <select value={structureForm.fee_type || "monthly"} onChange={(e) => setStructureForm({ ...structureForm, fee_type: e.target.value as FeeStructure["fee_type"] })}
                   className="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400">
                   <option value="monthly">Monthly</option>
-                  <option value="quarterly">Quarterly</option>
+                  <option value="exams">Exams</option>
+                  <option value="admission">Admission</option>
                   <option value="annual">Annual</option>
                   <option value="other">Other</option>
                 </select>
@@ -316,6 +319,11 @@ export default function FeeStudentList({ onStudentSelect }: Props) {
                 <option value="">-- Select Session --</option>
                 {sessionOptions().map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
+            </div>
+            <div>
+              <label className="block text-[10px] font-semibold text-slate-500 mb-0.5">Admission Date (year ke sath) 📅</label>
+              <input type="date" value={form.admission_date || ""} onChange={(e) => setForm({ ...form, admission_date: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400" />
             </div>
             <div>
               <label className="block text-[10px] font-semibold text-slate-500 mb-0.5">Fee Structure</label>

@@ -4,7 +4,7 @@ export interface FeeStructure {
   id: string;
   school_id: string;
   class_name: string;
-  fee_type: "monthly" | "quarterly" | "annual" | "other";
+  fee_type: "monthly" | "exams" | "admission" | "annual" | "other";
   amount: number;
   description: string;
   created_at: string;
@@ -22,6 +22,7 @@ export interface StudentFee {
   fee_structure_id: string | null;
   monthly_fee: number;
   session: string;
+  admission_date?: string;
   is_active: boolean;
   created_at: string;
 }
@@ -44,7 +45,7 @@ export interface FeePayment {
   student?: StudentFee;
 }
 
-export type FeeTab = "students" | "collect" | "report" | "slips";
+export type FeeTab = "students" | "collect" | "report" | "slips" | "calendar";
 
 // ─── PKR Formatter ───────────────────────────────────────────────────────────
 

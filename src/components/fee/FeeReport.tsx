@@ -143,9 +143,9 @@ export default function FeeReport() {
                   <th className="text-left px-4 py-2 font-semibold">Student</th>
                   <th className="text-left px-4 py-2 font-semibold">Class</th>
                   <th className="text-left px-4 py-2 font-semibold">Month</th>
-                  <th className="text-right px-4 py-2 font-semibold">Due</th>
+                  <th className="text-right px-4 py-2 font-semibold">Fee Billed</th>
                   <th className="text-right px-4 py-2 font-semibold">Paid</th>
-                  <th className="text-right px-4 py-2 font-semibold">Balance</th>
+                  <th className="text-right px-4 py-2 font-semibold">Due Balance</th>
                   <th className="text-center px-4 py-2 font-semibold">Status</th>
                   <th className="text-left px-4 py-2 font-semibold">Date</th>
                 </tr>

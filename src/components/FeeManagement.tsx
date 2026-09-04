@@ -5,6 +5,7 @@ import FeeStudentList from "./fee/FeeStudentList";
 import CollectFee from "./fee/CollectFee";
 import FeeReport from "./fee/FeeReport";
 import FeeSlipSender from "./fee/FeeSlipSender";
+import FeeCalendar from "./fee/FeeCalendar";
 import type { FeeTab } from "@/types/fee";
 
 const menuItems: { id: FeeTab; label: string; icon: string }[] = [
@@ -28,6 +29,11 @@ const menuItems: { id: FeeTab; label: string; icon: string }[] = [
     label: "Send Slips 📱",
     icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
   },
+  {
+    id: "calendar",
+    label: "Calendar 📅",
+    icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
+  },
 ];
 
 const components: Record<FeeTab, React.FC> = {
@@ -35,6 +41,7 @@ const components: Record<FeeTab, React.FC> = {
   collect: CollectFee,
   report: FeeReport,
   slips: FeeSlipSender,
+  calendar: FeeCalendar,
 };
 
 export default function FeeManagement() {

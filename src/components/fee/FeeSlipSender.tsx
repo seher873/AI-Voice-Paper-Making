@@ -217,10 +217,14 @@ export default function FeeSlipSender() {
                   <p className="text-[10px] text-slate-500 mt-0.5">
                     {student.class_name}{student.section ? `-${student.section}` : ""} · Roll: {student.roll_no || "—"} · 📱 {student.parent_phone}
                   </p>
-                  <div className="flex items-center gap-3 mt-1.5">
-                    <span className="text-[10px] text-slate-500">Due: <strong className="text-slate-700">{formatPKR(payment.amount_due)}</strong></span>
+                  <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                    <span className="text-[10px] text-slate-500">Monthly Fee: <strong className="text-slate-700">{formatPKR(payment.amount_due)}</strong></span>
                     <span className="text-[10px] text-slate-500">Paid: <strong className="text-green-700">{formatPKR(payment.amount_paid)}</strong></span>
-                    {balance > 0 && <span className="text-[10px] text-slate-500">Balance: <strong className="text-red-600">{formatPKR(balance)}</strong></span>}
+                    {balance > 0 ? (
+                      <span className="text-[10px] text-slate-500">Due Balance: <strong className="text-red-600">{formatPKR(balance)}</strong></span>
+                    ) : (
+                      <span className="text-[10px] font-semibold text-green-600">Balance: Paid in full ✓</span>
+                    )}
                   </div>
                 </div>
                 {/* Send Button */}
