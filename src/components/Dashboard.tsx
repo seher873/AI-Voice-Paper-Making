@@ -348,6 +348,86 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Desktop top bar */}
+      <div className="hidden lg:flex items-center justify-between bg-white/95 backdrop-blur border-b border-slate-200 px-5 py-2 z-30 shadow-sm flex-shrink-0">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
+            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+          <span className="font-bold text-sm tracking-tight truncate">
+            {mode === "paper" ? "AI Voice Paper" : mode === "fees" ? "Fee Management" : "Result Management"}
+          </span>
+          <span className="hidden xl:inline text-[11px] text-slate-400 font-medium truncate">
+            · {mode === "paper" ? "School Paper Builder" : mode === "fees" ? "Students · Fees · WhatsApp Slips" : "Results & Report Cards"}
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          {availableModes.length > 1 && (
+            <button
+              onClick={() => setMode(mode === "fees" || mode === "paper" ? "results" : "paper")}
+              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-[0.94] ${
+                mode === "results" ? "bg-indigo-600 text-white" : "bg-indigo-50 text-indigo-600"
+              }`}
+              title={mode === "results" ? "Open Papers" : "Open Results"}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </button>
+          )}
+          {plan.features.fees && (
+            <button
+              onClick={() => setMode(mode === "fees" ? "paper" : "fees")}
+              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-[0.94] ${
+                mode === "fees" ? "bg-amber-500 text-white" : "bg-amber-50 text-amber-600"
+              }`}
+              title="Fees"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </button>
+          )}
+          {isSuperAdmin && (
+            <button
+              onClick={() => setShowSchools(true)}
+              className="w-9 h-9 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center transition-all active:scale-[0.94]"
+              title="Admin / Schools"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10M9 21h6" />
+              </svg>
+            </button>
+          )}
+          <button
+            onClick={() => setShowSchoolInfo(!showSchoolInfo)}
+            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-[0.94] ${
+              showSchoolInfo ? "bg-indigo-600 text-white" : "bg-indigo-50 text-indigo-600"
+            }`}
+            title="School Info"
+          >
+            {resultCtx.state.schoolLogo ? (
+              <img src={resultCtx.state.schoolLogo} alt="Logo" className="w-5 h-5 rounded-full object-contain bg-white" />
+            ) : (
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+            )}
+          </button>
+          <button
+            onClick={() => setShowHome(true)}
+            className="w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center transition-all active:scale-[0.94]"
+            title="Home / Dashboard"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
       {/* Mobile backdrop */}
       {menuOpen && (
         <div
