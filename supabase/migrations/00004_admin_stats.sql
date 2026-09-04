@@ -59,7 +59,10 @@ BEGIN
     s.plan,
     s.created_at,
     (SELECT COUNT(*)::BIGINT FROM exams e WHERE e.school_id = s.id) AS exam_count,
-    (SELECT COUNT(*)::BIGINT FROM students st JOIN exams e ON e.id = st.exam_id WHERE e.school_id = s.id) AS student_count,
+    (
+      (SELECT COUNT(*)::BIGINT FROM students st JOIN exams e ON e.id = st.exam_id WHERE e.school_id = s.id)
+      + (SELECT COUNT(*)::BIGINT FROM student_fees sf WHERE sf.school_id = s.id)
+    ) AS student_count,
     (SELECT COUNT(*)::BIGINT FROM papers p WHERE p.school_id = s.id) AS paper_count,
     (SELECT MAX(updated_at) FROM school_state ss WHERE ss.school_id = s.id) AS last_active
   FROM schools s
