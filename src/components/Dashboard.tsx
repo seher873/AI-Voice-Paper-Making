@@ -14,6 +14,7 @@ import BackupPanel from "./BackupPanel";
 import SchoolsOverview from "./SchoolsOverview";
 import FeeManagement from "./FeeManagement";
 import dynamic from "next/dynamic";
+import HomeScreen from "./HomeScreen";
 
 const VoiceAgent = dynamic(() => import("./VoiceAgent"), { ssr: false });
 import { useState, useEffect, useRef } from "react";
@@ -67,6 +68,7 @@ export default function Dashboard() {
   const resultCtx = useResult();
   const [plan, setPlanState] = useState(() => initialPlanState().plan);
   const [mode, setMode] = useState<"paper" | "results" | "fees">(() => initialPlanState().mode);
+  const [showHome, setShowHome] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<"header" | "questions" | "template">("header");
   const [menuOpen, setMenuOpen] = useState(false);
   const [showSchoolInfo, setShowSchoolInfo] = useState(false);
@@ -246,6 +248,18 @@ export default function Dashboard() {
   }
 
   return (
+    <>
+      {showHome ? (
+        <HomeScreen
+          plan={plan}
+          isSuperAdmin={isSuperAdmin}
+          onSchoolInfo={() => setShowSchools(true)}
+          onSelect={(m) => {
+            setMode(m);
+            setShowHome(false);
+          }}
+        />
+      ) : (
     <div className="relative flex flex-col lg:flex-row app-h bg-gradient-to-br from-slate-50 to-indigo-50/50">
       {/* Data-saving tip banner */}
       {showDataTip && (
@@ -280,16 +294,25 @@ export default function Dashboard() {
             {mode === "paper" ? "AI Voice Paper" : "Result Management"}
           </span>
         </button>
-        {availableModes.length > 1 && (
+        <div className="flex items-center gap-1.5">
           <button
-            onClick={() => setMode(mode === "paper" ? "results" : "paper")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              mode === "results" ? "bg-indigo-600 text-white" : "bg-indigo-50 text-indigo-600"
-            }`}
+            onClick={() => setShowHome(true)}
+            className="px-2.5 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-bold transition-all active:scale-[0.97]"
+            title="Home / Dashboard"
           >
-            {mode === "paper" ? "Results" : "Papers"}
+            Home
           </button>
-        )}
+          {availableModes.length > 1 && (
+            <button
+              onClick={() => setMode(mode === "paper" ? "results" : "paper")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                mode === "results" ? "bg-indigo-600 text-white" : "bg-indigo-50 text-indigo-600"
+              }`}
+            >
+              {mode === "paper" ? "Results" : "Papers"}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Mobile backdrop */}
@@ -328,6 +351,16 @@ export default function Dashboard() {
               </p>
             </div>
             <div className="ml-auto flex items-center gap-1.5 min-w-0">
+              <button
+                onClick={() => setShowHome(true)}
+                className="px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 bg-white/10 text-white hover:bg-white/20 flex-shrink-0"
+                title="Dashboard / Home"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10" />
+                </svg>
+                <span className="hidden sm:inline">Home</span>
+              </button>
               {isSuperAdmin && (
                 <button
                   onClick={() => setShowSchools(true)}
@@ -833,6 +866,8 @@ export default function Dashboard() {
         <VoiceAgent isSuperAdmin={isSuperAdmin} />
       </ErrorBoundary>
     </div>
+      )}
+    </>
   );
 }
 
