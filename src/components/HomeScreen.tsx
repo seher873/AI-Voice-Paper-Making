@@ -121,7 +121,7 @@ export default function HomeScreen({ plan, isSuperAdmin, onSchoolInfo, onSelect 
             </svg>
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="text-lg font-bold text-white tracking-tight">Paperbol Dashboard</h1>
+            <h1 className="text-lg font-bold text-white tracking-tight">Dashboard</h1>
             <p className="text-[11px] text-indigo-200 font-medium truncate">Apna aik feature chunein</p>
           </div>
           <div className="flex items-center gap-1.5 flex-shrink-0">

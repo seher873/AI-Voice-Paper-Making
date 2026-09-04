@@ -7,7 +7,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import AuthNav from "@/components/AuthNav";
 
 export const metadata: Metadata = {
-  title: "AI Voice Paper - School Paper Builder",
+  title: "School Management System",
   description: "Create examination papers using voice typing and manual editing",
 };
 
