@@ -350,67 +350,85 @@ export default function FeeStudentList({ onStudentSelect }: Props) {
         </div>
       )}
 
-      {/* Students Table */}
-      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
-        <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-          <span className="text-xs font-bold text-slate-600">Students ({filtered.length})</span>
-        </div>
-        {filtered.length === 0 ? (
-          <div className="py-10 text-center text-slate-400 text-xs">
-            {students.length === 0 ? "Koi student nahi — \"Add Student\" se shuru karein" : "Koi result nahi mila"}
+      {/* Students - Class-wise */}
+      <div className="space-y-4">
+        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+          <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-600">Students ({filtered.length})</span>
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="border-b border-slate-100 text-[10px] text-slate-400 uppercase">
-                  <th className="text-left px-4 py-2 font-semibold">Student</th>
-                  <th className="text-left px-4 py-2 font-semibold">Class</th>
-                  <th className="text-left px-4 py-2 font-semibold">Roll</th>
-                  <th className="text-left px-4 py-2 font-semibold">Monthly Fee</th>
-                  <th className="text-left px-4 py-2 font-semibold">Phone</th>
-                  <th className="text-right px-4 py-2 font-semibold">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((s) => (
-                  <tr key={s.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                    <td className="px-4 py-2.5">
-                      <p className="font-semibold text-slate-700">{s.student_name}</p>
-                      {s.father_name && <p className="text-[10px] text-slate-400">{s.father_name}</p>}
-                    </td>
-                    <td className="px-4 py-2.5 text-slate-600">{s.class_name}{s.section ? `-${s.section}` : ""}</td>
-                    <td className="px-4 py-2.5 text-slate-500">{s.roll_no || "—"}</td>
-                    <td className="px-4 py-2.5 font-bold text-green-700">{formatPKR(s.monthly_fee)}</td>
-                    <td className="px-4 py-2.5 text-slate-500">{s.parent_phone || "—"}</td>
-                    <td className="px-4 py-2.5">
-                      <div className="flex items-center justify-end gap-1">
-                        {onStudentSelect && (
-                          <button onClick={() => onStudentSelect(s)}
-                            className="px-2 py-1 text-[10px] font-bold bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-all">
-                            Select
-                          </button>
-                        )}
-                        <button onClick={() => startEdit(s)}
-                          className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all">
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
-                        </button>
-                        <button onClick={() => deleteStudent(s.id)}
-                          className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all">
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
+          {filtered.length === 0 ? (
+            <div className="py-10 text-center text-slate-400 text-xs">
+              {students.length === 0 ? "Koi student nahi — \"Add Student\" se shuru karein" : "Koi result nahi mila"}
+            </div>
+          ) : (
+            (() => {
+              const byClass = new Map<string, typeof filtered>();
+              const classOrder: string[] = [];
+              filtered.forEach((s) => {
+                const key = s.class_name || "Other";
+                if (!byClass.has(key)) { byClass.set(key, []); classOrder.push(key); }
+                byClass.get(key)!.push(s);
+              });
+              return (
+                <div className="divide-y divide-slate-100">
+                  {classOrder.map((cls) => {
+                    const list = byClass.get(cls)!;
+                    const total = list.reduce((sum, s) => sum + (s.monthly_fee || 0), 0);
+                    return (
+                      <div key={cls}>
+                        <div className="flex items-center justify-between px-4 py-2 bg-emerald-50/60">
+                          <span className="text-xs font-bold text-emerald-800">{cls}</span>
+                          <span className="text-[10px] font-semibold text-emerald-600">
+                            {list.length} student{list.length !== 1 ? "s" : ""} · {formatPKR(total)}/mo
+                          </span>
+                        </div>
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-xs">
+                            <tbody>
+                              {list.map((s) => (
+                                <tr key={s.id} className="border-t border-slate-50 hover:bg-slate-50 transition-colors">
+                                  <td className="px-4 py-2.5">
+                                    <p className="font-semibold text-slate-700">{s.student_name}</p>
+                                    {s.father_name && <p className="text-[10px] text-slate-400">{s.father_name}</p>}
+                                  </td>
+                                  <td className="px-4 py-2.5 text-slate-500">{s.roll_no || "—"}</td>
+                                  <td className="px-4 py-2.5 font-bold text-green-700">{formatPKR(s.monthly_fee)}</td>
+                                  <td className="px-4 py-2.5 text-slate-500">{s.parent_phone || "—"}</td>
+                                  <td className="px-4 py-2.5">
+                                    <div className="flex items-center justify-end gap-1">
+                                      {onStudentSelect && (
+                                        <button onClick={() => onStudentSelect(s)}
+                                          className="px-2 py-1 text-[10px] font-bold bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-all">
+                                          Select
+                                        </button>
+                                      )}
+                                      <button onClick={() => startEdit(s)}
+                                        className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all">
+                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                      </button>
+                                      <button onClick={() => deleteStudent(s.id)}
+                                        className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all">
+                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                    );
+                  })}
+                </div>
+              );
+            })()
+          )}
+        </div>
       </div>
     </div>
   );

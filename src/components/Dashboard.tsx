@@ -788,7 +788,11 @@ export default function Dashboard() {
           {mode === "paper" && plan.features.paper && activeTab === "questions" && <QuestionEditor />}
           {mode === "paper" && plan.features.paper && activeTab === "template" && <TemplateSection />}
           {mode === "results" && plan.features.results && <ResultManagement />}
-          {mode === "fees" && plan.features.fees && <FeeManagement />}
+          {mode === "fees" && plan.features.fees && (
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 text-center text-slate-400 text-xs">
+              Fee Management ab right side mein dikh raha hai — student add karein aur list dekhein.
+            </div>
+          )}
         </div>
         </div>
 
@@ -846,19 +850,8 @@ export default function Dashboard() {
         </div>
       )}
       {mode === "fees" && plan.features.fees && (
-        <div className="flex-1 overflow-y-auto overflow-x-auto bg-gradient-to-b from-emerald-50 to-slate-50 p-3 sm:p-4 lg:p-6 flex items-center justify-center">
-          <div className="text-center text-slate-400 max-w-xs">
-            <svg className="w-14 h-14 mx-auto mb-3 text-green-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p className="text-sm font-semibold text-slate-500">Fee Management System</p>
-            <p className="text-xs mt-1 text-slate-400">Students add karein → Fee collect karein → WhatsApp pe slip bhejein</p>
-            <div className="mt-4 space-y-1.5 text-left">
-              {["👤 Students & fee records", "💰 Monthly collection", "📊 Paid / Partial / Due report", "📱 WhatsApp notification slips"].map((f) => (
-                <p key={f} className="text-xs text-green-600 font-medium">{f}</p>
-              ))}
-            </div>
-          </div>
+        <div className="flex-1 overflow-y-auto overflow-x-auto bg-gradient-to-b from-emerald-50 to-slate-50 p-3 sm:p-4 lg:p-6">
+          <FeeManagement />
         </div>
       )}
       {showSchools && isSuperAdmin && <SchoolsOverview onClose={() => setShowSchools(false)} />}
