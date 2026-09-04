@@ -59,21 +59,21 @@ export default function FeeManagement() {
       </div>
 
       {/* Tabs */}
-      <div className="sticky top-0 z-10 flex gap-0 border-b border-slate-200 bg-slate-50/95 overflow-x-auto">
+      <div className="sticky top-0 z-10 flex border-b border-slate-200 bg-white shadow-sm overflow-x-auto">
         {menuItems.map((item) => (
           <button
             key={item.id}
             onClick={() => setActiveTab(item.id)}
-            className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium whitespace-nowrap border-b-2 transition-all ${
+            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-3 text-xs font-semibold whitespace-nowrap border-b-2 transition-all min-w-[110px] ${
               activeTab === item.id
-                ? "border-green-600 text-green-700 bg-white"
-                : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-white/50"
+                ? "border-green-600 text-green-700 bg-emerald-50/70"
+                : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
             }`}
           >
             <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} />
             </svg>
-            <span className="inline text-[10px] sm:text-xs">{item.label}</span>
+            <span>{item.label}</span>
           </button>
         ))}
       </div>

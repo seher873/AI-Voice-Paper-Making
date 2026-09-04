@@ -291,7 +291,7 @@ export default function Dashboard() {
             <path strokeLinecap="round" d="M7 8h10M7 12h10M7 16h10" />
           </svg>
           <span className="font-bold text-sm tracking-tight truncate max-w-[160px]">
-            {mode === "paper" ? "AI Voice Paper" : "Result Management"}
+            {mode === "paper" ? "AI Voice Paper" : mode === "fees" ? "Fee Management" : "Result Management"}
           </span>
         </button>
         <div className="flex items-center gap-1.5">
@@ -326,6 +326,8 @@ export default function Dashboard() {
       {/* Left Panel - Controls */}
       <div
         className={`${
+          mode === "fees" ? "lg:hidden" : ""
+        } ${
           menuOpen ? "translate-x-0" : "-translate-x-full"
         } lg:translate-x-0 absolute lg:relative top-0 left-0 bottom-0 lg:bottom-auto z-30           w-[92vw] max-w-[480px] lg:h-auto lg:w-[520px] lg:min-w-[520px] xl:w-[560px] xl:min-w-[560px] bg-white/95 backdrop-blur-sm border-r border-slate-200 flex flex-col shadow-2xl lg:shadow-lg transition-transform duration-300 ease-in-out`}
       >
