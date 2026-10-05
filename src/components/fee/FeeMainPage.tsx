@@ -31,6 +31,7 @@ export default function FeeMainPage({ onHome }: Props) {
   const [selectedMonth, setSelectedMonth] = useState(currentMonthLabel());
 
   const [viewStudent, setViewStudent] = useState<StudentFee | null>(null);
+  const [editStudent, setEditStudent] = useState<StudentFee | null>(null);
   const [showCollect, setShowCollect] = useState(false);
   const [showSlips, setShowSlips] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -64,10 +65,11 @@ export default function FeeMainPage({ onHome }: Props) {
 
   // Filters
   const filteredStudents = students.filter((s) => {
-    const q = search.toLowerCase();
-    const matchSearch = !q || s.student_name.toLowerCase().includes(q) || s.roll_no.toLowerCase().includes(q) || s.father_name.toLowerCase().includes(q);
+    const q = search.trim().toLowerCase();
     const matchClass = !filterClass || s.class_name === filterClass;
     const matchSession = !filterSession || s.session === filterSession;
+    if (!q) return matchClass && matchSession;
+    const matchSearch = (s.student_name?.toLowerCase().includes(q)) || (s.roll_no?.toLowerCase().includes(q)) || (s.father_name?.toLowerCase().includes(q)) || (s.class_name?.toLowerCase().includes(q)) || (s.section?.toLowerCase().includes(q));
     return matchSearch && matchClass && matchSession;
   });
 
@@ -83,7 +85,22 @@ export default function FeeMainPage({ onHome }: Props) {
 
   function handleSaved() {
     setShowCollect(false);
+    setEditStudent(null);
     setRefreshKey((k) => k + 1);
+  }
+
+  async function handleDelete(s: StudentFee) {
+    if (!confirm(`Delete ${s.student_name}?`)) return;
+    try {
+      const sb = getSupabase();
+      const schoolId = await getSchoolId();
+      if (!schoolId) return;
+      await sb.from("student_fees").delete().eq("id", s.id).eq("school_id", schoolId);
+      setRefreshKey((k) => k + 1);
+    } catch (e) {
+      console.error(e);
+      alert("Delete failed");
+    }
   }
 
   if (loading) return (
@@ -128,6 +145,8 @@ export default function FeeMainPage({ onHome }: Props) {
         students={filteredStudents}
         payments={filteredPayments}
         onViewStudent={setViewStudent}
+        onEdit={setEditStudent}
+        onDelete={handleDelete}
       />
 
       {/* Modals */}
