@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { exportSchoolData, importSchoolData, type SchoolBackup } from "@/lib/backup";
+import { exportSchoolData, importSchoolData, downloadBackupExcel, downloadBackupJson, type SchoolBackup } from "@/lib/backup";
 import { useToast } from "@/context/ToastContext";
 
 export default function BackupPanel() {
@@ -12,14 +12,9 @@ export default function BackupPanel() {
     setLoading("export");
     try {
       const data = await exportSchoolData();
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `backup-${data.schoolName.replace(/\s+/g, "-")}-${new Date().toISOString().split("T")[0]}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-      addToast("Backup downloaded successfully!", "success");
+      downloadBackupExcel(data);
+      setTimeout(() => downloadBackupJson(data), 500);
+      addToast("Backup downloaded! Excel (readable) + JSON (restore)", "success");
     } catch (err) {
       addToast(err instanceof Error ? err.message : "Export failed", "error");
     } finally {
