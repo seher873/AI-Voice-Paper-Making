@@ -10,6 +10,7 @@ import StudentFeeTable from "./StudentFeeTable";
 import StudentDetailsPanel from "./StudentDetailsPanel";
 import CollectFeeModal from "./CollectFeeModal";
 import FeeSlipSender from "./FeeSlipSender";
+import StudentEditModal from "./StudentEditModal";
 
 interface PaymentRow extends FeePayment {
   student: StudentFee;
@@ -150,6 +151,13 @@ export default function FeeMainPage({ onHome }: Props) {
       />
 
       {/* Modals */}
+      {editStudent && (
+        <StudentEditModal
+          student={editStudent}
+          onClose={() => setEditStudent(null)}
+          onSaved={handleSaved}
+        />
+      )}
       {viewStudent && (
         <StudentDetailsPanel
           student={viewStudent}
