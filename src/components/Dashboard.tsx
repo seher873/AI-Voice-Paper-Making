@@ -71,6 +71,7 @@ export default function Dashboard() {
   const [showHome, setShowHome] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<"header" | "questions" | "template">("header");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [panelCollapsed, setPanelCollapsed] = useState(false);
   const [showSchoolInfo, setShowSchoolInfo] = useState(false);
   const [schoolInfoCollapsed, setSchoolInfoCollapsed] = useState(false);
   const [showPapersList, setShowPapersList] = useState(false);
@@ -350,27 +351,34 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Desktop top bar */}
-      <div className={`${mode === "fees" ? "hidden" : "hidden lg:flex"} items-center justify-between bg-white/95 backdrop-blur border-b border-slate-200 px-5 py-2 z-30 shadow-sm flex-shrink-0`}>
+      {/* Desktop top header */}
+      <div className={`${mode === "fees" ? "hidden" : "hidden lg:flex"} items-center justify-between bg-gradient-to-r from-indigo-600 to-indigo-700 px-5 py-2.5 z-30 shadow-sm flex-shrink-0`}>
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
+          <div className="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
             </svg>
           </div>
-          <span className="font-bold text-sm tracking-tight truncate">
-            {mode === "paper" ? "AI Voice Paper" : mode === "fees" ? "Fee Management" : "Result Management"}
-          </span>
-          <span className="hidden xl:inline text-[11px] text-slate-400 font-medium truncate">
-            · {mode === "paper" ? "School Paper Builder" : mode === "fees" ? "Students · Fees · WhatsApp Slips" : "Results & Report Cards"}
-          </span>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="font-bold text-sm tracking-tight text-white truncate">
+                {mode === "paper" ? "AI Voice Paper" : "Result Management"}
+              </span>
+              <span className="flex-shrink-0 inline-flex px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-white/15 text-indigo-100 leading-none whitespace-nowrap">
+                {plan.label}
+              </span>
+            </div>
+            <p className="text-[10px] text-indigo-200 font-medium truncate">
+              {mode === "paper" ? "School Paper Builder" : "Results & Report Cards"}
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-1.5">
           {availableModes.length > 1 && (
             <button
               onClick={() => setMode(mode === "fees" || mode === "paper" ? "results" : "paper")}
               className={`w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-[0.94] ${
-                mode === "results" ? "bg-indigo-600 text-white" : "bg-indigo-50 text-indigo-600"
+                mode === "results" ? "bg-white text-indigo-700" : "bg-white/10 text-white hover:bg-white/20"
               }`}
               title={mode === "results" ? "Open Papers" : "Open Results"}
             >
@@ -382,9 +390,7 @@ export default function Dashboard() {
           {plan.features.fees && (
             <button
               onClick={() => setMode(mode === "fees" ? "paper" : "fees")}
-              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-[0.94] ${
-                mode === "fees" ? "bg-amber-500 text-white" : "bg-amber-50 text-amber-600"
-              }`}
+              className="w-9 h-9 rounded-full bg-white/10 text-white hover:bg-white/20 flex items-center justify-center transition-all active:scale-[0.94]"
               title="Fees"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -395,7 +401,7 @@ export default function Dashboard() {
           {isSuperAdmin && (
             <button
               onClick={() => setShowSchools(true)}
-              className="w-9 h-9 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center transition-all active:scale-[0.94]"
+              className="w-9 h-9 rounded-full bg-white/10 text-white hover:bg-white/20 flex items-center justify-center transition-all active:scale-[0.94]"
               title="Admin / Schools"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -406,7 +412,7 @@ export default function Dashboard() {
           <button
             onClick={() => setShowSchoolInfo(!showSchoolInfo)}
             className={`w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-[0.94] ${
-              showSchoolInfo ? "bg-indigo-600 text-white" : "bg-indigo-50 text-indigo-600"
+              showSchoolInfo ? "bg-white text-indigo-700" : "bg-white/10 text-white hover:bg-white/20"
             }`}
             title="School Info"
           >
@@ -420,12 +426,27 @@ export default function Dashboard() {
           </button>
           <button
             onClick={() => setShowHome(true)}
-            className="w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center transition-all active:scale-[0.94]"
+            className="w-9 h-9 rounded-full bg-white text-indigo-700 hover:bg-indigo-50 flex items-center justify-center transition-all active:scale-[0.94]"
             title="Home / Dashboard"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10" />
             </svg>
+          </button>
+          <button
+            onClick={() => setPanelCollapsed((v) => !v)}
+            className="w-9 h-9 rounded-full bg-white/10 text-white hover:bg-white/20 flex items-center justify-center transition-all active:scale-[0.94]"
+            title={panelCollapsed ? "Show options" : "Hide options (full-width preview)"}
+          >
+            {panelCollapsed ? (
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            ) : (
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            )}
           </button>
         </div>
       </div>
@@ -438,16 +459,32 @@ export default function Dashboard() {
         />
       )}
 
+      {/* Expand tab (desktop, when panel hidden) */}
+      {panelCollapsed && mode !== "fees" && (
+        <button
+          onClick={() => setPanelCollapsed(false)}
+          className="hidden lg:flex fixed left-0 top-24 z-40 items-center gap-1 pl-1.5 pr-2 py-3 bg-indigo-600 text-white text-[10px] font-bold rounded-r-xl shadow-lg hover:bg-indigo-700 transition-all"
+          title="Show options"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+          <span className="[writing-mode:vertical-rl] tracking-wider">Options</span>
+        </button>
+      )}
+
       {/* Left Panel - Controls */}
       <div
         className={`${
           mode === "fees" ? "hidden lg:hidden" : ""
         } ${
           menuOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0 absolute lg:relative top-0 left-0 bottom-0 lg:bottom-auto z-30           w-[92vw] max-w-[480px] lg:h-auto lg:w-[520px] lg:min-w-[520px] xl:w-[560px] xl:min-w-[560px] bg-white/95 backdrop-blur-sm border-r border-slate-200 flex flex-col shadow-2xl lg:shadow-lg transition-transform duration-300 ease-in-out`}
+        } ${
+          panelCollapsed ? "lg:-translate-x-full lg:w-0 lg:min-w-0 lg:overflow-hidden lg:border-r-0 lg:shadow-none" : "lg:translate-x-0"
+        } absolute lg:relative top-0 left-0 bottom-0 lg:bottom-auto z-30 w-[92vw] max-w-[480px] lg:h-auto lg:w-[460px] lg:min-w-[460px] xl:w-[520px] xl:min-w-[520px] bg-white/95 backdrop-blur-sm border-r border-slate-200 flex flex-col shadow-2xl lg:shadow-lg transition-[transform,width,opacity] duration-300 ease-in-out`}
       >
-        {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 px-5 py-2.5 flex-shrink-0">
+        {/* Header (mobile drawer only — desktop uses top header) */}
+        <div className="lg:hidden bg-gradient-to-r from-indigo-600 to-indigo-700 px-5 py-2.5 flex-shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center">
               <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -477,6 +514,15 @@ export default function Dashboard() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10" />
                 </svg>
                 <span className="hidden sm:inline">Home</span>
+              </button>
+              <button
+                onClick={() => setPanelCollapsed(true)}
+                className="hidden lg:flex px-2 py-1.5 rounded-lg text-xs font-bold transition-all items-center gap-1 bg-white/10 text-white hover:bg-white/20 flex-shrink-0"
+                title="Hide options (full-width preview)"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
               </button>
               {isSuperAdmin && (
                 <button
