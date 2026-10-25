@@ -5,16 +5,29 @@ import { exportSchoolData, importSchoolData, downloadBackupExcel, downloadBackup
 import { useToast } from "@/context/ToastContext";
 
 export default function BackupPanel() {
-  const [loading, setLoading] = useState<"export" | "import" | null>(null);
+  const [loading, setLoading] = useState<"excel" | "json" | "import" | null>(null);
   const { addToast } = useToast();
 
-  const handleExport = async () => {
-    setLoading("export");
+  const handleExportExcel = async () => {
+    setLoading("excel");
     try {
       const data = await exportSchoolData();
       downloadBackupExcel(data);
-      setTimeout(() => downloadBackupJson(data), 500);
-      addToast("Backup downloaded! Excel (readable) + JSON (restore)", "success");
+      const counts = `${data.feeStudents?.length || 0} students, ${data.feePayments?.length || 0} payments, ${data.exams?.length || 0} exams`;
+      addToast(`Excel backup downloaded — ${counts}`, "success");
+    } catch (err) {
+      addToast(err instanceof Error ? err.message : "Export failed", "error");
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleExportJson = async () => {
+    setLoading("json");
+    try {
+      const data = await exportSchoolData();
+      downloadBackupJson(data);
+      addToast("JSON restore file downloaded", "success");
     } catch (err) {
       addToast(err instanceof Error ? err.message : "Export failed", "error");
     } finally {
@@ -63,11 +76,11 @@ export default function BackupPanel() {
       <label className="block text-xs font-semibold text-slate-500 mb-2">Backup & Restore</label>
       <div className="flex gap-2">
         <button
-          onClick={handleExport}
+          onClick={handleExportExcel}
           disabled={loading !== null}
           className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-xs font-bold"
         >
-          {loading === "export" ? (
+          {loading === "excel" ? (
             <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <circle cx="12" cy="12" r="10" strokeWidth={3} className="opacity-25" />
               <path d="M4 12a8 8 0 018-8" strokeWidth={3} className="opacity-75" />
@@ -77,7 +90,25 @@ export default function BackupPanel() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
           )}
-          Export
+          Excel
+        </button>
+        <button
+          onClick={handleExportJson}
+          disabled={loading !== null}
+          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-xs font-bold"
+          title="JSON file — Restore ke liye zaroori"
+        >
+          {loading === "json" ? (
+            <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" strokeWidth={3} className="opacity-25" />
+              <path d="M4 12a8 8 0 018-8" strokeWidth={3} className="opacity-75" />
+            </svg>
+          ) : (
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          )}
+          JSON
         </button>
         <button
           onClick={handleImport}
@@ -97,6 +128,9 @@ export default function BackupPanel() {
           Restore
         </button>
       </div>
+      <p className="text-[10px] text-slate-400 mt-1.5 leading-snug">
+        Excel = readable backup (6 sheets). JSON = isi se Restore hota hai.
+      </p>
     </div>
   );
 }

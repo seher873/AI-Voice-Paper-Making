@@ -4,6 +4,7 @@ import { DEFAULT_GRADE_SCALE } from "@/types/result";
 import { initialState as initialPaperState } from "@/types/paper";
 import type { StudentFee, FeeStructure, FeePayment } from "@/types/fee";
 import { getSupabase, getSchoolId } from "@/lib/supabase";
+import { loadSchoolState } from "@/lib/schoolData";
 import * as XLSX from "xlsx";
 
 const RESULT_KEY = "paper-maker-results-state";
@@ -45,7 +46,26 @@ function writeJSON(key: string, value: unknown) {
 
 export async function exportSchoolData(): Promise<SchoolBackup> {
   const result = readJSON<Partial<ResultState>>(RESULT_KEY, {});
-  const paper: PaperState = { ...initialPaperState, ...readJSON<Partial<PaperState>>(PAPER_KEY, {}) };
+  let paper: PaperState = { ...initialPaperState, ...readJSON<Partial<PaperState>>(PAPER_KEY, {}) };
+
+  // Prefer DB-backed state (school_state table); fall back to localStorage.
+  let exams = result.exams || [];
+  let gradeScales = result.gradeScale || DEFAULT_GRADE_SCALE;
+  let schoolName = paper.schoolName || result.schoolName || "My School";
+  try {
+    const dbState = await loadSchoolState();
+    if (dbState?.result) {
+      exams = dbState.result.exams || exams;
+      gradeScales = dbState.result.gradeScale || gradeScales;
+      schoolName = dbState.result.schoolName || schoolName;
+    }
+    if (dbState?.paper) {
+      paper = { ...initialPaperState, ...dbState.paper };
+      schoolName = paper.schoolName || schoolName;
+    }
+  } catch (e) {
+    console.error("Backup state read error:", e);
+  }
 
   let feeStructures: FeeStructure[] | undefined = undefined;
   let feeStudents: StudentFee[] | undefined = undefined;
@@ -70,9 +90,9 @@ export async function exportSchoolData(): Promise<SchoolBackup> {
   return {
     version: 1,
     exportedAt: new Date().toISOString(),
-    schoolName: paper.schoolName || result.schoolName || "My School",
-    exams: result.exams || [],
-    gradeScales: result.gradeScale || DEFAULT_GRADE_SCALE,
+    schoolName,
+    exams,
+    gradeScales,
     papers: [paper],
     feeStructures,
     feeStudents,
@@ -151,8 +171,8 @@ export function buildBackupExcel(data: SchoolBackup): XLSX.WorkBook {
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(infoRows), "Info");
 
   // Sheet 2: Fee Students
-  if (data.feeStudents?.length) {
-    const rows = data.feeStudents.map((s) => ({
+  {
+    const rows = (data.feeStudents || []).map((s) => ({
       "Student Name": s.student_name,
       "Father Name": s.father_name || "",
       Class: s.class_name,
@@ -164,14 +184,14 @@ export function buildBackupExcel(data: SchoolBackup): XLSX.WorkBook {
       "Admission Date": s.admission_date || "",
       Active: s.is_active ? "Yes" : "No",
     }));
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "Fee Students");
+    appendSheet(wb, "Fee Students", rows, ["Student Name", "Father Name", "Class", "Section", "Roll No", "Parent Phone", "Monthly Fee", "Session", "Admission Date", "Active"]);
   }
 
   // Sheet 3: Fee Payments
-  if (data.feePayments?.length) {
+  {
     const studMap: Record<string, string> = {};
     data.feeStudents?.forEach((s) => { studMap[s.id] = s.student_name; });
-    const rows = data.feePayments.map((p) => ({
+    const rows = (data.feePayments || []).map((p) => ({
       Student: studMap[p.student_fee_id] || p.student_fee_id,
       "Month/Year": p.month_year,
       "Amount Due": p.amount_due,
@@ -181,23 +201,23 @@ export function buildBackupExcel(data: SchoolBackup): XLSX.WorkBook {
       "Received By": p.received_by || "",
       Remarks: p.remarks || "",
     }));
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "Fee Payments");
+    appendSheet(wb, "Fee Payments", rows, ["Student", "Month/Year", "Amount Due", "Amount Paid", "Status", "Payment Date", "Received By", "Remarks"]);
   }
 
   // Sheet 4: Fee Structures
-  if (data.feeStructures?.length) {
-    const rows = data.feeStructures.map((s) => ({
+  {
+    const rows = (data.feeStructures || []).map((s) => ({
       Class: s.class_name || "",
       "Fee Type": s.fee_type || "",
       Amount: s.amount,
       Description: s.description || "",
     }));
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "Fee Structures");
+    appendSheet(wb, "Fee Structures", rows, ["Class", "Fee Type", "Amount", "Description"]);
   }
 
   // Sheet 5: Exams
-  if (data.exams?.length) {
-    const rows = data.exams.map((e) => ({
+  {
+    const rows = (data.exams || []).map((e) => ({
       "Exam Name": e.name,
       Session: e.session,
       Class: e.className,
@@ -206,14 +226,14 @@ export function buildBackupExcel(data: SchoolBackup): XLSX.WorkBook {
       Subjects: (e.subjects || []).map((s) => `${s.name} (${s.totalMarks})`).join(", "),
       Students: e.students?.length || 0,
     }));
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "Exams");
+    appendSheet(wb, "Exams", rows, ["Exam Name", "Session", "Class", "Section", "Date", "Subjects", "Students"]);
   }
 
   // Sheet 6: Results (latest exam results if available)
-  const latestExam = data.exams?.length ? data.exams[data.exams.length - 1] : null;
-  if (latestExam?.results?.length) {
-    const subjectNames = (latestExam.subjects || []).map((s) => s.name);
-    const rows = latestExam.results.map((r) => {
+  {
+    const latestExam = data.exams?.length ? data.exams[data.exams.length - 1] : null;
+    const subjectNames = (latestExam?.subjects || []).map((s) => s.name);
+    const rows = (latestExam?.results || []).map((r) => {
       const row: Record<string, string | number> = {
         "Roll No": r.rollNo,
         "Student Name": r.studentName,
@@ -228,16 +248,37 @@ export function buildBackupExcel(data: SchoolBackup): XLSX.WorkBook {
       row["Remark"] = r.remark;
       return row;
     });
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "Results");
+    appendSheet(wb, "Results", rows, ["Roll No", "Student Name", "Father Name", ...subjectNames, "Total Obtained", "Total Marks", "Percentage", "Grade", "Position", "Remark"]);
   }
 
   return wb;
 }
 
+function appendSheet(
+  wb: XLSX.WorkBook,
+  name: string,
+  rows: Record<string, string | number>[],
+  headers: string[]
+) {
+  const ws = rows.length
+    ? XLSX.utils.json_to_sheet(rows)
+    : XLSX.utils.aoa_to_sheet([headers, ["No records found", ...headers.slice(1).map(() => "")]]);
+  XLSX.utils.book_append_sheet(wb, ws, name);
+}
+
 export function downloadBackupExcel(data: SchoolBackup) {
   const wb = buildBackupExcel(data);
   const fileName = `backup-${data.schoolName.replace(/\s+/g, "-")}-${new Date().toISOString().split("T")[0]}.xlsx`;
-  XLSX.writeFile(wb, fileName);
+  const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+  const blob = new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 export function downloadBackupJson(data: SchoolBackup) {
