@@ -71,7 +71,6 @@ export default function Dashboard() {
   const [showHome, setShowHome] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<"header" | "questions" | "template">("header");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [panelCollapsed, setPanelCollapsed] = useState(false);
   const [showSchoolInfo, setShowSchoolInfo] = useState(false);
   const [schoolInfoCollapsed, setSchoolInfoCollapsed] = useState(false);
   const [showPapersList, setShowPapersList] = useState(false);
@@ -261,7 +260,7 @@ export default function Dashboard() {
           }}
         />
       ) : (
-    <div className={`relative flex flex-col ${mode === "fees" ? "" : "lg:flex-row"} app-h bg-gradient-to-br from-slate-50 to-indigo-50/50`}>
+    <div className="relative flex flex-col app-h bg-gradient-to-br from-slate-50 to-indigo-50/50">
       {/* Data-saving tip banner */}
       {showDataTip && (
         <div className="lg:absolute lg:top-2 lg:right-2 z-40 max-w-[260px] bg-amber-50 border border-amber-200 rounded-2xl shadow-lg p-3 text-[11px] text-amber-800 flex gap-2 items-start">
@@ -433,21 +432,6 @@ export default function Dashboard() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10" />
             </svg>
           </button>
-          <button
-            onClick={() => setPanelCollapsed((v) => !v)}
-            className="w-9 h-9 rounded-full bg-white/10 text-white hover:bg-white/20 flex items-center justify-center transition-all active:scale-[0.94]"
-            title={panelCollapsed ? "Show options" : "Hide options (full-width preview)"}
-          >
-            {panelCollapsed ? (
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            ) : (
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            )}
-          </button>
         </div>
       </div>
 
@@ -459,19 +443,8 @@ export default function Dashboard() {
         />
       )}
 
-      {/* Expand tab (desktop, when panel hidden) */}
-      {panelCollapsed && mode !== "fees" && (
-        <button
-          onClick={() => setPanelCollapsed(false)}
-          className="hidden lg:flex fixed left-0 top-24 z-40 items-center gap-1 pl-1.5 pr-2 py-3 bg-indigo-600 text-white text-[10px] font-bold rounded-r-xl shadow-lg hover:bg-indigo-700 transition-all"
-          title="Show options"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-          <span className="[writing-mode:vertical-rl] tracking-wider">Options</span>
-        </button>
-      )}
+      {/* Main content: entries + preview side by side */}
+      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
 
       {/* Left Panel - Controls */}
       <div
@@ -479,9 +452,7 @@ export default function Dashboard() {
           mode === "fees" ? "hidden lg:hidden" : ""
         } ${
           menuOpen ? "translate-x-0" : "-translate-x-full"
-        } ${
-          panelCollapsed ? "lg:-translate-x-full lg:w-0 lg:min-w-0 lg:overflow-hidden lg:border-r-0 lg:shadow-none" : "lg:translate-x-0"
-        } absolute lg:relative top-0 left-0 bottom-0 lg:bottom-auto z-30 w-[92vw] max-w-[480px] lg:h-auto lg:w-[460px] lg:min-w-[460px] xl:w-[520px] xl:min-w-[520px] bg-white/95 backdrop-blur-sm border-r border-slate-200 flex flex-col shadow-2xl lg:shadow-lg transition-[transform,width,opacity] duration-300 ease-in-out`}
+        } lg:translate-x-0 absolute lg:relative top-0 left-0 bottom-0 lg:bottom-auto z-30 w-[92vw] max-w-[480px] lg:h-auto lg:w-[460px] lg:min-w-[460px] xl:w-[520px] xl:min-w-[520px] bg-white/95 backdrop-blur-sm border-r border-slate-200 flex flex-col shadow-2xl lg:shadow-lg transition-transform duration-300 ease-in-out`}
       >
         {/* Header (mobile drawer only — desktop uses top header) */}
         <div className="lg:hidden bg-gradient-to-r from-indigo-600 to-indigo-700 px-5 py-2.5 flex-shrink-0">
@@ -514,15 +485,6 @@ export default function Dashboard() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10" />
                 </svg>
                 <span className="hidden sm:inline">Home</span>
-              </button>
-              <button
-                onClick={() => setPanelCollapsed(true)}
-                className="hidden lg:flex px-2 py-1.5 rounded-lg text-xs font-bold transition-all items-center gap-1 bg-white/10 text-white hover:bg-white/20 flex-shrink-0"
-                title="Hide options (full-width preview)"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
               </button>
               {isSuperAdmin && (
                 <button
@@ -1017,6 +979,7 @@ export default function Dashboard() {
           <FeeManagement onHome={() => setShowHome(true)} />
         </div>
       )}
+      </div>
       {showSchools && isSuperAdmin && <SchoolsOverview onClose={() => setShowSchools(false)} />}
       <ErrorBoundary fallback={null}>
         <VoiceAgent isSuperAdmin={isSuperAdmin} />
