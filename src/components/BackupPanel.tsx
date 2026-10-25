@@ -13,7 +13,9 @@ export default function BackupPanel() {
     try {
       const data = await exportSchoolData();
       downloadBackupExcel(data);
-      const counts = `${data.feeStudents?.length || 0} students, ${data.feePayments?.length || 0} payments, ${data.exams?.length || 0} exams`;
+      const resultRows = (data.exams || []).reduce((a, e) => a + (e.results?.length || 0), 0) || (data.results?.length || 0);
+      const marksRows = (data.exams || []).reduce((a, e) => a + (e.students?.length || 0), 0);
+      const counts = `${data.exams?.length || 0} exams, ${marksRows} marks, ${resultRows} results, ${data.feeStudents?.length || 0} students, ${data.feePayments?.length || 0} payments`;
       addToast(`Excel backup downloaded — ${counts}`, "success");
     } catch (err) {
       addToast(err instanceof Error ? err.message : "Export failed", "error");

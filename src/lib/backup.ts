@@ -164,6 +164,8 @@ export function buildBackupExcel(data: SchoolBackup): XLSX.WorkBook {
     { Field: "School Name", Value: data.schoolName },
     { Field: "Export Date", Value: new Date(data.exportedAt).toLocaleString() },
     { Field: "Exams", Value: data.exams?.length || 0 },
+    { Field: "Result Rows (all exams)", Value: (data.exams || []).reduce((a, e) => a + (e.results?.length || 0), 0) || (data.results?.length || 0) },
+    { Field: "Marks Entry Rows (all exams)", Value: (data.exams || []).reduce((a, e) => a + (e.students?.length || 0), 0) },
     { Field: "Fee Students", Value: data.feeStudents?.length || 0 },
     { Field: "Fee Payments", Value: data.feePayments?.length || 0 },
     { Field: "Fee Structures", Value: data.feeStructures?.length || 0 },
@@ -229,26 +231,69 @@ export function buildBackupExcel(data: SchoolBackup): XLSX.WorkBook {
     appendSheet(wb, "Exams", rows, ["Exam Name", "Session", "Class", "Section", "Date", "Subjects", "Students"]);
   }
 
-  // Sheet 6: Results (latest exam results if available)
+  // Sheet 6: Results (ALL exams aggregated)
   {
-    const latestExam = data.exams?.length ? data.exams[data.exams.length - 1] : null;
-    const subjectNames = (latestExam?.subjects || []).map((s) => s.name);
-    const rows = (latestExam?.results || []).map((r) => {
-      const row: Record<string, string | number> = {
-        "Roll No": r.rollNo,
-        "Student Name": r.studentName,
-        "Father Name": r.fatherName || "",
-      };
-      subjectNames.forEach((sn) => { row[sn] = r.subjectMarks[sn] ?? ""; });
-      row["Total Obtained"] = r.totalObtained;
-      row["Total Marks"] = r.totalMarks;
-      row["Percentage"] = r.percentage;
-      row["Grade"] = r.grade;
-      row["Position"] = r.position;
-      row["Remark"] = r.remark;
-      return row;
+    const examsWithResults = (data.exams || []).filter((e) => (e.results?.length || 0) > 0);
+    const sources: { exam: Exam | null; results: StudentResult[] }[] = examsWithResults.length
+      ? examsWithResults.map((e) => ({ exam: e, results: e.results || [] }))
+      : (data.results?.length ? [{ exam: null, results: data.results }] : []);
+
+    const subjectSet = new Set<string>();
+    examsWithResults.forEach((e) => (e.subjects || []).forEach((s) => subjectSet.add(s.name)));
+    sources.forEach(({ results }) => results.forEach((r) => Object.keys(r.subjectMarks || {}).forEach((k) => subjectSet.add(k))));
+    const subjectNames = Array.from(subjectSet);
+
+    const rows = sources.flatMap(({ exam, results }) =>
+      results.map((r) => {
+        const row: Record<string, string | number> = {
+          Exam: exam?.name || "",
+          Session: exam?.session || "",
+          Class: exam?.className || "",
+          Section: exam?.section || "",
+          "Roll No": r.rollNo,
+          "Student Name": r.studentName,
+          "Father Name": r.fatherName || "",
+        };
+        subjectNames.forEach((sn) => { row[sn] = r.subjectMarks?.[sn] ?? ""; });
+        row["Total Obtained"] = r.totalObtained;
+        row["Total Marks"] = r.totalMarks;
+        row["Percentage"] = r.percentage;
+        row["Grade"] = r.grade;
+        row["Position"] = r.position;
+        row["Remark"] = r.remark;
+        return row;
+      })
+    );
+    appendSheet(wb, "Results", rows, ["Exam", "Session", "Class", "Section", "Roll No", "Student Name", "Father Name", ...subjectNames, "Total Obtained", "Total Marks", "Percentage", "Grade", "Position", "Remark"]);
+  }
+
+  // Sheet 7: Marks Entry (ALL exams' students, even before results generated)
+  {
+    const examsAll = data.exams || [];
+    const subjectSet = new Set<string>();
+    examsAll.forEach((e) => {
+      (e.subjects || []).forEach((s) => subjectSet.add(s.name));
+      (e.students || []).forEach((st) => Object.keys(st.subjectMarks || {}).forEach((k) => subjectSet.add(k)));
     });
-    appendSheet(wb, "Results", rows, ["Roll No", "Student Name", "Father Name", ...subjectNames, "Total Obtained", "Total Marks", "Percentage", "Grade", "Position", "Remark"]);
+    const subjectNames = Array.from(subjectSet);
+
+    const rows = examsAll.flatMap((e) =>
+      (e.students || []).map((st) => {
+        const row: Record<string, string | number> = {
+          Exam: e.name,
+          Session: e.session,
+          Class: e.className,
+          Section: e.section,
+          "Roll No": st.rollNo,
+          "Student Name": st.studentName,
+          "Father Name": st.fatherName || "",
+        };
+        subjectNames.forEach((sn) => { row[sn] = st.subjectMarks?.[sn] ?? ""; });
+        row["Position"] = st.position ?? "";
+        return row;
+      })
+    );
+    appendSheet(wb, "Marks Entry", rows, ["Exam", "Session", "Class", "Section", "Roll No", "Student Name", "Father Name", ...subjectNames, "Position"]);
   }
 
   return wb;
