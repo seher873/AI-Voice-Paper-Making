@@ -11,6 +11,7 @@ import StudentDetailsPanel from "./StudentDetailsPanel";
 import CollectFeeModal from "./CollectFeeModal";
 import FeeSlipSender from "./FeeSlipSender";
 import StudentEditModal from "./StudentEditModal";
+import StudentAddModal from "./StudentAddModal";
 
 interface PaymentRow extends FeePayment {
   student: StudentFee;
@@ -34,6 +35,7 @@ export default function FeeMainPage({ onHome }: Props) {
   const [viewStudent, setViewStudent] = useState<StudentFee | null>(null);
   const [editStudent, setEditStudent] = useState<StudentFee | null>(null);
   const [showCollect, setShowCollect] = useState(false);
+  const [showAdd, setShowAdd] = useState(false);
   const [showSlips, setShowSlips] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -86,6 +88,7 @@ export default function FeeMainPage({ onHome }: Props) {
 
   function handleSaved() {
     setShowCollect(false);
+    setShowAdd(false);
     setEditStudent(null);
     setRefreshKey((k) => k + 1);
   }
@@ -131,6 +134,7 @@ export default function FeeMainPage({ onHome }: Props) {
           uniqueClasses={uniqueClasses} sessions={sessions}
           onCollect={() => setShowCollect(true)}
           onSendSlips={() => setShowSlips(true)}
+          onAddStudent={() => setShowAdd(true)}
           onHome={onHome}
         />
       </div>
@@ -151,6 +155,12 @@ export default function FeeMainPage({ onHome }: Props) {
       />
 
       {/* Modals */}
+      {showAdd && (
+        <StudentAddModal
+          onClose={() => setShowAdd(false)}
+          onSaved={handleSaved}
+        />
+      )}
       {editStudent && (
         <StudentEditModal
           student={editStudent}
