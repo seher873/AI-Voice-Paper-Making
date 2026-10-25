@@ -51,7 +51,12 @@ export default function StudentAddModal({ onClose, onSaved }: Props) {
         school_id: schoolId,
         admission_date: form.admission_date || null,
       };
-      const { error } = await sb.from("student_fees").insert(payload);
+      let { error } = await sb.from("student_fees").insert(payload);
+      // Older schemas may not have `admission_date` — retry without it.
+      if (error && /admission_date/i.test(error.message)) {
+        const { admission_date: _omit, ...rest } = payload;
+        ({ error } = await sb.from("student_fees").insert(rest));
+      }
       if (error) throw new Error(error.message);
       onSaved();
     } catch (e: unknown) {

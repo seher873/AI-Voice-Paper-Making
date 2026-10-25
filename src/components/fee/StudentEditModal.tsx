@@ -25,7 +25,23 @@ export default function StudentEditModal({ student, onClose, onSaved }: Props) {
       const sb = getSupabase();
       const schoolId = await getSchoolId();
       if (!schoolId) return;
-      const { error } = await sb.from("student_fees").update(form).eq("id", student.id).eq("school_id", schoolId);
+      const payload = {
+        student_name: form.student_name,
+        father_name: form.father_name,
+        class_name: form.class_name,
+        section: form.section,
+        roll_no: form.roll_no,
+        parent_phone: form.parent_phone,
+        monthly_fee: form.monthly_fee,
+        session: form.session,
+        admission_date: form.admission_date || null,
+        is_active: form.is_active,
+      };
+      let { error } = await sb.from("student_fees").update(payload).eq("id", student.id).eq("school_id", schoolId);
+      if (error && /admission_date/i.test(error.message)) {
+        const { admission_date: _omit, ...rest } = payload;
+        ({ error } = await sb.from("student_fees").update(rest).eq("id", student.id).eq("school_id", schoolId));
+      }
       if (error) throw new Error(error.message);
       onSaved();
     } catch (e: unknown) {
@@ -88,6 +104,10 @@ export default function StudentEditModal({ student, onClose, onSaved }: Props) {
           <div>
             <label className="block text-[11px] font-semibold text-slate-500 mb-1">Monthly Fee (PKR)</label>
             <input type="number" className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400" value={form.monthly_fee} onChange={(e) => setForm({ ...form, monthly_fee: Number(e.target.value) })} />
+          </div>
+          <div>
+            <label className="block text-[11px] font-semibold text-slate-500 mb-1">Admission Date</label>
+            <input type="date" className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400" value={form.admission_date || ""} onChange={(e) => setForm({ ...form, admission_date: e.target.value })} />
           </div>
           <div>
             <label className="block text-[11px] font-semibold text-slate-500 mb-1">Active</label>
